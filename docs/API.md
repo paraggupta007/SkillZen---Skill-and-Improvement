@@ -51,3 +51,7 @@ Requires the session cookie. Response: HTTP 200 with the safe user object. Error
 Requires the session cookie. Example: `{"targetRole":"Backend developer","experienceLevel":"beginner","skills":["TypeScript"]}`. Any subset of name, targetRole, experienceLevel and skills may be changed; role and experience can be null. Unknown or empty fields fail validation. Response: HTTP 200 with the updated safe user. Errors: 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 403 `ORIGIN_FORBIDDEN`, 503 `AUTH_UNAVAILABLE`.
 
 For all endpoints, a rejected non-allowed origin on a write returns 403 `ORIGIN_FORBIDDEN`; unexpected server errors use the common 500 response. Auth is not available unless a database and JWT secret are configured.
+
+## AI layer
+
+The internal provider router has no public endpoint yet. Interview SSE endpoints will be documented when implemented; there is currently no browser-accessible AI generation route.

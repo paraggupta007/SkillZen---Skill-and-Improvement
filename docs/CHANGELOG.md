@@ -11,3 +11,8 @@
 - Added bcrypt registration and login, JWT cookies, logout, profile APIs, origin checks and auth rate limits.
 - Added repository-backed persistence and in-memory Supertest integration tests.
 - Updated vulnerable production dependencies; four moderate development-only audit findings remain in Drizzle Kit’s esbuild loader chain.
+
+## Phase 2 — AI layer
+
+- Added free-model provider adapters, fallback router, circuit breakers, timeout and retry, structured JSON repair, scoped LRU cache and usage repository.
+- Added fake-provider and mocked HTTP tests; real provider behavior is not yet verified.

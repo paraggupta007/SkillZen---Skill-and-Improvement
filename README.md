@@ -2,7 +2,7 @@
 
 SkillZen is a work-in-progress college project for practicing AI mock interviews and mock tests, and learning from actionable feedback. Its planned interview features include adaptive questions, voice, reports and privacy-conscious webcam-based body-language feedback. Webcam gaze and facial-expression estimates are imperfect; they are not retina scans, proof of attention, or evidence of cheating.
 
-**Current status: Phase 1 API authentication and profile foundation.** The interview, frontend authentication screens, mock test, AI and webcam features are not implemented yet. The user indicated that the initial database migration was run locally; the sandbox could not independently verify it. Follow [progress](docs/PROGRESS.md) for the actual status.
+**Current status: Phase 2 backend foundation, authentication and AI layer.** Interviews, frontend authentication screens, mock tests and webcam features are not implemented yet. The AI adapters have not been tested with real providers. The user indicated that the initial database migration was run locally; the sandbox could not independently verify it. Follow [progress](docs/PROGRESS.md) for the actual status.
 
 ## Run locally
 
@@ -21,3 +21,9 @@ Open http://localhost:5173 and http://localhost:4000/api/health. The development
 ## Documentation
 
 Start with [documentation index](docs/INDEX.md), [local setup](docs/SETUP.md), [architecture](docs/ARCHITECTURE.md), and [phase 0](docs/phases/phase-00-foundation.md). The full implementation and extension examples will be documented as the relevant features are built.
+
+## How to extend (implemented so far)
+
+- **AI provider:** implement `ILLMProvider` (including `generate`, `stream`, and `isHealthy`), import it in `apps/api/src/container.ts`, and add one instance to the `registered` list. Add its name to `LLM_PROVIDER_ORDER`. It must use a free model and keep its credentials server-side.
+- **New round or evaluator:** these extension points are planned for the interview phase; examples will be added when they exist.
+- **Post-interview action:** subscribe a handler to `interview.completed` through the event bus; the interview flow does not yet publish this event.

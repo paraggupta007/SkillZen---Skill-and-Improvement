@@ -21,7 +21,7 @@ erDiagram
 - `answers`: text and optional speech metrics.
 - `evaluations`: answer scores and feedback.
 - `reports`: one final summary per interview.
-- `ai_usage_logs`: provider performance and token usage; not yet written by the app.
+- `ai_usage_logs`: provider attempt performance and token usage; the AI router writes metadata via its repository when a database is configured. Logging is best effort and no prompt or generated text is stored there.
 
 Indexes support interview history, ordered questions and answer lookup. Foreign keys use cascade deletion for owned records and set nullable links to null when appropriate. This initial schema does not yet enforce all business rules or score bounds; implement validation and ownership checks with the corresponding services.
 

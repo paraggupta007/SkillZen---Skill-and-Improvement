@@ -7,6 +7,13 @@ import { DrizzleUsageRepository } from "./ai/usage-repository.js";
 import { CachedProvider } from "./ai/cache/cached-provider.js";
 import { PromptBuilder } from "./domain/prompts/prompt-builder.js";
 import { JsonGenerator } from "./ai/json-generator.js";
+import { RoundFactory } from "./domain/rounds/round-factory.js";
+import { TechnicalRound } from "./domain/rounds/technical-round.js";
+import { HRRound } from "./domain/rounds/hr-round.js";
+import { BehavioralRound } from "./domain/rounds/behavioral-round.js";
+import { LLMAnswerEvaluator } from "./domain/evaluation/llm-answer-evaluator.js";
+import { SpeechMetricsEvaluator } from "./domain/evaluation/speech-metrics-evaluator.js";
+import { CompositeEvaluator } from "./domain/evaluation/composite-evaluator.js";
 import type { Env } from "./config/env.js";
 import { EventBus } from "./core/event-bus.js";
 import { logger } from "./core/logger.js";
@@ -53,7 +60,18 @@ export function createContainer(
   );
   const prompts = new PromptBuilder();
   const jsonGenerator = new JsonGenerator(llm, prompts);
+  const rounds = new RoundFactory();
+  rounds.register("technical", TechnicalRound);
+  rounds.register("hr", HRRound);
+  rounds.register("behavioral", BehavioralRound);
+  // Add each evaluator with one registration here.
+  const evaluator = new CompositeEvaluator([
+    new LLMAnswerEvaluator(jsonGenerator, prompts),
+    new SpeechMetricsEvaluator(),
+  ]);
   return {
+    rounds,
+    evaluator,
     env,
     logger,
     events: new EventBus(),

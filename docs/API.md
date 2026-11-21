@@ -55,3 +55,5 @@ For all endpoints, a rejected non-allowed origin on a write returns 403 `ORIGIN_
 ## AI layer
 
 The internal provider router has no public endpoint yet. Interview SSE endpoints will be documented when implemented; there is currently no browser-accessible AI generation route.
+
+The interview domain strategies exist internally, but no interview endpoints have been implemented yet.

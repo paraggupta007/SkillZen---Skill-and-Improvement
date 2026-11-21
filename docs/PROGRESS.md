@@ -5,7 +5,7 @@ A checked box means the work is implemented and verified, not just planned.
 - [x] Phase 0: Foundation — scaffold, tests and migrations; user indicated the local Neon migration was completed (output not provided).
 - [x] Phase 1: Authentication and users — integration tests use an in-memory repository; real database flow still needs manual verification.
 - [x] Phase 2: AI layer and fake-provider tests — real provider calls remain unverified.
-- [ ] Phase 3: Interview rounds, questions and answer evaluations.
+- [ ] Phase 3: Interview rounds and evaluators built; endpoints, persistence, streaming and end-to-end verification remain.
 - [ ] Phase 4: Reports, analytics and history.
 - [ ] Phase 5: Frontend MVP.
 - [ ] Phase 6: Voice and speech metrics.

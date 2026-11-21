@@ -16,3 +16,8 @@
 
 - Added free-model provider adapters, fallback router, circuit breakers, timeout and retry, structured JSON repair, scoped LRU cache and usage repository.
 - Added fake-provider and mocked HTTP tests; real provider behavior is not yet verified.
+
+## Phase 3 — interview domain (in progress)
+
+- Added round strategies, registry factory and composable AI/speech evaluators with fake-model unit tests.
+- Interview persistence, API flows and real-provider verification are still pending.

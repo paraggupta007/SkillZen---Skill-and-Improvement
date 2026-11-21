@@ -1,6 +1,6 @@
 # Architecture
 
-Currently implemented: frontend scaffold, HTTP foundation, auth and user repository, AI provider chain, DI composition root, event bus and database schema/client. The interview sequence and domain components below are targets, not implemented features.
+Currently implemented: frontend scaffold, HTTP foundation, auth and user repository, AI provider chain, round and evaluator strategies, DI composition root, event bus and database schema/client. The interview sequence and domain components below are targets, not implemented features.
 
 ## System
 
@@ -23,7 +23,7 @@ flowchart TD
   Interfaces --> Providers[Provider adapters]
 ```
 
-The auth service and user repository now implement this layering. Interview services are planned. AI adapters are implemented but have not been verified against live providers.
+The auth service and user repository now implement this layering. Interview services and endpoints are planned; round and evaluation strategies are implemented but not wired to HTTP. AI adapters are implemented but have not been verified against live providers.
 
 ## Planned class diagram
 

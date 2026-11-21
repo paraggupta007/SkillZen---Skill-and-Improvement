@@ -14,5 +14,6 @@
 - [Phase 0: Foundation](phases/phase-00-foundation.md)
 - [Phase 1: Auth and users](phases/phase-01-auth.md)
 - [Phase 2: AI layer](phases/phase-02-ai.md)
+- [Phase 3: Interview domain (in progress)](phases/phase-03-interview.md)
 
 More phase documents will be added alongside their code.

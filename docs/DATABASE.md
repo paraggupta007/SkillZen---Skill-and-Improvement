@@ -28,3 +28,7 @@ Indexes support interview history, ordered questions and answer lookup. Foreign 
 ## Authentication access
 
 The user repository is the only authentication component that queries the `users` table. Emails are normalized to lowercase on registration and login; the database unique constraint protects against concurrent duplicate registration. No schema change was needed in Phase 1.
+
+## Interview domain status
+
+The round and evaluator strategies do not yet persist interviews, questions, answers or evaluations. Their database-backed flow is still being implemented; Phase 3 added no migration.

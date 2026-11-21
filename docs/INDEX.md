@@ -12,5 +12,6 @@
 - [Viva questions](VIVA_QA.md)
 - [Project report](PROJECT_REPORT.md)
 - [Phase 0: Foundation](phases/phase-00-foundation.md)
+- [Phase 1: Auth and users](phases/phase-01-auth.md)
 
 More phase documents will be added alongside their code.

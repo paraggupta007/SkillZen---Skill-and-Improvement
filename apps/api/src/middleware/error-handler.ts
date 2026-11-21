@@ -31,6 +31,9 @@ export const errorHandler: ErrorRequestHandler = (
     res.status(413).json(fail("PAYLOAD_TOO_LARGE", "Request body too large"));
     return;
   }
-  logger.error({ error }, "Unhandled request error");
+  logger.error(
+    { name: error instanceof Error ? error.name : "UnknownError" },
+    "Unhandled request error",
+  );
   res.status(500).json(fail("INTERNAL_ERROR", "Internal server error"));
 };

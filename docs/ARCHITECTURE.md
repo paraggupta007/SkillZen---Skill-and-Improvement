@@ -1,6 +1,6 @@
 # Architecture
 
-Currently implemented: frontend scaffold, HTTP foundation, DI composition root, event bus and database schema/client. The interview sequence and domain components below are targets, not implemented features.
+Currently implemented: frontend scaffold, HTTP foundation, auth and user repository, DI composition root, event bus and database schema/client. The interview sequence and domain components below are targets, not implemented features.
 
 ## System
 
@@ -23,7 +23,7 @@ flowchart TD
   Interfaces --> Providers[Provider adapters]
 ```
 
-Only the application foundation and DB client exist today; repositories, services and providers are planned.
+The auth service and user repository now implement this layering. Interview services and AI providers are planned.
 
 ## Planned class diagram
 
@@ -61,3 +61,7 @@ sequenceDiagram
 ```
 
 The in-process event bus exists, but report generation and a durable job queue do not yet exist. Async work must account for process restarts before deployment.
+
+## Authentication
+
+Routes validate input and call `AuthService`, which depends on `IUserRepository`. `DrizzleUserRepository` is injected by the container; tests inject an in-memory implementation. Passwords use bcrypt, and one-hour JWTs are stored in httpOnly cookies. Logout clears the browser cookie but does not revoke copied tokens.

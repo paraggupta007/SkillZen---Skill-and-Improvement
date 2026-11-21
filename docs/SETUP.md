@@ -10,11 +10,11 @@
 
 ## Keys for later phases
 
-These are not yet used by the scaffold. Put them only in `apps/api/.env`, never browser variables or chat:
+Put these only in `apps/api/.env`, never browser variables or chat:
 
 - `GROQ_API_KEY`: https://console.groq.com/keys
 - `GEMINI_API_KEY`: https://aistudio.google.com/app/apikey
 - `OPENROUTER_API_KEY`: https://openrouter.ai/settings/keys — select only free models.
-- `JWT_SECRET`: generate using `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` and put the output into `JWT_SECRET` in the file.
+- `JWT_SECRET` (required for auth): generate using `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` and put the output into `JWT_SECRET` in the file.
 
 A configured provider is not proof that a model is currently free, available, or within quota; check provider terms and limits. Use test fakes for automated tests when the AI phase is implemented.

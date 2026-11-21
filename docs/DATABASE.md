@@ -1,0 +1,26 @@
+# Database
+
+Drizzle schema and versioned migrations currently cover the initial eight tables. They are generated, not yet verified against Neon. Mock tests, candidate feedback and webcam metrics are planned for later migrations.
+
+```mermaid
+erDiagram
+ USERS ||--o{ RESUMES : owns
+ USERS ||--o{ INTERVIEWS : attends
+ RESUMES o|--o{ INTERVIEWS : informs
+ INTERVIEWS ||--o{ QUESTIONS : contains
+ QUESTIONS ||--o{ ANSWERS : receives
+ QUESTIONS o|--o{ QUESTIONS : follows
+ ANSWERS ||--o{ EVALUATIONS : receives
+ INTERVIEWS ||--o| REPORTS : has
+```
+
+- `users`: account and profile; skills stored as JSON.
+- `resumes`: extracted text, skills and ATS score, belonging to a user.
+- `interviews`: user, optional resume, type, difficulty and status.
+- `questions`: interview question and optional parent follow-up.
+- `answers`: text and optional speech metrics.
+- `evaluations`: answer scores and feedback.
+- `reports`: one final summary per interview.
+- `ai_usage_logs`: provider performance and token usage; not yet written by the app.
+
+Indexes support interview history, ordered questions and answer lookup. Foreign keys use cascade deletion for owned records and set nullable links to null when appropriate. This initial schema does not yet enforce all business rules or score bounds; implement validation and ownership checks with the corresponding services.

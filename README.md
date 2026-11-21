@@ -2,7 +2,7 @@
 
 SkillZen is a work-in-progress college project for practicing AI mock interviews and mock tests, and learning from actionable feedback. Its planned interview features include adaptive questions, voice, reports and privacy-conscious webcam-based body-language feedback. Webcam gaze and facial-expression estimates are imperfect; they are not retina scans, proof of attention, or evidence of cheating.
 
-**Current status: Phase 0 foundation only.** The interview, authentication, mock test, AI and webcam features are not implemented yet. The initial database migration has been generated but has not yet been run against Neon. Follow [progress](docs/PROGRESS.md) for the actual status.
+**Current status: Phase 0 foundation only.** The interview, authentication, mock test, AI and webcam features are not implemented yet. The user indicated that the initial database migration was run locally; the sandbox could not independently verify it. Follow [progress](docs/PROGRESS.md) for the actual status.
 
 ## Run locally
 

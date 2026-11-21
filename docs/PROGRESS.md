@@ -2,7 +2,7 @@
 
 A checked box means the work is implemented and verified, not just planned.
 
-- [ ] Phase 0: Foundation — scaffold and migration files built; Neon migration verification pending after a restricted-sandbox connection failure.
+- [x] Phase 0: Foundation — scaffold, tests and migrations; user indicated the local Neon migration was completed (output not provided).
 - [ ] Phase 1: Authentication and users.
 - [ ] Phase 2: Free AI providers, router, prompt builder and fake provider.
 - [ ] Phase 3: Interview rounds, questions and answer evaluations.
@@ -16,4 +16,4 @@ A checked box means the work is implemented and verified, not just planned.
 - [ ] Phase 9: Optional advanced features (ask which features before starting).
 - [ ] Phase 10: Hardening, deployment and final report.
 
-Neon migration, real AI, and deployment need user-supplied setup. Do not interpret webcam estimates as verified attention, retinal tracking, or cheating detection.
+Real AI and deployment need user-supplied setup. The Neon migration was reported complete by the user; this sandbox cannot independently verify it. Do not interpret webcam estimates as verified attention, retinal tracking, or cheating detection.

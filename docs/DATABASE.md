@@ -1,6 +1,6 @@
 # Database
 
-Drizzle schema and versioned migrations currently cover the initial eight tables. They are generated, not yet verified against Neon. Mock tests, candidate feedback and webcam metrics are planned for later migrations.
+Drizzle schema and versioned migrations currently cover the initial eight tables. The user indicated that migrations were run locally; the sandbox could not independently verify Neon. Mock tests, candidate feedback and webcam metrics are planned for later migrations.
 
 ```mermaid
 erDiagram

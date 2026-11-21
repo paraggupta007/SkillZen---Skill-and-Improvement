@@ -1,4 +1,4 @@
-# Phase 0: Foundation (in progress)
+# Phase 0: Foundation (user-reported migration)
 
 ## Goal
 
@@ -40,8 +40,8 @@ Follow [setup](../SETUP.md), then run `npm run lint`, `npm run type-check`, `npm
 
 ## Problems faced and how they were fixed
 
-The checkout contained only a placeholder README, so the specification in the request was used. The sandbox defaults to Node 22; the checks were also run with Node 20.20.2 and CI targets Node 20. A pooled Neon URL was provided, but the migration attempt could not establish a connection from this restricted sandbox (`Connection terminated unexpectedly`). The migration remains unverified; run it from a machine with access to Neon.
+The checkout contained only a placeholder README, so the specification in the request was used. The sandbox defaults to Node 22; the checks were also run with Node 20.20.2 and CI targets Node 20. A pooled Neon URL was provided, but the migration attempt could not establish a connection from this restricted sandbox (`Connection terminated unexpectedly`). The user later indicated completion after being asked to run the migration locally; the migration output was not provided and this sandbox cannot independently verify the database.
 
 ## What is next
 
-Verify the migration on the user's Neon database; then implement authentication and integration tests. Phase 0 is not complete until the Neon migration is verified.
+Implement authentication and integration tests. Confirm migration output if database problems arise.

@@ -14,6 +14,10 @@ import { BehavioralRound } from "./domain/rounds/behavioral-round.js";
 import { LLMAnswerEvaluator } from "./domain/evaluation/llm-answer-evaluator.js";
 import { SpeechMetricsEvaluator } from "./domain/evaluation/speech-metrics-evaluator.js";
 import { CompositeEvaluator } from "./domain/evaluation/composite-evaluator.js";
+import { InterviewService } from "./modules/interviews/interview-service.js";
+import { DrizzleInterviewRepository } from "./modules/interviews/drizzle-interview-repository.js";
+import type { IInterviewRepository } from "./modules/interviews/interview-repository.js";
+import type { ILLMProvider } from "./ai/types.js";
 import type { Env } from "./config/env.js";
 import { EventBus } from "./core/event-bus.js";
 import { logger } from "./core/logger.js";
@@ -24,7 +28,11 @@ import { createDatabase } from "./db/client.js";
 /** Build the application's shared dependencies. */
 export function createContainer(
   env: Env,
-  options: { userRepository?: IUserRepository } = {},
+  options: {
+    userRepository?: IUserRepository;
+    interviewRepository?: IInterviewRepository;
+    providers?: ILLMProvider[];
+  } = {},
 ) {
   const database = env.DATABASE_URL
     ? createDatabase(env.DATABASE_URL)
@@ -53,7 +61,9 @@ export function createContainer(
     names.some((name) => !byName.has(name))
   )
     throw new Error("Invalid LLM_PROVIDER_ORDER");
-  const providers = names.map((name) => new CachedProvider(byName.get(name)!));
+  const providers =
+    options.providers ??
+    names.map((name) => new CachedProvider(byName.get(name)!));
   const llm = new LLMRouter(
     providers,
     database ? new DrizzleUsageRepository(database.db) : undefined,
@@ -69,12 +79,27 @@ export function createContainer(
     new LLMAnswerEvaluator(jsonGenerator, prompts),
     new SpeechMetricsEvaluator(),
   ]);
+  const events = new EventBus();
+  const interviewRepo =
+    options.interviewRepository ??
+    (database ? new DrizzleInterviewRepository(database.db) : undefined);
+  const interviewService = interviewRepo
+    ? new InterviewService(
+        interviewRepo,
+        rounds,
+        prompts,
+        jsonGenerator,
+        evaluator,
+        events,
+      )
+    : undefined;
   return {
+    interviews: interviewService,
     rounds,
     evaluator,
     env,
     logger,
-    events: new EventBus(),
+    events,
     database,
     auth,
     llm,

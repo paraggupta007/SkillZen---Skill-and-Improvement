@@ -12,6 +12,8 @@ export interface EvalInput {
   context: EvalContext;
   round: InterviewRound;
   speech?: SpeechMetrics;
+  onChunk?: (chunk: string) => void;
+  signal?: AbortSignal;
 }
 /** A namespaced evaluation component; missing metrics are not fabricated. */
 export interface Evaluation {

@@ -21,3 +21,9 @@
 
 - Added round strategies, registry factory and composable AI/speech evaluators with fake-model unit tests.
 - Interview persistence, API flows and real-provider verification are still pending.
+
+### Phase 3 — interview API (pending live verification)
+
+- Added authenticated interview creation, history, detail, SSE questions and evaluations, and idempotent completion.
+- Added transactional persistence and migration 0002, tested against isolated PGlite; fake-AI HTTP integration and a manual Neon/Groq smoke command were added.
+- Neon migration 0002 and real Groq testing remain outstanding.

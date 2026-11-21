@@ -1,6 +1,6 @@
 # Database
 
-Drizzle schema and versioned migrations currently cover the initial eight tables. The user indicated that migrations were run locally; the sandbox could not independently verify Neon. Mock tests, candidate feedback and webcam metrics are planned for later migrations.
+Drizzle schema and versioned migrations currently cover the initial eight tables. The user indicated that earlier migrations were run locally; migration 0002 has been tested with PGlite but not yet applied or verified on Neon. Mock tests, candidate feedback and webcam metrics are planned for later migrations.
 
 ```mermaid
 erDiagram
@@ -16,7 +16,7 @@ erDiagram
 
 - `users`: account and profile; skills stored as JSON.
 - `resumes`: extracted text, skills and ATS score, belonging to a user.
-- `interviews`: user, optional resume, type, difficulty and status.
+- `interviews`: user, role, optional resume, type, difficulty and status.
 - `questions`: interview question and optional parent follow-up.
 - `answers`: text and optional speech metrics.
 - `evaluations`: answer scores and feedback.
@@ -31,4 +31,4 @@ The user repository is the only authentication component that queries the `users
 
 ## Interview domain status
 
-The round and evaluator strategies do not yet persist interviews, questions, answers or evaluations. Their database-backed flow is still being implemented; Phase 3 added no migration.
+Migration 0002 adds the interview role and unique indexes on question order, answer per question and evaluation per answer. Transactions lock the interview row before state transitions, and answers plus evaluations are written together. Migrations were exercised on isolated PGlite, not the user’s Neon database. Back up existing data before migrating; existing duplicate rows would need resolution before unique indexes can be created.

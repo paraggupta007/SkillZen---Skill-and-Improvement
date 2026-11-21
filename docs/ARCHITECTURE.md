@@ -1,14 +1,14 @@
 # Architecture
 
-Currently implemented: frontend scaffold, HTTP foundation, auth and user repository, AI provider chain, round and evaluator strategies, DI composition root, event bus and database schema/client. The interview sequence and domain components below are targets, not implemented features.
+Currently implemented: frontend scaffold, HTTP foundation, auth and user repository, AI provider chain, round and evaluator strategies, interview API and repository, DI composition root, event bus and database schema/client. The frontend interview screens and report generation are planned.
 
 ## System
 
 ```mermaid
 flowchart LR
-  Browser[React + Vite] -->|REST and future SSE| API[Express API]
+  Browser[React + Vite] -->|REST and SSE| API[Express API]
   API --> DB[(PostgreSQL / Neon pool)]
-  API -. planned .-> AI[Free AI provider chain]
+  API --> AI[Free AI provider chain]
   Browser -. planned local analysis .-> Camera[Webcam metrics]
 ```
 
@@ -23,9 +23,9 @@ flowchart TD
   Interfaces --> Providers[Provider adapters]
 ```
 
-The auth service and user repository now implement this layering. Interview services and endpoints are planned; round and evaluation strategies are implemented but not wired to HTTP. AI adapters are implemented but have not been verified against live providers.
+The auth service and user repository now implement this layering. The interview service depends on repository and evaluator interfaces; its PostgreSQL repository locks the parent interview for state changes. AI adapters are implemented but have not been verified against live providers.
 
-## Planned class diagram
+## Class diagram
 
 ```mermaid
 classDiagram
@@ -40,7 +40,7 @@ classDiagram
   CompositeEvaluator --> IEvaluator
 ```
 
-## Planned interview sequence
+## Interview sequence (frontend and reports planned)
 
 ```mermaid
 sequenceDiagram
@@ -57,7 +57,7 @@ sequenceDiagram
   API->>AI: Evaluate and prepare next question
   API-->>Web: Stream feedback
   Web->>API: Complete interview
-  API-->>Web: Report status
+  Note over API: Report generation is planned
 ```
 
 The in-process event bus exists, but report generation and a durable job queue do not yet exist. Async work must account for process restarts before deployment.
@@ -68,4 +68,8 @@ Routes validate input and call `AuthService`, which depends on `IUserRepository`
 
 ## AI routing
 
-`LLMRouter` tries registered providers in configured order, twice each, with timeouts and independent circuit breakers. It records metadata through a repository interface. `JsonGenerator` validates outputs and requests one repair. Cached completions are opt-in and scoped; live streams are not cached. AI vendor keys are server-side only. No API route currently invokes the AI layer.
+`LLMRouter` tries registered providers in configured order, twice each, with timeouts and independent circuit breakers. It records metadata through a repository interface. `JsonGenerator` validates outputs and requests one repair. Cached completions are opt-in and scoped; live streams are not cached. AI vendor keys are server-side only. Interview routes invoke this AI layer.
+
+## Interview flow
+
+`InterviewService` validates ownership through `IInterviewRepository`. Each answer is evaluated while a possible next question is prepared; the best-effort candidate is scoped to the user and kept in a bounded process-local cache for 60 seconds. Feedback is not delayed waiting for prefetch. The cache may miss after restart or across instances, and prefetch does not yet start while the user is still speaking. SSE deltas are provisional raw model text; only validated completion events are persisted. The event bus is not a durable queue.

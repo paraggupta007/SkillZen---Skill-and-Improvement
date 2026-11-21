@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { JsonGenerator } from "../../ai/json-generator.js";
 import type { PromptBuilder } from "../prompts/prompt-builder.js";
 import type { EvalInput, Evaluation, IEvaluator } from "./evaluator.js";
-const score = z.number().finite().min(0).max(10);
+const score = z.number().int().min(0).max(10);
 const evaluationSchema = z.object({
   correctness: score,
   clarity: score,
@@ -22,9 +22,15 @@ export class LLMAnswerEvaluator implements IEvaluator {
   ) {}
   /** Return validated quality scores and constructive feedback. */
   async evaluate(input: EvalInput): Promise<Evaluation> {
+    const request = input.round.buildEvaluationPrompt(
+      input.context,
+      this.prompts,
+    );
+    request.signal = input.signal;
     const result = await this.generator.generate(
-      input.round.buildEvaluationPrompt(input.context, this.prompts),
+      request,
       evaluationSchema,
+      input.onChunk,
     );
     return {
       metrics: {

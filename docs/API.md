@@ -22,7 +22,7 @@ Unknown endpoints return HTTP 404:
 
 Malformed JSON returns 400 `INVALID_JSON`; oversized JSON returns 413 `PAYLOAD_TOO_LARGE`; rate-limited requests return 429 `RATE_LIMITED`; unhandled errors return 500 `INTERNAL_ERROR`.
 
-Resumes, interviews, reports, analytics, speech, mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
+Resumes, reports, analytics, speech transcription, mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
 
 ## Authentication and profile
 
@@ -54,6 +54,45 @@ For all endpoints, a rejected non-allowed origin on a write returns 403 `ORIGIN_
 
 ## AI layer
 
-The internal provider router has no public endpoint yet. Interview SSE endpoints will be documented when implemented; there is currently no browser-accessible AI generation route.
+The interview endpoints use the internal provider router; there is no general-purpose public AI endpoint.
 
-The interview domain strategies exist internally, but no interview endpoints have been implemented yet.
+## Interviews
+
+All interview endpoints require the session cookie and use user ownership checks. JSON errors before an SSE stream starts use the standard HTTP envelope. The AI routes limit requests per user.
+
+### POST /api/interviews
+
+Request: `{"role":"Backend developer","roundType":"technical","difficulty":"medium","totalQuestions":2,"jdText":"Optional job description"}`. Round types: `technical`, `hr`, `behavioral`; difficulty: `easy`, `medium`, `hard`; question count: 1–20. The optional job description is at most 12,000 characters. Response 201 contains the newly created interview. Errors include 400 `VALIDATION_ERROR`/`INVALID_ROUND`, 401 `UNAUTHENTICATED`, and 503 `INTERVIEWS_UNAVAILABLE`.
+
+### GET /api/interviews and GET /api/interviews/:id
+
+History returns up to 100 owned interview records. Detail returns `{"interview":{...},"turns":[{"question":{...},"answer":{...},"evaluation":{...}}]}`; unanswered turns have null answer/evaluation. Errors include 401 `UNAUTHENTICATED` and 404 `NOT_FOUND` for an inaccessible interview.
+
+### GET /api/interviews/:id/next-question
+
+Returns `text/event-stream`. The first pending question is returned again instead of creating a duplicate. The endpoint generates a question only when there is no unanswered question. Although it is a GET for EventSource compatibility, it changes state and checks Origin / cross-site fetch metadata. Before the stream, errors can include 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 403 `ORIGIN_FORBIDDEN`, 404 `NOT_FOUND`, 429 `RATE_LIMITED`, or 503 `INTERVIEWS_UNAVAILABLE`.
+
+### POST /api/interviews/:id/answers
+
+Request: `{"questionId":"<uuid>","answerText":"My answer","speech":{"durationSeconds":30,"wordCount":50,"fillerCount":2,"pauseCount":1}}`. `speech` is optional; text is limited to 12,000 characters. Returns SSE as described below. A valid final event contains `metrics` (including 0–10 integer scores), a feedback array and `idealAnswer`. The answer and evaluation are saved together after validation. Errors before streaming are like those above; once streaming has started, an error event may contain `NOT_FOUND`, `ALREADY_ANSWERED`, `INTERVIEW_CLOSED` or `AI_ERROR`.
+
+### POST /api/interviews/:id/complete
+
+No body. Marks an interview completed only after all questions are answered; repeated completion is idempotent. The successful response contains the completed interview. Errors include 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 404 `NOT_FOUND`, and 409 `INTERVIEW_INCOMPLETE`/`INTERVIEW_CLOSED`. A best-effort in-process `interview.completed` event is published once. Report generation is not yet implemented and event delivery is not durable across process failure.
+
+### SSE format and safety
+
+Each event has a standard response envelope:
+
+```text
+event: status
+data: {"success":true,"data":{"state":"processing"},"error":null}
+
+event: delta
+data: {"success":true,"data":{"text":"...","provisional":true},"error":null}
+
+event: complete
+data: {"success":true,"data":{"id":"..."},"error":null}
+```
+
+`delta` is raw, **unvalidated model JSON**, not the final question or evaluation. Display it only as text and never treat it as trusted structured data; JSON repair or a concurrent request can make `complete` differ. Only `complete` has passed validation and persistence. An `error` event has the standard failure envelope and HTTP status stays 200 after streaming begins. Clients must handle disconnects and errors and should not assume a provisional answer was saved. SSE answer submission is POST, so use `fetch` streaming rather than browser EventSource.

@@ -1,5 +1,5 @@
 // Drizzle implementation of the user repository; all account SQL stays here.
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { createDatabase } from "../../db/client.js";
 import { users } from "../../db/schema.js";
 import { AppError } from "../../core/errors.js";
@@ -48,5 +48,13 @@ export class DrizzleUserRepository implements IUserRepository {
     return (
       await this.db.update(users).set(input).where(eq(users.id, id)).returning()
     )[0];
+  }
+  /** Delete only a specifically identified temporary smoke-test user and owned data. */
+  async deleteSmokeUser(id: string, email: string) {
+    if (!/^skillzen-smoke-[0-9a-f-]+@example\.invalid$/.test(email))
+      throw new Error("Not a smoke-test email");
+    await this.db
+      .delete(users)
+      .where(and(eq(users.id, id), eq(users.email, email)));
   }
 }

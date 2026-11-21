@@ -54,6 +54,7 @@ export const interviews = pgTable(
     resumeId: uuid("resume_id").references(() => resumes.id, {
       onDelete: "set null",
     }),
+    role: text("role").notNull().default("General"),
     roundType: text("round_type").notNull(),
     difficulty: text("difficulty").notNull(),
     totalQuestions: integer("total_questions").notNull(),
@@ -85,7 +86,9 @@ export const questions = pgTable(
     ),
     generatedBy: text("generated_by").notNull(),
   },
-  (t) => [index("questions_interview_order_idx").on(t.interviewId, t.orderNo)],
+  (t) => [
+    uniqueIndex("questions_interview_order_idx").on(t.interviewId, t.orderNo),
+  ],
 );
 export const answers = pgTable(
   "answers",
@@ -101,22 +104,26 @@ export const answers = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("answers_question_idx").on(t.questionId)],
+  (t) => [uniqueIndex("answers_question_idx").on(t.questionId)],
 );
-export const evaluations = pgTable("evaluations", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  answerId: uuid("answer_id")
-    .notNull()
-    .references(() => answers.id, { onDelete: "cascade" }),
-  correctness: integer("correctness").notNull(),
-  clarity: integer("clarity").notNull(),
-  depth: integer("depth").notNull(),
-  relevance: integer("relevance").notNull(),
-  overall: integer("overall").notNull(),
-  feedback: text("feedback").notNull(),
-  idealAnswer: text("ideal_answer").notNull(),
-  raw: jsonb("raw").notNull(),
-});
+export const evaluations = pgTable(
+  "evaluations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    answerId: uuid("answer_id")
+      .notNull()
+      .references(() => answers.id, { onDelete: "cascade" }),
+    correctness: integer("correctness").notNull(),
+    clarity: integer("clarity").notNull(),
+    depth: integer("depth").notNull(),
+    relevance: integer("relevance").notNull(),
+    overall: integer("overall").notNull(),
+    feedback: text("feedback").notNull(),
+    idealAnswer: text("ideal_answer").notNull(),
+    raw: jsonb("raw").notNull(),
+  },
+  (t) => [uniqueIndex("evaluations_answer_idx").on(t.answerId)],
+);
 export const reports = pgTable(
   "reports",
   {

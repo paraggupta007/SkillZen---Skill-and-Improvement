@@ -18,3 +18,7 @@ Put these only in `apps/api/.env`, never browser variables or chat:
 - `JWT_SECRET` (required for auth): generate using `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` and put the output into `JWT_SECRET` in the file.
 
 A configured provider is not proof that a model is currently free, available, or within quota; check provider terms and limits. Automated AI tests use fakes and do not require these keys. Real AI calls are not yet verified and no public interview endpoint exists.
+
+## Interview API verification
+
+Run `npm run db:migrate` after updating the project, because Phase 3 adds migration 0002. Set `JWT_SECRET` and `GROQ_API_KEY` in `apps/api/.env`, then optionally run `npm run smoke:groq -w api` on a network that can reach Neon and Groq. The check creates a temporary user and interview and attempts to delete them afterward; AI usage metadata remains. See [TESTING.md](TESTING.md). This has not yet been verified against live services.

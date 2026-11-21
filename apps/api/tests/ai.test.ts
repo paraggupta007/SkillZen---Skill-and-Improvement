@@ -187,3 +187,17 @@ describe("provider HTTP adapters", () => {
     expect(JSON.stringify(logs)).not.toContain("secret error");
   });
 });
+
+describe("streamed structured output", () => {
+  it("repairs a streamed invalid response and returns only validated data", async () => {
+    const fake = new FakeLLMProvider(['{"score":"bad"}', '{"score":7}']);
+    const chunks: string[] = [];
+    const output = await new JsonGenerator(fake, new PromptBuilder()).generate(
+      req,
+      z.object({ score: z.number().int().min(0).max(10) }),
+      (chunk) => chunks.push(chunk),
+    );
+    expect(chunks).toEqual(['{"score":"bad"}']);
+    expect(output.score).toBe(7);
+  });
+});

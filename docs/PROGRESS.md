@@ -2,7 +2,7 @@
 
 A checked box means the work is implemented and verified, not just planned.
 
-- [ ] Phase 0: Foundation — scaffold and migration files built; Neon migration verification pending.
+- [ ] Phase 0: Foundation — scaffold and migration files built; Neon migration verification pending after a restricted-sandbox connection failure.
 - [ ] Phase 1: Authentication and users.
 - [ ] Phase 2: Free AI providers, router, prompt builder and fake provider.
 - [ ] Phase 3: Interview rounds, questions and answer evaluations.

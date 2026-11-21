@@ -1,0 +1,5 @@
+node_modules
+coverage
+dist
+package-lock.json
+apps/api/src/db/migrations/meta

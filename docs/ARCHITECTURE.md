@@ -9,7 +9,7 @@ flowchart LR
   Browser[React + Vite] -->|REST and SSE| API[Express API]
   API --> DB[(PostgreSQL / Neon pool)]
   API --> AI[Free AI provider chain]
-  Browser -. planned local analysis .-> Camera[Webcam metrics]
+  Browser -. optional local analysis .-> Camera[Webcam face observations]
 ```
 
 ## Layers
@@ -91,3 +91,7 @@ The browser can read questions with speech synthesis and use Web Speech recognit
 ## Resume analysis and PDF export
 
 An injected report PDF renderer creates an in-memory PDF after checking ownership and report readiness. The download route does not start a report job. Built-in PDF fonts currently have limited Unicode coverage. A separate resource-limited child process extracts text from uploaded PDFs; it is not an OS security sandbox. A repository stores extracted text by owner, and the AI prompt treats resume/JD contents as untrusted.
+
+## Camera coaching (Phase 8 in progress)
+
+After explicit consent and start, the browser loads MediaPipe Face Landmarker and its official model from Google, captures video locally and samples at approximately 5 fps. Face framing and iris-position counters are approximations, not attention or cheating detection. No frames or landmarks are sent to the server. The user can explicitly save/delete aggregate counters; a separate evaluator provides non-diagnostic framing suggestions on the online report, without affecting scores. Full body/hand gesture analysis and PDF integration are not implemented; real camera and model loading remain unverified.

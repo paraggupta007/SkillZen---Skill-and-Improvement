@@ -154,3 +154,20 @@ export const aiUsageLogs = pgTable("ai_usage_logs", {
     .notNull()
     .defaultNow(),
 });
+
+/** Optional user-shared camera observation counters; no images or landmarks. */
+export const cameraObservations = pgTable("camera_observations", {
+  interviewId: uuid("interview_id")
+    .primaryKey()
+    .references(() => interviews.id, { onDelete: "cascade" }),
+  samples: integer("samples").notNull(),
+  faceVisible: integer("face_visible").notNull(),
+  centered: integer("centered").notNull(),
+  centeredKnown: integer("centered_known").notNull(),
+  gazeNearCamera: integer("gaze_near_camera").notNull(),
+  gazeKnown: integer("gaze_known").notNull(),
+  headMovements: integer("head_movements").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});

@@ -22,6 +22,10 @@ import {
   GroqTranscriber,
   type ITranscriber,
 } from "./modules/speech/transcriber.js";
+import { CameraService } from "./modules/camera/camera-service.js";
+import { DrizzleCameraRepository } from "./modules/camera/drizzle-camera-repository.js";
+import type { ICameraRepository } from "./modules/camera/camera-repository.js";
+import { CameraEvaluator } from "./domain/evaluation/camera-evaluator.js";
 import { ResumeService } from "./modules/resumes/resume-service.js";
 import { DrizzleResumeRepository } from "./modules/resumes/drizzle-resume-repository.js";
 import type { IResumeRepository } from "./modules/resumes/resume-repository.js";
@@ -53,6 +57,7 @@ export function createContainer(
     interviewRepository?: IInterviewRepository;
     reportRepository?: IReportRepository;
     resumeRepository?: IResumeRepository;
+    cameraRepository?: ICameraRepository;
     resumeExtractor?: IResumeTextExtractor;
     analyticsRepository?: IAnalyticsRepository;
     providers?: ILLMProvider[];
@@ -131,6 +136,13 @@ export function createContainer(
         resumeRepo,
       )
     : undefined;
+  const cameraRepo =
+    options.cameraRepository ??
+    (database ? new DrizzleCameraRepository(database.db) : undefined);
+  const cameraService =
+    cameraRepo && interviewRepo
+      ? new CameraService(interviewRepo, cameraRepo, new CameraEvaluator())
+      : undefined;
   const reportRepo =
     options.reportRepository ??
     (database ? new DrizzleReportRepository(database.db) : undefined);
@@ -155,6 +167,7 @@ export function createContainer(
     ? new AnalyticsService(analyticsRepo)
     : undefined;
   return {
+    camera: cameraService,
     resumes: resumeService,
     transcriber:
       options.transcriber ??

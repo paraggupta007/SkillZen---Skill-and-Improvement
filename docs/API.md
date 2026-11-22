@@ -146,3 +146,9 @@ Body: `{"jobDescription":"Optional role description"}` (up to 12,000 characters,
 ### DELETE /api/resumes/:id
 
 Deletes the owned resume row and extracted text, clearing its interview references; returns `{"success":true,"data":{"deleted":true},"error":null}`. Returns 404 for missing or unowned resumes. Derived questions, answers and reports are not deleted.
+
+## Optional camera observations (Phase 8 in progress)
+
+`GET /api/interviews/:id/camera-metrics` returns `{ "metrics": null, "suggestions": [] }` when no observations were shared, or bounded aggregate counters with non-diagnostic framing suggestions. All requests require authentication and ownership; responses are private/no-store. `PUT` accepts only numeric integer counters: `samples`, `faceVisible`, `centered`, `centeredKnown`, `gazeNearCamera`, `gazeKnown`, and `headMovements` (0–18,000; samples at least 1; numerators and denominators must be consistent). Images, video, landmarks and unexpected fields are rejected. Only in-progress interviews accept new counts. `DELETE` removes stored counts for an owned interview, including after completion. Common errors: 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 404 `NOT_FOUND`, 409 `INTERVIEW_CLOSED`, 429 `RATE_LIMITED`, 503 `CAMERA_METRICS_UNAVAILABLE`. The route does not verify the user-supplied counters.
+
+The frontend shares counts only after explicit user action. The online report displays optional observations separately from the score; the PDF does not yet include them. Estimates are not proof of attention, cheating, identity, or medical retinal assessment. Full gesture and body-posture analysis is not yet implemented. Apply migration 0003 before using persistence.

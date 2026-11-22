@@ -47,3 +47,7 @@ Browser speech APIs vary in availability and may use a network service. We offer
 ## Resume extraction and privacy
 
 PDF input is limited to 5 MB, 10 pages and 20,000 extracted characters. PDF.js runs in a subprocess with a 128 MB V8 heap limit, 15-second deadline and two-process concurrency limit; this is resource isolation, not an OS security sandbox. Only extracted text is stored. Users can delete it, but generated interview material may retain derived information. AI match scores are estimates, never ATS or hiring decisions. Scanned PDFs and full Unicode report-font coverage are deferred.
+
+## Camera observations
+
+Video and landmarks stay in the browser. The user separately chooses whether to save coarse counts; they can delete those counts. The model is downloaded from Google after opt-in, and WebAssembly files are served locally. Estimates are uncertain and are not biometric identification, medical retinal analysis, evidence of attention, or cheating detection. The observations do not change interview scores. Full body and hand gesture analysis remains to be implemented and requires additional validation.

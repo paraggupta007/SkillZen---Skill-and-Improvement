@@ -14,7 +14,11 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { apiBase, apiRequest } from "../services/api";
-import type { InterviewDetail, ReportState } from "../services/types";
+import type {
+  CameraResult,
+  InterviewDetail,
+  ReportState,
+} from "../services/types";
 import { ErrorState, Eyebrow, Loading } from "../components/ui";
 /** Display a generated interview report, or its current generation status. */
 export function ReportPage() {
@@ -33,6 +37,18 @@ export function ReportPage() {
     queryFn: () => apiRequest<InterviewDetail>(`/interviews/${id}`),
     enabled: Boolean(id),
     retry: false,
+  });
+  const camera = useQuery({
+    queryKey: ["camera", id],
+    queryFn: () => apiRequest<CameraResult>(`/interviews/${id}/camera-metrics`),
+    enabled: Boolean(id),
+    retry: false,
+  });
+  const removeCamera = useMutation({
+    mutationFn: () =>
+      apiRequest(`/interviews/${id}/camera-metrics`, { method: "DELETE" }),
+    onSuccess: () =>
+      client.setQueryData(["camera", id], { metrics: null, suggestions: [] }),
   });
   const retry = useMutation({
     mutationFn: () =>
@@ -155,6 +171,57 @@ export function ReportPage() {
                 icon="tip"
               />
             </div>
+            {camera.data?.metrics && (
+              <section className="panel camera-panel">
+                <div className="camera-title">
+                  <div>
+                    <h2>Optional camera observations</h2>
+                    <p>
+                      These self-submitted counts do not affect your interview
+                      score.
+                    </p>
+                  </div>
+                </div>
+                <div className="camera-metrics">
+                  <p>
+                    Face visible in {camera.data.metrics.faceVisible} of{" "}
+                    {camera.data.metrics.samples} sampled frames.{" "}
+                    {camera.data.metrics.centeredKnown
+                      ? `Face centered in ${camera.data.metrics.centered} of ${camera.data.metrics.centeredKnown} usable frames.`
+                      : "Not enough data to estimate framing."}
+                  </p>
+                  <p>
+                    {camera.data.metrics.gazeKnown
+                      ? `Iris position near center in ${camera.data.metrics.gazeNearCamera} of ${camera.data.metrics.gazeKnown} usable frames.`
+                      : "Not enough data to estimate iris position."}
+                  </p>
+                  {camera.data.suggestions.map((tip, index) => (
+                    <p key={`${index}-${tip}`}>{tip}</p>
+                  ))}
+                  <p>
+                    Imperfect estimates, not retina scans or evidence of
+                    attention or cheating. Results vary with lighting, glasses,
+                    camera position and individual differences.
+                  </p>
+                  <button
+                    type="button"
+                    className="voice-button"
+                    disabled={removeCamera.isPending}
+                    onClick={() => removeCamera.mutate()}
+                  >
+                    Delete saved camera counts
+                  </button>
+                  {removeCamera.isError && (
+                    <ErrorState message={removeCamera.error.message} />
+                  )}
+                </div>
+              </section>
+            )}
+            {camera.isError && (
+              <p className="voice-error">
+                Camera observations could not be loaded.
+              </p>
+            )}
             <div className="report-disclaimer">
               AI feedback is a practice aid, not a hiring decision. Use your own
               judgment and keep improving.

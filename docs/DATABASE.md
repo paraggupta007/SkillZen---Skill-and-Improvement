@@ -42,3 +42,7 @@ Phase 4 uses the existing `reports` table and its unique `interview_id` index; i
 Phase 6 adds no migration. Existing answer speech metrics and evaluation data are stored when supplied; audio recordings are not stored by the application. Text transcriptions enter the editable answer field and are saved only when the answer is submitted.
 
 Phase 7 uses the existing resume table and foreign key; it adds no migration. Resume text persists until the owner deletes it or the user is deleted.
+
+## Camera observations (Phase 8 in progress)
+
+Migration `0003_tricky_lorna_dane.sql` adds `camera_observations`, keyed to one interview with cascading deletion. It stores only explicitly shared bounded counters and an update time; no video, frames, or landmarks. Users can delete the observations separately. Apply the migration to Neon before saving or retrieving camera data.

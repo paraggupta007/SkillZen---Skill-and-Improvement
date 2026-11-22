@@ -86,3 +86,17 @@ export interface ResumeAnalysis {
   summary: string;
   matchScore: number | null;
 }
+
+/** User-shared camera counters and cautious framing suggestions. */
+export interface CameraResult {
+  metrics: {
+    samples: number;
+    faceVisible: number;
+    centered: number;
+    centeredKnown: number;
+    gazeNearCamera: number;
+    gazeKnown: number;
+    headMovements: number;
+  } | null;
+  suggestions: string[];
+}

@@ -65,3 +65,8 @@
 
 - Added owner-checked PDF report downloads; default PDF fonts have limited Unicode support.
 - Added text-based PDF resume upload, deletion, AI coaching and optional resume context for interviews. Extraction uses a resource-bounded subprocess; live provider analysis is unverified.
+
+## Phase 8 — in progress
+
+- Added explicitly consented local MediaPipe face-framing and iris-position observations, with opt-in aggregate sharing and deletion.
+- Added migration 0003 and non-diagnostic report suggestions. Full gesture/body-posture analysis, PDF integration and real-camera testing remain pending.

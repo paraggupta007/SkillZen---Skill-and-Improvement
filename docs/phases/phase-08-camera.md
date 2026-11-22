@@ -25,8 +25,8 @@ Video and landmarks remain in the browser; only explicitly approved aggregate co
 
 ## How to run and test it
 
-Pull the latest branch, run `npm install`, then `npm run db:migrate` to apply migrations through 0004, and `npm run dev`. In an in-progress interview opt in, start the camera, then stop and optionally save counts. Delete saved counts from the interview or report. Run `npm run lint`, `npm run type-check`, `npm test`, and `npm run build`. Automated tests use mock camera/model APIs and isolated PGlite; live device permissions, browser/WASM and model downloads, tracking accuracy, PDF layout and the full real workflow still need manual verification. Migration 0004 has not been verified on the user's Neon database.
+Pull the latest branch, run `npm install`, then `npm run db:migrate` to apply migrations through 0004, and `npm run dev`. In an in-progress interview opt in, start the camera, then stop and optionally save counts. Delete saved counts from the interview or report. Run `npm run lint`, `npm run type-check`, `npm test`, and `npm run build`. Automated tests use mock camera/model APIs and isolated PGlite; live device permissions, browser/WASM and model downloads, tracking accuracy, PDF layout and the full real workflow still need manual verification. The user reported completing migration 0004 locally; its Neon state has not been independently verified.
 
 ## What is next
 
-Apply migration 0004 on Neon, manually validate the camera/model behavior and PDF, and address issues found. Phase 8 remains in progress until real-device validation.
+Manually validate the camera/model behavior and PDF, and address issues found. Phase 8 remains in progress until real-device validation.

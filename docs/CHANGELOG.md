@@ -85,3 +85,8 @@
 ## Signed-in home navigation
 
 - The home page now checks the current session and shows a dashboard link and sign-out action for signed-in users; clicking the SkillZen logo no longer makes the page appear logged out. A session-check failure is shown separately from a signed-out state.
+
+## Interview question feedback
+
+- Added optional, editable and deletable 1–5 ratings and comments for individual interview questions during practice and on reports.
+- Added migration 0006 and owner isolation tests. Feedback is separate from AI evaluations, scores and PDF reports. Neon migration and live browser checks remain pending.

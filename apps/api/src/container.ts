@@ -1,4 +1,9 @@
 import {
+  QuestionFeedbackService,
+  type IQuestionFeedbackRepository,
+} from "./modules/question-feedback/question-feedback-service.js";
+import { DrizzleQuestionFeedbackRepository } from "./modules/question-feedback/drizzle-question-feedback-repository.js";
+import {
   MockTestService,
   type IMockTestRepository,
 } from "./modules/mock-tests/mock-test-service.js";
@@ -64,6 +69,7 @@ export function createContainer(
     resumeRepository?: IResumeRepository;
     cameraRepository?: ICameraRepository;
     mockTestRepository?: IMockTestRepository;
+    questionFeedbackRepository?: IQuestionFeedbackRepository;
     resumeExtractor?: IResumeTextExtractor;
     analyticsRepository?: IAnalyticsRepository;
     providers?: ILLMProvider[];
@@ -176,7 +182,13 @@ export function createContainer(
   const mockTestRepo =
     options.mockTestRepository ??
     (database ? new DrizzleMockTestRepository(database.db) : undefined);
+  const feedbackRepo =
+    options.questionFeedbackRepository ??
+    (database ? new DrizzleQuestionFeedbackRepository(database.db) : undefined);
   return {
+    questionFeedback: feedbackRepo
+      ? new QuestionFeedbackService(feedbackRepo)
+      : undefined,
     mockTests: mockTestRepo ? new MockTestService(mockTestRepo) : undefined,
     camera: cameraService,
     resumes: resumeService,

@@ -12,7 +12,7 @@ A checked box means the work is implemented and verified, not just planned.
 - [x] Phase 7: Resume, job description and PDF — fake-AI and PDF extraction tests pass; real provider/browser workflow unverified and report PDF fonts have limited Unicode coverage.
 - [ ] Phase 8: Consent-based browser-only body-language estimates and reports — local face/iris and coarse pose/wrist observations, optional aggregate sharing and online/PDF reporting implemented; user reported completing migration and camera/report test instructions; detailed results and tracking accuracy not independently verified.
 - [x] Mock tests: small fixed JavaScript/web multiple-choice banks, saved attempts, scoring and explanations; automated tests pass; migration 0005 and real browser flow remain to be verified on Neon.
-- [ ] Interview/question feedback: user ratings and comments, separate from AI answer evaluations; design with implementation.
+- [x] Interview/question feedback: optional per-question ratings/comments with owner access, editing and deletion, separate from AI answer evaluations; PGlite and browser-component tests pass; Neon migration 0006 and real browser flow remain unverified.
 - [ ] Phase 9: Optional advanced features (ask which features before starting).
 - [ ] Phase 10: Hardening, deployment and final report — public contact page, favicon and responsive navigation added; Vercel frontend / separate Node API deployment documented but not deployed or end-to-end verified.
 

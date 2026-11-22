@@ -28,6 +28,7 @@ import {
 } from "../hooks/use-speech";
 import { useRecording } from "../hooks/use-recording";
 import { useInterviewStore } from "../store/interview-store";
+import { QuestionFeedback } from "../components/question-feedback";
 import { CameraCoaching } from "../components/camera-coaching";
 import { ErrorState, Eyebrow, Loading } from "../components/ui";
 /** Show the live question, answer editor and validated feedback. */
@@ -351,6 +352,13 @@ export function InterviewPage() {
                   >
                     <Volume2 size={16} /> Read question aloud
                   </button>
+                )}
+                {active && (
+                  <QuestionFeedback
+                    key={active.id}
+                    interviewId={id}
+                    questionId={active.id}
+                  />
                 )}
                 {nextQuestion.isError && (
                   <ErrorState

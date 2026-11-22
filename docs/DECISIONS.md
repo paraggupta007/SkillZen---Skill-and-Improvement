@@ -4,7 +4,7 @@
 
 - Context: the original specification uses PrepPilot; the owner chose SkillZen and requested mock tests and feedback on interview questions/options.
 - Options: preserve old name or use the owner's name.
-- Choice: SkillZen. Basic mock tests now use a small curated bank; candidate interview/question feedback remains on the roadmap.
+- Choice: SkillZen. Basic mock tests now use a small curated bank; optional candidate interview-question feedback is stored separately from AI evaluations.
 - Why: it matches the current project goal.
 
 ## Database
@@ -55,3 +55,7 @@ Video and landmarks stay in the browser. The user separately chooses whether to 
 ## Mock-test scope
 
 The initial test feature uses a small curated, publicly visible bank rather than AI-generated questions. Scores are simple correctness counts, not a hiring or ability determination. Snapshots preserve results if the bank changes; draft answers stay on the page until submitted.
+
+## Candidate question feedback
+
+One editable/deletable rating and optional comment per interview question is stored server-side and shown only to its owner through the API. It is not an AI evaluation, not included in prompts or report PDFs, and does not influence scores. There is no admin aggregation or notification feature yet.

@@ -4,14 +4,14 @@ Vercel serves the **frontend**; this repository's Express API is a long-running 
 
 ## 1. Prepare the database
 
-Use a Neon pooled PostgreSQL connection URL and back up existing data. Apply all migrations through `0005_green_chimera.sql` **once** from a trusted machine or deployment job using the intended production `DATABASE_URL`:
+Use a Neon pooled PostgreSQL connection URL and back up existing data. Apply all migrations through `0006_peaceful_shinobi_shaw.sql` **once** from a trusted machine or deployment job using the intended production `DATABASE_URL`:
 
 ```bash
 npm ci --include=dev
 npm run db:migrate
 ```
 
-`apps/api/.env` is loaded when running locally, or set the variables privately in the deployment environment. If `NODE_ENV=production`, the migration command also requires the production `JWT_SECRET` to satisfy configuration validation. Never commit secrets or put them in `VITE_` variables. Do not share credentials in chat. The user reported earlier migrations through 0004; migration 0005 on Neon has not been confirmed. A health response does not verify database access.
+`apps/api/.env` is loaded when running locally, or set the variables privately in the deployment environment. If `NODE_ENV=production`, the migration command also requires the production `JWT_SECRET` to satisfy configuration validation. Never commit secrets or put them in `VITE_` variables. Do not share credentials in chat. The user reported earlier migrations through 0004; migrations 0005 and 0006 on Neon have not been confirmed. A health response does not verify database access.
 
 ## 2. Host the API on Render
 

@@ -44,3 +44,7 @@ After pulling the Phase 8 changes, run `npm install` and `npm run db:migrate` to
 ## Mock tests
 
 After pulling, run `npm install` and `npm run db:migrate` to apply migration 0005. Under Mock tests, select JavaScript basics or Web fundamentals and 3 or 5 questions. Draft selections are not saved until submission. Review the score and explanations, revisit an attempt from history, or delete it. The small fixed bank may repeat questions and is not a secure examination.
+
+## Feedback on interview questions
+
+Apply migrations through 0006. Open “Rate this question” during an interview, or open a question in the report’s feedback section. A 1–5 rating is required; a comment is optional. You can edit or delete feedback. It is stored in your account, not sent to the AI or used in scoring. Avoid adding sensitive information.

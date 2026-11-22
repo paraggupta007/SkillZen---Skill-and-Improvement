@@ -19,6 +19,7 @@ import type {
   InterviewDetail,
   ReportState,
 } from "../services/types";
+import { QuestionFeedback } from "../components/question-feedback";
 import { ErrorState, Eyebrow, Loading } from "../components/ui";
 /** Display a generated interview report, or its current generation status. */
 export function ReportPage() {
@@ -82,6 +83,23 @@ export function ReportPage() {
           Practice again <ArrowRight size={16} />
         </Link>
       </div>
+      {interview.data?.turns.length ? (
+        <section className="panel report-question-feedback">
+          <h2>Feedback on the questions</h2>
+          <p>
+            Tell us which questions were useful. This is separate from your
+            answer evaluation and does not change your score.
+          </p>
+          {interview.data.turns.map(({ question }) => (
+            <QuestionFeedback
+              key={question.id}
+              interviewId={id}
+              questionId={question.id}
+              summary={`${question.orderNo}. ${question.text}`}
+            />
+          ))}
+        </section>
+      ) : null}
       {report.isLoading ? (
         <Loading label="Loading your report..." />
       ) : report.isError ? (

@@ -22,7 +22,6 @@ Unknown endpoints return HTTP 404:
 
 Malformed JSON returns 400 `INVALID_JSON`; oversized JSON returns 413 `PAYLOAD_TOO_LARGE`; rate-limited requests return 429 `RATE_LIMITED`; unhandled errors return 500 `INTERNAL_ERROR`.
 
-Candidate interview/question feedback endpoints are planned and do not exist yet.
 
 ## Authentication and profile
 
@@ -163,3 +162,13 @@ All endpoints require authentication, use private/no-store responses and are lim
 - `DELETE /api/mock-tests/:id` removes the owned attempt and result. Unknown or unowned IDs return 404; invalid requests return 400, missing authentication 401, missing database configuration 503 and rate limiting 429.
 
 Questions are a small fixed public bank for practice; answers are not sent in pre-submission API responses but must not be treated as secret or as secure examination material. Draft selections remain only in the page and are lost on reload or navigation.
+
+## Candidate feedback on interview questions
+
+`GET`, `PUT`, and `DELETE /api/interviews/:id/questions/:questionId/feedback` require authentication and both the interview and question must belong together and to the user. Responses are private/no-store; requests are limited to 100 per user per 15 minutes. Unknown, unowned or mismatched questions return 404 `NOT_FOUND`.
+
+- `GET` returns `{ "feedback": null }` if no rating exists, otherwise `{ "feedback": { "questionId": "...", "rating": 4, "comment": "Useful", "updatedAt": "..." } }`.
+- `PUT` accepts `{ "rating": 4, "comment": "Useful" }`; rating is a required integer 1–5, comment is optional, trimmed and at most 1,000 characters. One row per question is created or replaced. Unknown fields are rejected.
+- `DELETE` removes the feedback (idempotent for an existing owned question). Ratings may be managed during or after the interview. Invalid input returns 400 `VALIDATION_ERROR`; missing authentication 401, rate limiting 429, missing configuration 503 `FEEDBACK_UNAVAILABLE`.
+
+Candidate feedback is separate from AI answer evaluations and does not affect the score. It is not fed into AI prompts or included in the report PDF. It is stored in the application database until deleted or the question is removed; there is currently no owner-facing aggregation or moderation interface. Apply migrations through 0006 before use.

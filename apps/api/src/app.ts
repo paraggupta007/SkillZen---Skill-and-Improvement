@@ -1,3 +1,4 @@
+import { createQuestionFeedbackRoutes } from "./modules/question-feedback/routes.js";
 import { createMockTestRoutes } from "./modules/mock-tests/routes.js";
 // Assemble the HTTP middleware and public health endpoint.
 import express from "express";
@@ -69,6 +70,10 @@ export function createApp(container: Container) {
   app.use("/api", createMockTestRoutes(container.auth, container.mockTests));
   app.use("/api", createResumeRoutes(container.resumes, container.auth));
   app.use("/api", createCameraRoutes(container.auth, container.camera));
+  app.use(
+    "/api",
+    createQuestionFeedbackRoutes(container.auth, container.questionFeedback),
+  );
   app.use(
     "/api",
     createSpeechRoutes(

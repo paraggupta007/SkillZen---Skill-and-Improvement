@@ -160,6 +160,7 @@ describe("frontend pages", () => {
     vi.stubGlobal("fetch", fetcher);
     mount("/app/interview/abc", <InterviewPage />, "/app/interview/:id");
     await screen.findByText("What is caching?");
+    expect(screen.getByText("Rate this question")).toBeTruthy();
     const actor = userEvent.setup();
     await actor.type(screen.getByLabelText("Your answer"), "Reuse results");
     await actor.click(screen.getByRole("button", { name: /submit answer/i }));

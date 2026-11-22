@@ -43,6 +43,13 @@
       "when": 1795319378144,
       "tag": "0005_green_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795322671719,
+      "tag": "0006_peaceful_shinobi_shaw",
+      "breakpoints": true
     }
   ]
 }

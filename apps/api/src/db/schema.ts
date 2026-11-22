@@ -11,8 +11,10 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  check,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const interviewStatus = pgEnum("interview_status", [
   "in_progress",
@@ -202,5 +204,27 @@ export const mockTests = pgTable(
   },
   (t) => [
     index("mock_tests_user_created_idx").on(t.userId, t.createdAt.desc()),
+  ],
+);
+
+/** Optional candidate opinion of an interview question; independent of AI evaluation. */
+export const questionFeedback = pgTable(
+  "question_feedback",
+  {
+    questionId: uuid("question_id")
+      .primaryKey()
+      .references(() => questions.id, { onDelete: "cascade" }),
+    rating: integer("rating").notNull(),
+    comment: text("comment").notNull().default(""),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    check("question_feedback_rating_check", sql`${t.rating} between 1 and 5`),
+    check(
+      "question_feedback_comment_length_check",
+      sql`char_length(${t.comment}) <= 1000`,
+    ),
   ],
 );

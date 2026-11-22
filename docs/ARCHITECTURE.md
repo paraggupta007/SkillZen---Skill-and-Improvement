@@ -99,3 +99,7 @@ After explicit consent and start, the browser loads MediaPipe Face and Pose Land
 ## Mock tests
 
 A small curated multiple-choice bank is shuffled and snapshotted at creation. The authenticated service strips answer keys until submission, validates choices and scores server-side. A conditional database update prevents concurrent submissions from overwriting a completed attempt; history and deletion are owner-scoped. This is practice content, not a secure or adaptive assessment. No AI service is used.
+
+## Candidate question feedback
+
+A dedicated service and repository validate question/interview ownership before reading or changing an optional rating/comment. Feedback is stored independently from answer evaluations and AI/report generation, and the UI loads it only when a feedback disclosure opens.

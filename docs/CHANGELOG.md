@@ -33,3 +33,8 @@
 - Added a credential-safe Groq connectivity/streaming diagnostic and stage-specific smoke errors.
 - Fixed provider SSE parsing when CRLF boundaries are split across network chunks, with a regression test.
 - The user confirmed the Neon migration succeeded; real Groq smoke verification is still pending.
+
+### Phase 3 — update deprecated Groq models
+
+- Switched Groq reasoning and quick tasks to the provider's recommended GPT-OSS 120B and 20B model IDs; added request-body regression tests.
+- The change is based on Groq's published deprecation notice; it has not yet been verified with the user's live account.

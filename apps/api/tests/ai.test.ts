@@ -159,10 +159,44 @@ describe("provider HTTP adapters", () => {
       const result = await groq.generate(req);
       expect(result.text).toBe("hello");
       expect(result.tokensIn).toBe(2);
+      const firstRequest = fetchMock.mock.calls[0]?.[1] as RequestInit;
+      const firstBody: unknown = JSON.parse(String(firstRequest.body));
+      expect(firstBody).toMatchObject({ model: "openai/gpt-oss-120b" });
       const chunks: string[] = [];
       for await (const chunk of groq.stream(req)) chunks.push(chunk);
       expect(chunks).toEqual(["Hi"]);
+      const streamRequest = fetchMock.mock.calls[1]?.[1] as RequestInit;
+      const streamBody: unknown = JSON.parse(String(streamRequest.body));
+      expect(streamBody).toMatchObject({
+        model: "openai/gpt-oss-120b",
+        stream: true,
+      });
       expect(JSON.stringify(result)).not.toContain("server-secret");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+  it("uses the smaller available Groq model for quick tasks", async () => {
+    const { GroqProvider } =
+      await import("../src/ai/providers/groq-provider.js");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({ choices: [{ message: { content: "ok" } }] }),
+          { status: 200 },
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const result = await new GroqProvider("server-secret").generate({
+        ...req,
+        task: "quick",
+      });
+      const sent = fetchMock.mock.calls[0]?.[1] as RequestInit;
+      const body: unknown = JSON.parse(String(sent.body));
+      expect(body).toMatchObject({ model: "openai/gpt-oss-20b" });
+      expect(result.model).toBe("openai/gpt-oss-20b");
     } finally {
       vi.unstubAllGlobals();
     }

@@ -27,7 +27,7 @@ Strategy isolates vendor implementations. The router uses a chain of responsibil
 
 ## Design decisions and trade-offs
 
-Gemini uses `gemini-2.5-flash`; Groq uses 70B for reasoning and 8B for quick tasks; OpenRouter uses an explicit `:free` model. Provider availability and quotas may change. A failed stream is retried or falls back only before any content is emitted; switching providers mid-answer would corrupt the output. Circuit state and cache are process-local. Cache is off unless a caller provides a safe per-user cache scope; callers should not cache sensitive inputs without a deliberate retention decision. Metadata logging is best effort and does not block generation. Prompt boundaries reduce risk but do not guarantee immunity to prompt injection.
+Gemini uses `gemini-2.5-flash`; Groq uses `openai/gpt-oss-120b` for reasoning and `openai/gpt-oss-20b` for quick tasks; OpenRouter uses an explicit `:free` model. Provider availability and quotas may change. A failed stream is retried or falls back only before any content is emitted; switching providers mid-answer would corrupt the output. Circuit state and cache are process-local. Cache is off unless a caller provides a safe per-user cache scope; callers should not cache sensitive inputs without a deliberate retention decision. Metadata logging is best effort and does not block generation. Prompt boundaries reduce risk but do not guarantee immunity to prompt injection.
 
 ## How to run and test it
 

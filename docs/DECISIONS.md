@@ -26,3 +26,10 @@
 - Context: local frontend work should not require credentials.
 - Choice: health reports process availability without probing the DB; production requires a database URL and a strong JWT secret.
 - Why: liveness stays fast, while production cannot silently run without essential configuration.
+
+## Groq model replacements (November 2026)
+
+- Context: the original specification named `llama-3.3-70b-versatile` and `llama-3.1-8b-instant`. The user's live diagnostic received HTTP 404. Groq's [deprecation notice](https://console.groq.com/docs/deprecations) says those models were shut down for free/developer tiers on August 16, 2026.
+- Options: keep unavailable model IDs, or use Groq's documented replacements.
+- Choice: `openai/gpt-oss-120b` for reasoning and `openai/gpt-oss-20b` for quick tasks.
+- Why: the replacements are listed by Groq for those older models and appear on its [rate-limits page](https://console.groq.com/docs/rate-limits). Free quotas and availability can change; the user must verify their organization is on the free plan and check its limits. Live verification is still pending.

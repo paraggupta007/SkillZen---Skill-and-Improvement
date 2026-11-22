@@ -1,4 +1,4 @@
-# Phase 3: Interview domain and API (pending live verification)
+# Phase 3: Interview domain and API
 
 ## Goal
 
@@ -40,8 +40,8 @@ Run `npm run lint`, `npm run type-check`, `npm test`, and `npm run build`. Autom
 
 ## Problems faced and how they were fixed
 
-The sandbox cannot reach Neon or live AI vendors. The user reported the Neon migration succeeded but the live Groq smoke check failed with a generic stream error; credential-safe diagnostics have been added. A later HTTP 404 is consistent with Groq retiring the original Llama model IDs on free/developer tiers; the provider now uses Groq’s GPT-OSS replacements. Live verification is still pending. A local PGlite engine tests actual SQL migrations and repository operations, while Supertest uses a fake AI provider and in-memory repository for the whole HTTP flow. Neither substitutes for live network verification. The optional smoke script creates a temporary user and interview and attempts cleanup, but usage logs remain and cleanup may require manual attention.
+The sandbox cannot reach Neon or live AI vendors. The user reported the Neon migration succeeded but the live Groq smoke check failed with a generic stream error; credential-safe diagnostics have been added. A later HTTP 404 is consistent with Groq retiring the original Llama model IDs on free/developer tiers; the provider now uses Groq’s GPT-OSS replacements. The user later reported that the Neon and Groq interview smoke check passed. A local PGlite engine tests actual SQL migrations and repository operations, while Supertest uses a fake AI provider and in-memory repository for the whole HTTP flow. Neither substitutes for live network verification. The optional smoke script creates a temporary user and interview and attempts cleanup, but usage logs remain and cleanup may require manual attention.
 
 ## What is next
 
-Diagnose and verify a real Groq interview on the user's computer. Phase 3 is not complete until that manual check succeeds. Then implement reports and analytics, followed by the frontend.
+The user reported a successful real Neon/Groq interview smoke check. Next implement reports and analytics, followed by the frontend.

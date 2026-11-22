@@ -38,3 +38,7 @@
 
 - Switched Groq reasoning and quick tasks to the provider's recommended GPT-OSS 120B and 20B model IDs; added request-body regression tests.
 - The change is based on Groq's published deprecation notice; it has not yet been verified with the user's live account.
+
+### Phase 3 — live smoke verification
+
+- User reported that the Neon and Groq interview smoke check passed after the model update.

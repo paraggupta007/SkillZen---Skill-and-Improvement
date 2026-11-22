@@ -16,5 +16,6 @@
 - [Phase 2: AI layer](phases/phase-02-ai.md)
 - [Phase 3: Interview domain](phases/phase-03-interview.md)
 - [Phase 4: Reports and analytics](phases/phase-04-reports.md)
+- [Phase 5: Frontend MVP](phases/phase-05-frontend.md)
 
 More phase documents will be added alongside their code.

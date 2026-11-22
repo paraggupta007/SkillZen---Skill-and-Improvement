@@ -48,3 +48,9 @@
 - Completion events schedule validated report generation, with pending/failed/ready status and explicit retry.
 - Added report and dashboard analytics repositories, authenticated APIs and isolated PostgreSQL/fake-AI integration tests.
 - Background state is process-local; live report generation and a durable worker remain unverified/not implemented.
+
+## Phase 5 — frontend MVP
+
+- Added responsive landing, sign-in, registration, dashboard, setup, streaming interview and report screens.
+- Added session guards, API/SSE clients, query cache, answer draft store, score trend and asynchronous report retry.
+- Added frontend tests and a Vercel SPA rewrite; live browser flow and production deployment still need verification.

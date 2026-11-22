@@ -33,3 +33,9 @@
 - Options: keep unavailable model IDs, or use Groq's documented replacements.
 - Choice: `openai/gpt-oss-120b` for reasoning and `openai/gpt-oss-20b` for quick tasks.
 - Why: the replacements are listed by Groq for those older models and appear on its [rate-limits page](https://console.groq.com/docs/rate-limits). Free quotas and availability can change; the user must verify their organization is on the free plan and check its limits. Live verification is still pending.
+
+## Frontend streaming and state
+
+- Choice: fetch-based SSE for both GET and POST; TanStack Query for server state and Zustand for the current answer draft.
+- Why: native EventSource cannot submit the answer as POST. Streamed model text is labeled provisional until a validated complete event arrives. Interrupted answer streams can be reconciled by refreshing the saved interview before retrying.
+- Reports poll every 20 seconds to leave headroom below the per-user request limit; the underlying process-local job state is not durable.

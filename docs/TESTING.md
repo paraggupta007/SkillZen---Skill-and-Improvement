@@ -26,3 +26,5 @@ If the smoke check reports an incomplete stream, run `npm run diagnose:groq -w a
 Groq's older Llama model IDs were shut down on its free/developer tiers. The diagnostic and provider now use `openai/gpt-oss-120b` for reasoning and `openai/gpt-oss-20b` for quick tasks. Mocked tests verify the selected model IDs; the user reported the live smoke test passed after this change. Check Groq account limits and pricing before running network requests.
 
 Phase 4 uses an isolated PGlite database and fake AI to test completion-triggered reporting, failed generation and retry, cross-user isolation, report idempotence and dashboard statistics. These tests do not prove live provider report quality or multi-instance job durability.
+
+Phase 5 frontend tests exercise registration, protected-route redirects, setup, streamed answer submission, partial JSON display, CRLF chunk boundaries, streaming errors and interrupted responses. Run `npm test -w web`. These are mocked browser-component tests, not a full live browser/Neon/Groq test. Manually check desktop and mobile layout, account creation, session resume, answer feedback, reports and logout with your local configuration.

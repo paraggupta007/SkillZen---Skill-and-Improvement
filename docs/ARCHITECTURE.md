@@ -1,6 +1,6 @@
 # Architecture
 
-Currently implemented: frontend scaffold, HTTP foundation, auth and user repository, AI provider chain, round and evaluator strategies, interview API and repository, asynchronous report generation, analytics, DI composition root, event bus and database schema/client. The frontend interview and report screens are planned.
+Currently implemented: responsive React frontend, HTTP foundation, auth and user repository, AI provider chain, round and evaluator strategies, interview API and repository, asynchronous report generation, analytics, DI composition root, event bus and database schema/client.
 
 ## System
 
@@ -23,7 +23,7 @@ flowchart TD
   Interfaces --> Providers[Provider adapters]
 ```
 
-The auth service and user repository now implement this layering. The interview service depends on repository and evaluator interfaces; its PostgreSQL repository locks the parent interview for state changes. AI adapters are implemented but have not been verified against live providers.
+The auth service and user repository now implement this layering. The interview service depends on repository and evaluator interfaces; its PostgreSQL repository locks the parent interview for state changes. The user reported a successful live Groq interview smoke test; the other providers and live report generation are not yet verified.
 
 ## Class diagram
 
@@ -40,7 +40,7 @@ classDiagram
   CompositeEvaluator --> IEvaluator
 ```
 
-## Interview sequence (frontend and reports planned)
+## Interview sequence
 
 ```mermaid
 sequenceDiagram
@@ -79,3 +79,7 @@ Routes validate input and call `AuthService`, which depends on `IUserRepository`
 ## Reports and analytics
 
 An `interview.completed` event schedules `ReportService`. It validates AI-generated strengths, weaknesses, tips and summary, and computes the 0–10 overall score as the rounded mean of answer scores. Status is process-local; a failed job can be retried and a missing report is scheduled on access. Only the latest ten truncated turns are sent to the report prompt to limit tokens, while the score uses all answers. `IReportRepository` and `IAnalyticsRepository` isolate database access. Live report generation is not yet manually verified.
+
+## Frontend
+
+React Router provides public and protected routes. TanStack Query owns server state, Zustand stores the current answer draft, and a fetch-based SSE parser handles both GET and POST streams. SSE deltas are provisional and the final validated event is authoritative. Dashboard charts use Recharts and are loaded with the dashboard route. The development Vite proxy forwards `/api` to Express; production can configure `VITE_API_URL` (the API base including `/api`) but cross-site cookie support depends on browser and deployment settings.

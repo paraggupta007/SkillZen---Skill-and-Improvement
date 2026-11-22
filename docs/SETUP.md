@@ -26,3 +26,7 @@ Run `npm run db:migrate` after updating the project, because Phase 3 adds migrat
 If the Groq smoke check fails, `npm run diagnose:groq -w api` prints a credential-safe status for direct and streamed Groq requests; see [TESTING.md](TESTING.md). Never paste keys or `.env` contents into chat.
 
 Completed interviews now schedule report generation. `GET /api/reports/:interviewId` returns pending, failed or ready; see [API.md](API.md). The smoke script intentionally disables its report subscriber so temporary-account cleanup cannot race a report job; it checks interviews, not report quality.
+
+## Frontend MVP
+
+Visit `http://localhost:5173`, create an account, choose an interview from the dashboard and answer the streamed questions. A completed interview opens its report; pending reports refresh every 20 seconds and failures can be retried. Return to the dashboard to see session history and available scores. Authentication requires a working database, a JWT secret and an AI provider for real questions. The API is proxied by Vite during local development; no browser-side AI credentials are needed. The browser workflow has automated mocked tests but has not yet been verified end to end against a live provider.

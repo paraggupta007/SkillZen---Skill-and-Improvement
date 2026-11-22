@@ -7,7 +7,7 @@ A checked box means the work is implemented and verified, not just planned.
 - [x] Phase 2: AI layer and fake-provider tests — real provider calls remain unverified.
 - [x] Phase 3: Interview API, persistence, streaming and fake-provider tests; the user reported a successful Neon/Groq smoke check.
 - [x] Phase 4: Reports, analytics and history — fake-provider/isolated PostgreSQL tests pass; live report generation not yet verified.
-- [ ] Phase 5: Frontend MVP.
+- [x] Phase 5: Frontend MVP — responsive authentication, setup, streamed interview, dashboard and reports; automated browser-component tests pass, live browser flow still needs verification.
 - [ ] Phase 6: Voice and speech metrics.
 - [ ] Phase 7: Resume, job description and PDF.
 - [ ] Phase 8: Consent-based browser-only body-language estimates and reports.

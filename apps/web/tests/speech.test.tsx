@@ -71,3 +71,71 @@ describe("browser voice", () => {
     expect(result.current.listening).toBe(false);
   });
 });
+
+describe("question playback", () => {
+  it("chooses an enhanced English voice, allows selecting another and cleans up", async () => {
+    const { render, screen, fireEvent } =
+      await import("@testing-library/react");
+    const { QuestionVoice } = await import("../src/components/question-voice");
+    const voices = [
+      { voiceURI: "one", name: "Standard voice", lang: "en-US", default: true },
+      { voiceURI: "two", name: "Natural voice", lang: "en-GB", default: false },
+      {
+        voiceURI: "three",
+        name: "French voice",
+        lang: "fr-FR",
+        default: false,
+      },
+    ];
+    const synth = {
+      getVoices: vi.fn(() => voices),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      cancel: vi.fn(),
+      speak: vi.fn(),
+    };
+    class Utterance {
+      text: string;
+      voice?: unknown;
+      lang = "";
+      rate = 1;
+      onerror: unknown;
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+    vi.stubGlobal("speechSynthesis", synth);
+    vi.stubGlobal("SpeechSynthesisUtterance", Utterance);
+    const { unmount } = render(
+      <QuestionVoice text="Tell me more" disabled={false} />,
+    );
+    const select = screen.getByLabelText(
+      /interviewer voice/i,
+    ) as HTMLSelectElement;
+    expect(select.value).toBe("two");
+    expect(select.options.length).toBe(2);
+    fireEvent.change(select, { target: { value: "one" } });
+    fireEvent.click(
+      screen.getByRole("button", { name: /read question aloud/i }),
+    );
+    expect(synth.speak).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "Tell me more",
+        voice: voices[0],
+        lang: "en-US",
+        rate: 0.95,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /stop reading/i }));
+    unmount();
+    expect(synth.removeEventListener).toHaveBeenCalled();
+    expect(synth.cancel).toHaveBeenCalled();
+  });
+  it("offers a text fallback when speech is unavailable", async () => {
+    const { render, screen } = await import("@testing-library/react");
+    const { QuestionVoice } = await import("../src/components/question-voice");
+    vi.stubGlobal("speechSynthesis", undefined);
+    render(<QuestionVoice text="Question" disabled={false} />);
+    expect(screen.getByText(/speech playback is unavailable/i)).toBeTruthy();
+  });
+});

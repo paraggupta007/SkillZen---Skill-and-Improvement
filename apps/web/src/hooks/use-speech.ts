@@ -129,16 +129,32 @@ export function useSpeech(
   const stop = useCallback(() => recognition.current?.stop(), []);
   return { supported: Boolean(Constructor), listening, error, start, stop };
 }
-/** Read a question aloud using the browser's built-in speech synthesis. */
-export function speakQuestion(text: string) {
+/** Read using an available browser voice; availability and quality vary by device. */
+export function speakQuestion(
+  text: string,
+  voice?: SpeechSynthesisVoice,
+  onError?: () => void,
+) {
   if (
     !window.speechSynthesis ||
     typeof SpeechSynthesisUtterance === "undefined"
   )
     return false;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  window.speechSynthesis.speak(utterance);
-  return true;
+  try {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
+    } else utterance.lang = "en-US";
+    utterance.rate = 0.95;
+    utterance.onerror = (event) => {
+      if (event.error !== "canceled" && event.error !== "interrupted")
+        onError?.();
+    };
+    window.speechSynthesis.speak(utterance);
+    return true;
+  } catch {
+    return false;
+  }
 }

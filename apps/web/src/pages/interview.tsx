@@ -10,7 +10,6 @@ import {
   MessageSquareText,
   Mic,
   MicOff,
-  Volume2,
   Sparkles,
 } from "lucide-react";
 import { apiRequest } from "../services/api";
@@ -21,14 +20,11 @@ import type {
   InterviewDetail,
   Question,
 } from "../services/types";
-import {
-  speakQuestion,
-  useSpeech,
-  type SpeechMetrics,
-} from "../hooks/use-speech";
+import { useSpeech, type SpeechMetrics } from "../hooks/use-speech";
 import { useRecording } from "../hooks/use-recording";
 import { useInterviewStore } from "../store/interview-store";
 import { QuestionFeedback } from "../components/question-feedback";
+import { QuestionVoice } from "../components/question-voice";
 import { CameraCoaching } from "../components/camera-coaching";
 import { ErrorState, Eyebrow, Loading } from "../components/ui";
 /** Show the live question, answer editor and validated feedback. */
@@ -344,14 +340,7 @@ export function InterviewPage() {
                   </>
                 )}
                 {active && (
-                  <button
-                    type="button"
-                    className="voice-button"
-                    disabled={voiceBusy}
-                    onClick={() => speakQuestion(active.text)}
-                  >
-                    <Volume2 size={16} /> Read question aloud
-                  </button>
+                  <QuestionVoice text={active.text} disabled={voiceBusy} />
                 )}
                 {active && (
                   <QuestionFeedback

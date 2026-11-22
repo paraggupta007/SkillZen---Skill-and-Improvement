@@ -2850,3 +2850,51 @@ p {
   border-radius: 8px;
   font-size: 13px;
 }
+
+.question-voice {
+  margin-top: 14px;
+}
+.question-voice label {
+  display: block;
+  color: #597962;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.question-voice select {
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid #dce9dc;
+  border-radius: 7px;
+  color: #345742;
+  background: white;
+}
+.question-voice p {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #657b6b;
+}
+.question-voice .voice-error {
+  color: #a5574e;
+}
+.camera-tips-toggle {
+  margin-bottom: 12px;
+}
+.camera-live-tips {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: #f0f7ee;
+  border-radius: 8px;
+  color: #395d43;
+  font-size: 12px;
+}
+.camera-live-tips p {
+  margin-top: 5px;
+}
+.camera-live-tips ul {
+  padding-left: 18px;
+  margin: 6px 0 0;
+}
+.camera-live-tips li + li {
+  margin-top: 5px;
+}

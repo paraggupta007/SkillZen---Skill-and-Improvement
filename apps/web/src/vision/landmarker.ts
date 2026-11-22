@@ -11,7 +11,10 @@ import fallbackBinary from "@mediapipe/tasks-vision/vision_wasm_nosimd_internal.
 import type { Point } from "./analyzers";
 /** Browser-only face landmark detector. */
 export interface IFaceLandmarker {
-  detect(video: HTMLVideoElement, timestamp: number): readonly Point[];
+  detect(
+    video: HTMLVideoElement,
+    timestamp: number,
+  ): readonly (readonly Point[])[];
   close(): void;
 }
 /** Load MediaPipe and its official face model after the user opts in. */
@@ -29,12 +32,12 @@ export async function createFaceLandmarker(): Promise<IFaceLandmarker> {
         delegate: "CPU",
       },
       runningMode: "VIDEO",
-      numFaces: 1,
+      numFaces: 2,
     },
   );
   return {
     detect: (video, timestamp) =>
-      instance.detectForVideo(video, timestamp).faceLandmarks[0] ?? [],
+      instance.detectForVideo(video, timestamp).faceLandmarks,
     close: () => instance.close(),
   };
 }

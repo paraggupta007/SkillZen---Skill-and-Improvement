@@ -110,3 +110,8 @@
 
 - Added private editable/deletable feedback on options in completed mock tests, independent of score and AI.
 - Production limits now use shared database counters, replacing process-local rate-limit stores. Migrations 0008 and 0009 are required before deploying; live Neon and Vercel flows still need verification.
+
+## Interview voice and live camera tips
+
+- Added an English browser-voice picker, preferring voices explicitly labelled natural, neural, enhanced or premium when present. Voice names, gender, quality and availability are device/browser dependent; browser speech services may be local or network-based.
+- Added opt-out local live tips for sustained framing, potentially multiple faces, repeated visible wrist movement and approximate side-to-side iris changes. Models may miss people or mistake images for faces; these tips do not assess attention, identity, cheating or interview performance. Multi-face samples are omitted from aggregate counts, and only explicitly saved aggregates leave the device.

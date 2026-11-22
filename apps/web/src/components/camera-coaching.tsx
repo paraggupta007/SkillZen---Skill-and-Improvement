@@ -10,6 +10,7 @@ import {
   FaceMetricsAggregator,
   PoseAnalyzer,
 } from "../vision/analyzers";
+import { LiveCoaching, irisDirection } from "../vision/live-coaching";
 import type { IFaceLandmarker, IPoseLandmarker } from "../vision/landmarker";
 type Metrics = ReturnType<FaceMetricsAggregator["snapshot"]>;
 /** Offer optional local camera observations without uploading any frames or metrics. */
@@ -47,6 +48,10 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
   const [error, setError] = useState("");
   const [poseWarning, setPoseWarning] = useState("");
   const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [tipsEnabled, setTipsEnabled] = useState(true);
+  const tipsRef = useRef(true);
+  const [tips, setTips] = useState<string[]>([]);
+  const coaching = useRef(new LiveCoaching());
   const video = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null);
   const landmarker = useRef<IFaceLandmarker | null>(null);
@@ -56,6 +61,8 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
   const aggregate = useRef<FaceMetricsAggregator | null>(null);
   function stop() {
     generation.current++;
+    coaching.current = new LiveCoaching();
+    setTips([]);
     if (aggregate.current) {
       const finalMetrics = aggregate.current.snapshot();
       if (finalMetrics.samples) setMetrics(finalMetrics);
@@ -150,6 +157,7 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
       const aggregator = new FaceMetricsAggregator();
       aggregate.current = aggregator;
       let lastVideoTime = -1;
+      let lastFrameAt = performance.now();
       let updates = 0;
       timer.current = window.setInterval(() => {
         const current = video.current;
@@ -157,32 +165,52 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
           !current ||
           current.readyState < 2 ||
           current.currentTime === lastVideoTime
-        )
+        ) {
+          if (performance.now() - lastFrameAt > 2500) {
+            coaching.current = new LiveCoaching();
+            setTips((previous) => (previous.length ? [] : previous));
+          }
           return;
+        }
         lastVideoTime = current.currentTime;
+        lastFrameAt = performance.now();
         try {
-          aggregator.add(
-            analyzer.analyze(detector.detect(current, performance.now())),
-          );
+          const faces = detector.detect(current, performance.now());
+          const points = faces[0] ?? [];
+          const face = analyzer.analyze(points);
+          // Do not attribute face or pose measurements when more than one face-like shape is visible.
+          if (faces.length < 2) aggregator.add(face);
+          if (tipsRef.current)
+            coaching.current.face(faces.length, face, irisDirection(points));
           if (++updates % 5 === 0) {
-            if (poseLandmarker.current) {
+            if (poseLandmarker.current && faces.length === 1) {
               try {
-                aggregator.addPose(
-                  poseAnalyzer.analyze(
-                    poseLandmarker.current.detect(current, performance.now()),
-                  ),
+                const pose = poseAnalyzer.analyze(
+                  poseLandmarker.current.detect(current, performance.now()),
                 );
+                aggregator.addPose(pose);
+                if (tipsRef.current) coaching.current.pose(pose);
               } catch {
                 poseLandmarker.current.close();
                 poseLandmarker.current = null;
+                coaching.current.pose(null);
                 setPoseWarning(
                   "Body and wrist observations stopped; face observations remain active.",
                 );
               }
-            }
+            } else if (faces.length !== 1) coaching.current.pose(null);
             setMetrics(aggregator.snapshot());
           }
-          if (aggregator.snapshot().samples >= 18000) {
+          if (tipsRef.current) {
+            const next = coaching.current.cues();
+            setTips((previous) =>
+              previous.length === next.length &&
+              previous.every((value, i) => value === next[i])
+                ? previous
+                : next,
+            );
+          }
+          if (updates >= 18000) {
             stop();
             setError(
               "Camera practice stopped after reaching the session limit.",
@@ -217,7 +245,10 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
         Video is analyzed in your browser, never uploaded. Face and pose models
         download from Google when you start. Estimates are imperfect and are not
         retina scans, proof of attention, or cheating detection. You can skip or
-        stop at any time.
+        stop at any time. Live tips stay on this device and can be switched off.
+        Multiple face-like shapes can be misdetected, including photos or
+        screens; samples with multiple detected faces are excluded from saved
+        counts.
       </p>
       <label className="resume-consent">
         <input
@@ -229,6 +260,19 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
         <span>
           I agree to local camera analysis for optional practice feedback.
         </span>
+      </label>
+      <label className="resume-consent camera-tips-toggle">
+        <input
+          type="checkbox"
+          checked={tipsEnabled}
+          onChange={(event) => {
+            tipsRef.current = event.target.checked;
+            setTipsEnabled(event.target.checked);
+            coaching.current = new LiveCoaching();
+            setTips([]);
+          }}
+        />
+        <span>Show optional live framing and movement tips</span>
       </label>
       <video
         ref={video}
@@ -251,6 +295,25 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
           <CameraOff size={16} />{" "}
           {state === "starting" ? "Cancel" : "Stop camera"}
         </button>
+      )}
+      {state === "active" && tipsEnabled && (
+        <div
+          className="camera-live-tips"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <strong>Live practice tips</strong>
+          {tips.length ? (
+            <ul>
+              {tips.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No current tips. Visual estimates can be inaccurate.</p>
+          )}
+        </div>
       )}
       {state === "starting" && (
         <p className="camera-notice" role="status">

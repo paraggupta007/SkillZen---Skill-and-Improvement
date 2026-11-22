@@ -54,3 +54,7 @@ The Vercel CLI 66.6.0 local production build was exercised with `NODEJS_HELPERS=
 ## Option feedback and shared rate limits
 
 PGlite tests cover option feedback ownership, completed-attempt requirement, validation, save/update/delete, score isolation and cascade deletion, plus browser-component interactions. Shared rate-limit tests cover concurrent atomic increments across stores, expiry, scopes, hashed identifiers, app wiring and fail-closed database errors. They do not test live Neon, Vercel proxy identities or browser behavior.
+
+## Interview playback and live coaching
+
+Automated browser-mocked tests exercise English voice selection, enhanced-voice preference, playback cleanup, camera consent, persistence thresholds, unknown landmark resets, the live tip toggle, and aggregate-only saving. These tests do not establish the accuracy of MediaPipe on real cameras or the naturalness, gender, availability or privacy behavior of a device's speech voices. Manually check on supported phones and desktops: select and play voices, switch and stop playback, start the optional camera, try different lighting and framing, check the tips toggle and stop/unmount cleanup. Multi-face and iris results are estimates, not proof about people or attention.

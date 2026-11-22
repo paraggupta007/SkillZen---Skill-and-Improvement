@@ -172,19 +172,17 @@ export class DrizzleInterviewRepository implements IInterviewRepository {
         })
         .returning();
       if (!answer) throw new Error("Insert failed");
-      await tx
-        .insert(evaluations)
-        .values({
-          answerId: answer.id,
-          correctness: correctness!,
-          clarity: clarity!,
-          depth: depth!,
-          relevance: relevance!,
-          overall: overall!,
-          feedback: evaluation.feedback.join("\n"),
-          idealAnswer: evaluation.idealAnswer,
-          raw: evaluation,
-        });
+      await tx.insert(evaluations).values({
+        answerId: answer.id,
+        correctness: correctness!,
+        clarity: clarity!,
+        depth: depth!,
+        relevance: relevance!,
+        overall: overall!,
+        feedback: evaluation.feedback.join("\n"),
+        idealAnswer: evaluation.idealAnswer,
+        raw: evaluation,
+      });
     });
   }
   /** Mark a fully answered interview complete exactly once. */

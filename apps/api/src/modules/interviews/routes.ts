@@ -9,6 +9,7 @@ import { rateLimit } from "express-rate-limit";
 import { z, ZodError } from "zod";
 import { AppError } from "../../core/errors.js";
 import { fail, ok } from "../../core/response.js";
+import { requireUser, currentUserId } from "../../middleware/require-user.js";
 import type { AuthService } from "../auth/auth-service.js";
 import type { InterviewService } from "./interview-service.js";
 const createSchema = z
@@ -56,23 +57,7 @@ export function createInterviewRoutes(
       );
     return service;
   }
-  router.use("/interviews", (req, res, next) => {
-    void (async () => {
-      if (!auth)
-        throw new AppError(
-          503,
-          "AUTH_UNAVAILABLE",
-          "Authentication is not configured",
-        );
-      const token: unknown = req.cookies?.skillzen_session;
-      if (typeof token !== "string")
-        throw new AppError(401, "UNAUTHENTICATED", "Please log in");
-      const userId = auth.verify(token);
-      await auth.me(userId);
-      res.locals.userId = userId;
-      next();
-    })().catch(next);
-  });
+  router.use("/interviews", requireUser(auth));
   const aiLimit = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 60,
@@ -83,18 +68,13 @@ export function createInterviewRoutes(
       res.status(429).json(fail("RATE_LIMITED", "Too many interview requests"));
     },
   });
-  function user(res: Response): string {
-    return String(res.locals.userId);
-  }
   function startStream(res: Response) {
-    res
-      .status(200)
-      .set({
-        "Content-Type": "text/event-stream; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        Connection: "keep-alive",
-        "X-Accel-Buffering": "no",
-      });
+    res.status(200).set({
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
+    });
     res.flushHeaders();
   }
   function send(res: Response, event: string, data: unknown) {
@@ -138,19 +118,23 @@ export function createInterviewRoutes(
     "/interviews",
     asyncRoute(async (req, res) => {
       const input = createSchema.parse(req.body);
-      res.status(201).json(ok(await ready().create(user(res), input)));
+      res.status(201).json(ok(await ready().create(currentUserId(res), input)));
     }),
   );
   router.get(
     "/interviews",
     asyncRoute(async (_req, res) => {
-      res.json(ok(await ready().list(user(res))));
+      res.json(ok(await ready().list(currentUserId(res))));
     }),
   );
   router.get(
     "/interviews/:id",
     asyncRoute(async (req, res) => {
-      res.json(ok(await ready().get(user(res), idSchema.parse(req.params.id))));
+      res.json(
+        ok(
+          await ready().get(currentUserId(res), idSchema.parse(req.params.id)),
+        ),
+      );
     }),
   );
   router.get(
@@ -159,8 +143,10 @@ export function createInterviewRoutes(
     asyncRoute(async (req, res) => {
       const id = idSchema.parse(req.params.id);
       const service = ready();
-      await service.get(user(res), id);
-      await stream(res, (options) => service.next(user(res), id, options));
+      await service.get(currentUserId(res), id);
+      await stream(res, (options) =>
+        service.next(currentUserId(res), id, options),
+      );
     }),
   );
   router.post(
@@ -170,10 +156,10 @@ export function createInterviewRoutes(
       const id = idSchema.parse(req.params.id);
       const input = answerSchema.parse(req.body);
       const service = ready();
-      await service.get(user(res), id);
+      await service.get(currentUserId(res), id);
       await stream(res, (options) =>
         service.answer(
-          user(res),
+          currentUserId(res),
           id,
           input.questionId,
           input.answerText,
@@ -187,7 +173,12 @@ export function createInterviewRoutes(
     "/interviews/:id/complete",
     asyncRoute(async (req, res) => {
       res.json(
-        ok(await ready().complete(user(res), idSchema.parse(req.params.id))),
+        ok(
+          await ready().complete(
+            currentUserId(res),
+            idSchema.parse(req.params.id),
+          ),
+        ),
       );
     }),
   );

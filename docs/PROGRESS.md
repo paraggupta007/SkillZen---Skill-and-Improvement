@@ -6,7 +6,7 @@ A checked box means the work is implemented and verified, not just planned.
 - [x] Phase 1: Authentication and users — integration tests use an in-memory repository; real database flow still needs manual verification.
 - [x] Phase 2: AI layer and fake-provider tests — real provider calls remain unverified.
 - [x] Phase 3: Interview API, persistence, streaming and fake-provider tests; the user reported a successful Neon/Groq smoke check.
-- [ ] Phase 4: Reports, analytics and history.
+- [x] Phase 4: Reports, analytics and history — fake-provider/isolated PostgreSQL tests pass; live report generation not yet verified.
 - [ ] Phase 5: Frontend MVP.
 - [ ] Phase 6: Voice and speech metrics.
 - [ ] Phase 7: Resume, job description and PDF.

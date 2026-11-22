@@ -24,3 +24,5 @@ A configured provider is not proof that a model is currently free, available, or
 Run `npm run db:migrate` after updating the project, because Phase 3 adds migration 0002. Set `JWT_SECRET` and `GROQ_API_KEY` in `apps/api/.env`, then optionally run `npm run smoke:groq -w api` on a network that can reach Neon and Groq. The check creates a temporary user and interview and attempts to delete them afterward; AI usage metadata remains. See [TESTING.md](TESTING.md). This has not yet been verified against live services.
 
 If the Groq smoke check fails, `npm run diagnose:groq -w api` prints a credential-safe status for direct and streamed Groq requests; see [TESTING.md](TESTING.md). Never paste keys or `.env` contents into chat.
+
+Completed interviews now schedule report generation. `GET /api/reports/:interviewId` returns pending, failed or ready; see [API.md](API.md). The smoke script intentionally disables its report subscriber so temporary-account cleanup cannot race a report job; it checks interviews, not report quality.

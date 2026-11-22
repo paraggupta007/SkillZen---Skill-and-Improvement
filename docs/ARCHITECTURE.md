@@ -1,6 +1,6 @@
 # Architecture
 
-Currently implemented: frontend scaffold, HTTP foundation, auth and user repository, AI provider chain, round and evaluator strategies, interview API and repository, DI composition root, event bus and database schema/client. The frontend interview screens and report generation are planned.
+Currently implemented: frontend scaffold, HTTP foundation, auth and user repository, AI provider chain, round and evaluator strategies, interview API and repository, asynchronous report generation, analytics, DI composition root, event bus and database schema/client. The frontend interview and report screens are planned.
 
 ## System
 
@@ -57,10 +57,12 @@ sequenceDiagram
   API->>AI: Evaluate and prepare next question
   API-->>Web: Stream feedback
   Web->>API: Complete interview
-  Note over API: Report generation is planned
+  API->>AI: Generate report asynchronously
+  Web->>API: Poll report status
+  API-->>Web: Pending or completed report
 ```
 
-The in-process event bus exists, but report generation and a durable job queue do not yet exist. Async work must account for process restarts before deployment.
+The in-process event bus starts report generation. The status map is not a durable job queue; requesting a completed interview’s missing report can schedule it again after restart. Multiple instances can duplicate AI work, although the database unique constraint prevents duplicate reports.
 
 ## Authentication
 
@@ -73,3 +75,7 @@ Routes validate input and call `AuthService`, which depends on `IUserRepository`
 ## Interview flow
 
 `InterviewService` validates ownership through `IInterviewRepository`. Each answer is evaluated while a possible next question is prepared; the best-effort candidate is scoped to the user and kept in a bounded process-local cache for 60 seconds. Feedback is not delayed waiting for prefetch. The cache may miss after restart or across instances, and prefetch does not yet start while the user is still speaking. SSE deltas are provisional raw model text; only validated completion events are persisted. The event bus is not a durable queue.
+
+## Reports and analytics
+
+An `interview.completed` event schedules `ReportService`. It validates AI-generated strengths, weaknesses, tips and summary, and computes the 0–10 overall score as the rounded mean of answer scores. Status is process-local; a failed job can be retried and a missing report is scheduled on access. Only the latest ten truncated turns are sent to the report prompt to limit tokens, while the score uses all answers. `IReportRepository` and `IAnalyticsRepository` isolate database access. Live report generation is not yet manually verified.

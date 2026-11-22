@@ -22,7 +22,7 @@ Unknown endpoints return HTTP 404:
 
 Malformed JSON returns 400 `INVALID_JSON`; oversized JSON returns 413 `PAYLOAD_TOO_LARGE`; rate-limited requests return 429 `RATE_LIMITED`; unhandled errors return 500 `INTERNAL_ERROR`.
 
-Resumes, reports, analytics, speech transcription, mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
+Resumes, speech transcription, PDF reports, mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
 
 ## Authentication and profile
 
@@ -78,7 +78,7 @@ Request: `{"questionId":"<uuid>","answerText":"My answer","speech":{"durationSec
 
 ### POST /api/interviews/:id/complete
 
-No body. Marks an interview completed only after all questions are answered; repeated completion is idempotent. The successful response contains the completed interview. Errors include 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 404 `NOT_FOUND`, and 409 `INTERVIEW_INCOMPLETE`/`INTERVIEW_CLOSED`. A best-effort in-process `interview.completed` event is published once. Report generation is not yet implemented and event delivery is not durable across process failure.
+No body. Marks an interview completed only after all questions are answered; repeated completion is idempotent. The successful response contains the completed interview. Errors include 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 404 `NOT_FOUND`, and 409 `INTERVIEW_INCOMPLETE`/`INTERVIEW_CLOSED`. A best-effort in-process `interview.completed` event starts report generation. Event delivery is not durable across process failure; requesting a missing report can schedule it again.
 
 ### SSE format and safety
 
@@ -96,3 +96,19 @@ data: {"success":true,"data":{"id":"..."},"error":null}
 ```
 
 `delta` is raw, **unvalidated model JSON**, not the final question or evaluation. Display it only as text and never treat it as trusted structured data; JSON repair or a concurrent request can make `complete` differ. Only `complete` has passed validation and persistence. An `error` event has the standard failure envelope and HTTP status stays 200 after streaming begins. Clients must handle disconnects and errors and should not assume a provisional answer was saved. SSE answer submission is POST, so use `fetch` streaming rather than browser EventSource.
+
+## Reports and analytics
+
+All routes require the session cookie and are scoped to the authenticated user. Report IDs below refer to **interview IDs**, not the internal report row ID.
+
+### GET /api/reports/:interviewId
+
+A completed interview with a ready report returns 200: `{"success":true,"data":{"status":"ready","report":{"interviewId":"<uuid>","overallScore":8,"strengths":["Clear answer"],"weaknesses":["Limited depth"],"tips":["Give an example"],"summary":"Good start"}},"error":null}` (additional report fields may be present). Overall score is the rounded mean of per-answer overall scores on a 0–10 scale. If generation is running or restarted on demand, returns HTTP 202 with `{"success":true,"data":{"status":"pending"},"error":null}`. If the latest local attempt failed, returns HTTP 200 with `{"success":true,"data":{"status":"failed","error":"REPORT_GENERATION_FAILED"},"error":null}`; retry explicitly. Errors: 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 403 `ORIGIN_FORBIDDEN`, 404 `NOT_FOUND`, 409 `INTERVIEW_INCOMPLETE`, 429 `RATE_LIMITED`, 503 `REPORTS_UNAVAILABLE`. The GET can start generation and is origin-checked.
+
+### POST /api/reports/:interviewId/retry
+
+No request body. Returns 202 and pending if a report must be generated, or 200 and ready if it already exists. The same validation, authentication, ownership, rate-limit and incomplete-interview errors apply.
+
+### GET /api/analytics/summary
+
+Returns `{"success":true,"data":{"totalInterviews":2,"completedInterviews":1,"averageScore":8,"scoreTrend":[{"interviewId":"<uuid>","startedAt":"<ISO date>","score":8}]},"error":null}`. The average and trend include only completed interviews with generated reports; `averageScore` is null if none exist. Trend contains at most 20 scores, ordered oldest to newest. Errors include 401 `UNAUTHENTICATED` and 503 `ANALYTICS_UNAVAILABLE`.

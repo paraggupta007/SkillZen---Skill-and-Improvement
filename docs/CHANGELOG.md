@@ -42,3 +42,9 @@
 ### Phase 3 — live smoke verification
 
 - User reported that the Neon and Groq interview smoke check passed after the model update.
+
+## Phase 4 — reports and analytics
+
+- Completion events schedule validated report generation, with pending/failed/ready status and explicit retry.
+- Added report and dashboard analytics repositories, authenticated APIs and isolated PostgreSQL/fake-AI integration tests.
+- Background state is process-local; live report generation and a durable worker remain unverified/not implemented.

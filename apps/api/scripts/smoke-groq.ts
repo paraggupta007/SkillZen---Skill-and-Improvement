@@ -51,7 +51,11 @@ async function main() {
     throw new Error(
       "Set DATABASE_URL, JWT_SECRET (32+ characters), and GROQ_API_KEY in apps/api/.env",
     );
-  const container = createContainer({ ...env, LLM_PROVIDER_ORDER: "groq" });
+  // This check covers the interview flow; disable background reports to avoid racing cleanup.
+  const container = createContainer(
+    { ...env, LLM_PROVIDER_ORDER: "groq" },
+    { subscribeReports: false },
+  );
   if (!container.database) throw new Error("Database is not configured");
   const users = new DrizzleUserRepository(container.database.db);
   const email = `skillzen-smoke-${randomUUID()}@example.invalid`;

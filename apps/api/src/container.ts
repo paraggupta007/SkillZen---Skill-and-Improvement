@@ -18,6 +18,13 @@ import { InterviewService } from "./modules/interviews/interview-service.js";
 import { DrizzleInterviewRepository } from "./modules/interviews/drizzle-interview-repository.js";
 import type { IInterviewRepository } from "./modules/interviews/interview-repository.js";
 import type { ILLMProvider } from "./ai/types.js";
+import { ReportService } from "./modules/reports/report-service.js";
+import { DrizzleReportRepository } from "./modules/reports/drizzle-report-repository.js";
+import type { IReportRepository } from "./modules/reports/report-repository.js";
+import { ReportPrompt } from "./domain/prompts/report-prompt.js";
+import { AnalyticsService } from "./modules/analytics/analytics-service.js";
+import { DrizzleAnalyticsRepository } from "./modules/analytics/drizzle-analytics-repository.js";
+import type { IAnalyticsRepository } from "./modules/analytics/analytics-repository.js";
 import type { Env } from "./config/env.js";
 import { EventBus } from "./core/event-bus.js";
 import { logger } from "./core/logger.js";
@@ -31,7 +38,10 @@ export function createContainer(
   options: {
     userRepository?: IUserRepository;
     interviewRepository?: IInterviewRepository;
+    reportRepository?: IReportRepository;
+    analyticsRepository?: IAnalyticsRepository;
     providers?: ILLMProvider[];
+    subscribeReports?: boolean;
   } = {},
 ) {
   const database = env.DATABASE_URL
@@ -93,7 +103,31 @@ export function createContainer(
         events,
       )
     : undefined;
+  const reportRepo =
+    options.reportRepository ??
+    (database ? new DrizzleReportRepository(database.db) : undefined);
+  const reportService =
+    reportRepo && interviewRepo
+      ? new ReportService(
+          interviewRepo,
+          reportRepo,
+          jsonGenerator,
+          new ReportPrompt(prompts),
+        )
+      : undefined;
+  if (reportService && options.subscribeReports !== false)
+    events.subscribe("interview.completed", ({ userId, interviewId }) =>
+      reportService.schedule(userId, interviewId),
+    );
+  const analyticsRepo =
+    options.analyticsRepository ??
+    (database ? new DrizzleAnalyticsRepository(database.db) : undefined);
+  const analyticsService = analyticsRepo
+    ? new AnalyticsService(analyticsRepo)
+    : undefined;
   return {
+    reports: reportService,
+    analytics: analyticsService,
     interviews: interviewService,
     rounds,
     evaluator,

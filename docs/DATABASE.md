@@ -32,3 +32,7 @@ The user repository is the only authentication component that queries the `users
 ## Interview domain status
 
 Migration 0002 adds the interview role and unique indexes on question order, answer per question and evaluation per answer. Transactions lock the interview row before state transitions, and answers plus evaluations are written together. The user reported the migration succeeded on Neon; repository behavior was additionally exercised on isolated PGlite. Back up existing data before migrating; existing duplicate rows would need resolution before unique indexes can be created.
+
+## Reports and analytics
+
+Phase 4 uses the existing `reports` table and its unique `interview_id` index; it adds no schema migration. Report insertion is idempotent across concurrent generators. Analytics queries join reports to user-owned completed interviews. Failed/pending job status is in memory, not persisted; a missing report can be scheduled again after restart.

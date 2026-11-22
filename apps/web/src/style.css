@@ -2816,3 +2816,37 @@ p {
     padding: 19px;
   }
 }
+
+.account-danger {
+  margin-top: 16px;
+  border-color: #ecd8d1;
+}
+.account-danger > p {
+  color: #6e7f72;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.account-danger form {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+.account-danger .resume-consent {
+  margin: 0;
+}
+.button-delete {
+  background: #a6493e;
+  color: white;
+  justify-self: start;
+}
+.button-delete:hover:not(:disabled) {
+  background: #8e3a32;
+}
+.landing-account-deleted {
+  margin: 0 6%;
+  padding: 12px 16px;
+  color: #315d42;
+  background: #e8f4e9;
+  border-radius: 8px;
+  font-size: 13px;
+}

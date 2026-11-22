@@ -124,6 +124,25 @@ export function createAuthRoutes(service: AuthService | undefined, env: Env) {
       res.json(ok(await ready().update(current(req), profile.parse(req.body))));
     }),
   );
+  router.delete(
+    "/users/me",
+    authLimit,
+    asyncRoute(async (req, res) => {
+      const { password: providedPassword } = z
+        .object({ password })
+        .strict()
+        .parse(req.body);
+      await ready().deleteAccount(current(req), providedPassword);
+      res
+        .clearCookie(cookieName, {
+          httpOnly: cookieOptions.httpOnly,
+          secure: cookieOptions.secure,
+          sameSite: cookieOptions.sameSite,
+          path: cookieOptions.path,
+        })
+        .json(ok({ deleted: true }));
+    }),
+  );
   router.use(
     (error: unknown, _req: Request, res: Response, next: NextFunction) => {
       if (error instanceof ZodError) {

@@ -103,3 +103,7 @@ A small curated multiple-choice bank is shuffled and snapshotted at creation. Th
 ## Candidate question feedback
 
 A dedicated service and repository validate question/interview ownership before reading or changing an optional rating/comment. Feedback is stored independently from answer evaluations and AI/report generation, and the UI loads it only when a feedback disclosure opens.
+
+## Account deletion
+
+`AuthService` rechecks the password and asks the user repository to delete by account ID and unchanged password hash. The database cascades related records in one delete. Session-bearing endpoints recheck account existence, so old cookies cannot access an account after deletion. Data outside the application database is not erased and provider requests already in flight cannot necessarily be recalled.

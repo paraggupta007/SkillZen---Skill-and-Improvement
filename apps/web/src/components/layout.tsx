@@ -10,11 +10,13 @@ import {
   Menu,
   X,
   Mail,
+  Settings,
   LogOut,
   Plus,
   Sparkles,
 } from "lucide-react";
 import { apiRequest } from "../services/api";
+import { useInterviewStore } from "../store/interview-store";
 import { useCurrentUser } from "../services/queries";
 /** Product wordmark linked to the landing page. */
 export function Brand({ inverted = false }: { inverted?: boolean }) {
@@ -44,6 +46,7 @@ export function AppLayout() {
   const logout = useMutation({
     mutationFn: () => apiRequest("/auth/logout", { method: "POST" }),
     onSuccess: () => {
+      useInterviewStore.getState().clear();
       client.clear();
       navigate("/login");
     },
@@ -65,6 +68,9 @@ export function AppLayout() {
           </NavLink>
           <NavLink to="/app/resumes">
             <FileText size={18} /> Resumes
+          </NavLink>
+          <NavLink to="/app/settings">
+            <Settings size={18} /> Account settings
           </NavLink>
           <NavLink to="/contact">
             <Mail size={18} /> Contact developer
@@ -144,6 +150,9 @@ export function AppLayout() {
             </NavLink>
             <NavLink to="/app/resumes" onClick={() => setMenuOpen(false)}>
               Resumes
+            </NavLink>
+            <NavLink to="/app/settings" onClick={() => setMenuOpen(false)}>
+              Account settings
             </NavLink>
             <NavLink to="/contact" onClick={() => setMenuOpen(false)}>
               Contact developer

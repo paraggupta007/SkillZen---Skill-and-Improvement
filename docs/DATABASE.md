@@ -1,6 +1,6 @@
 # Database
 
-Drizzle schema and versioned migrations cover users, interviews, related reports, resumes, camera aggregates and mock tests. The user reported applying migrations through 0004 locally; this sandbox cannot independently verify Neon. Candidate question feedback has its own table.
+Drizzle schema and versioned migrations cover users, interviews, related reports, resumes, camera aggregates and mock tests. The user reported completing migration instructions through 0006 locally; this sandbox cannot independently verify Neon. Candidate question feedback has its own table.
 
 ```mermaid
 erDiagram
@@ -49,8 +49,12 @@ Migration `0003_tricky_lorna_dane.sql` adds `camera_observations`, keyed to one 
 
 ## Mock tests
 
-Migration `0005_green_chimera.sql` adds owner-scoped `mock_tests`: topic, a question/answer-key snapshot, final selected answers, score, and timestamps. A conditional update permits completion only once. Attempts cascade on user deletion and may be deleted individually. Draft selections are not persisted. Migration 0005 has only been tested with PGlite so far.
+Migration `0005_green_chimera.sql` adds owner-scoped `mock_tests`: topic, a question/answer-key snapshot, final selected answers, score, and timestamps. A conditional update permits completion only once. Attempts cascade on user deletion and may be deleted individually. Draft selections are not persisted. Migration 0005 was tested with PGlite; the user subsequently reported completing migration instructions through 0006.
 
 ## Question feedback
 
-Migration `0006_peaceful_shinobi_shaw.sql` adds one `question_feedback` record per interview question, with a 1–5 rating, optional comment (up to 1,000 characters) and update time. It cascades when its question is deleted. The API checks the interview owner and the question/interview relationship. Feedback is independent of answer evaluations and is not used for scoring or AI prompts. Neon migration 0006 is not yet verified.
+Migration `0006_peaceful_shinobi_shaw.sql` adds one `question_feedback` record per interview question, with a 1–5 rating, optional comment (up to 1,000 characters) and update time. It cascades when its question is deleted. The API checks the interview owner and the question/interview relationship. Feedback is independent of answer evaluations and is not used for scoring or AI prompts. The user reported completing migration instructions through 0006; Neon has not been independently verified.
+
+## Account deletion
+
+After password reauthentication, deleting a user cascades through their owned resumes, interviews, questions, answers, evaluations, reports, camera observations, question feedback and mock tests. AI usage metadata is not tied to an account and is retained. Database backups, operational logs, previously downloaded files and copies held by AI or transcription providers are not deleted by this operation.

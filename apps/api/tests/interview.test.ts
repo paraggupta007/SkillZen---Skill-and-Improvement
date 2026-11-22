@@ -43,6 +43,11 @@ class MemoryUsers implements IUserRepository {
     this.users.set(user.id, user);
     return user;
   }
+  async deleteWithPasswordHash(id: string, passwordHash: string) {
+    const user = this.users.get(id);
+    if (!user || user.passwordHash !== passwordHash) return false;
+    return this.users.delete(id);
+  }
   async update(id: string, input: ProfileUpdate) {
     const current = this.users.get(id);
     if (!current) return undefined;

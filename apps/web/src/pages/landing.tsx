@@ -1,8 +1,9 @@
 // Public introduction to SkillZen and its current capabilities.
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ApiError, apiRequest } from "../services/api";
 import { useCurrentUser } from "../services/queries";
+import { useInterviewStore } from "../store/interview-store";
 import {
   ArrowDown,
   ArrowRight,
@@ -20,11 +21,13 @@ import { Eyebrow } from "../components/ui";
 /** Public landing page with a clearly marked illustrative interview preview. */
 export function Landing() {
   const user = useCurrentUser();
+  const location = useLocation();
   const client = useQueryClient();
   const navigate = useNavigate();
   const logout = useMutation({
     mutationFn: () => apiRequest("/auth/logout", { method: "POST" }),
     onSuccess: () => {
+      useInterviewStore.getState().clear();
       client.clear();
       navigate("/login");
     },
@@ -81,6 +84,11 @@ export function Landing() {
           )}
         </div>
       </header>
+      {location.state?.accountDeleted === true && (
+        <p className="landing-account-deleted" role="status">
+          Your account and its app data have been deleted.
+        </p>
+      )}
       {sessionUnavailable && (
         <p className="landing-session-message" role="alert">
           We couldn’t check your session. Please try again.

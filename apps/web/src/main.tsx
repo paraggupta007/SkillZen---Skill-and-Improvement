@@ -14,6 +14,7 @@ const Dashboard = lazy(() =>
 );
 import { ResumesPage } from "./pages/resumes";
 import { Setup } from "./pages/setup";
+import { SettingsPage } from "./pages/settings";
 import { InterviewPage } from "./pages/interview";
 import { ReportPage } from "./pages/report";
 import { MockTestsPage, MockTestPage } from "./pages/mock-tests";
@@ -41,6 +42,7 @@ createRoot(document.getElementById("root")!).render(
             />
             <Route path="mock-tests" element={<MockTestsPage />} />
             <Route path="mock-tests/:id" element={<MockTestPage />} />
+            <Route path="settings" element={<SettingsPage />} />
             <Route path="resumes" element={<ResumesPage />} />
             <Route path="setup" element={<Setup />} />
             <Route path="interview/:id" element={<InterviewPage />} />

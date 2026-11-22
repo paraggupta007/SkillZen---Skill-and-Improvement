@@ -40,3 +40,5 @@ Mock-test tests use PGlite and mocked browser requests to check ownership, answe
 Contact page and mobile navigation have component tests for provided links, public access and menu behavior. Visual layout across actual devices and full deployed Vercel/API authentication remain unverified.
 
 Question-feedback tests cover owner/question isolation, validation, save/update/delete, post-completion use, cascade deletion, and mocked UI editing and report access. Migration 0006 has been tested in PGlite, not yet on Neon; the real browser workflow remains unverified.
+
+Account deletion tests use PGlite to verify password checks, origin and owner protection, cascading related records and rejection of copied cookies after deletion. A mocked component test verifies confirmation, errors and client-state cleanup. Live Neon, backups and provider retention have not been verified.

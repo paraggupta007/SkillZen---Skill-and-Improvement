@@ -15,4 +15,4 @@ Ratings are 1–5; comments are optional and limited to 1,000 characters. Feedba
 
 ## Run and verify
 
-Pull the branch, run `npm install`, `npm run db:migrate`, and `npm run dev`. Open an interview and use **Rate this question**, then save, edit and delete feedback. Complete an interview and use **Feedback on the questions** on its report to revisit feedback. Run `npm run lint`, `npm run type-check`, `npm test` and `npm run build`. Migration 0006 has been tested with PGlite but not yet confirmed on Neon. The live browser and deployed workflow remain unverified.
+Pull the branch, run `npm install`, `npm run db:migrate`, and `npm run dev`. Open an interview and use **Rate this question**, then save, edit and delete feedback. Complete an interview and use **Feedback on the questions** on its report to revisit feedback. Run `npm run lint`, `npm run type-check`, `npm test` and `npm run build`. Migration 0006 has been tested with PGlite; the user reported completing migration and feedback test instructions without detailed results. Neon and deployed workflows have not been independently verified.

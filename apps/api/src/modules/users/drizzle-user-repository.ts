@@ -49,6 +49,14 @@ export class DrizzleUserRepository implements IUserRepository {
       await this.db.update(users).set(input).where(eq(users.id, id)).returning()
     )[0];
   }
+  /** Delete the authenticated account only if its verified password hash is unchanged. */
+  async deleteWithPasswordHash(id: string, passwordHash: string) {
+    const deleted = await this.db
+      .delete(users)
+      .where(and(eq(users.id, id), eq(users.passwordHash, passwordHash)))
+      .returning({ id: users.id });
+    return deleted.length > 0;
+  }
   /** Delete only a specifically identified temporary smoke-test user and owned data. */
   async deleteSmokeUser(id: string, email: string) {
     if (!/^skillzen-smoke-[0-9a-f-]+@example\.invalid$/.test(email))

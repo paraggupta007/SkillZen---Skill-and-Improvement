@@ -59,3 +59,7 @@ The initial test feature uses a small curated, publicly visible bank rather than
 ## Candidate question feedback
 
 One editable/deletable rating and optional comment per interview question is stored server-side and shown only to its owner through the API. It is not an AI evaluation, not included in prompts or report PDFs, and does not influence scores. There is no admin aggregation or notification feature yet.
+
+## Account deletion and data boundaries
+
+Account deletion requires a current password, explicit UI confirmation and a conditional database delete. Cascades remove account-owned app data; provider copies, backups, logs and downloaded files are outside this operation. Logout remains stateless and does not revoke copied tokens before expiry; deleting the user prevents old tokens from authenticating because protected endpoints verify account existence.

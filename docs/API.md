@@ -172,3 +172,9 @@ Questions are a small fixed public bank for practice; answers are not sent in pr
 - `DELETE` removes the feedback (idempotent for an existing owned question). Ratings may be managed during or after the interview. Invalid input returns 400 `VALIDATION_ERROR`; missing authentication 401, rate limiting 429, missing configuration 503 `FEEDBACK_UNAVAILABLE`.
 
 Candidate feedback is separate from AI answer evaluations and does not affect the score. It is not fed into AI prompts or included in the report PDF. It is stored in the application database until deleted or the question is removed; there is currently no owner-facing aggregation or moderation interface. Apply migrations through 0006 before use.
+
+## Account deletion
+
+`DELETE /api/users/me` requires the session cookie and body `{ "password": "current-password" }`; no user ID is accepted. The password is rechecked before the account and app-owned records are deleted. On success it clears the cookie and returns `{ "deleted": true }`. Invalid credentials or a missing/invalid session return 401, invalid input 400, concurrent account changes 409, and excessive authentication attempts 429. Normal origin protection applies. Because protected routes check that the account still exists, a copied old session cookie cannot access the deleted account; ordinary logout still does not revoke copied tokens.
+
+Deletion does not erase provider-held data, backups, operational logs, downloaded documents or non-user-linked AI usage metadata; already-running requests may have transmitted data. It cannot be undone.

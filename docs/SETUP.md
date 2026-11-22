@@ -48,3 +48,7 @@ After pulling, run `npm install` and `npm run db:migrate` to apply migration 000
 ## Feedback on interview questions
 
 Apply migrations through 0006. Open “Rate this question” during an interview, or open a question in the report’s feedback section. A 1–5 rating is required; a comment is optional. You can edit or delete feedback. It is stored in your account, not sent to the AI or used in scoring. Avoid adding sensitive information.
+
+## Account deletion
+
+In Account settings, enter your current password, type `DELETE` and check the confirmation box to permanently delete your account and app-owned database records. There is no recovery. Provider data, backups, operational logs and files already downloaded are not removed. Test with a disposable account, not your main account.

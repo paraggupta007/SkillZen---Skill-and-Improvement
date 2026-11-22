@@ -90,3 +90,8 @@
 
 - Added optional, editable and deletable 1–5 ratings and comments for individual interview questions during practice and on reports.
 - Added migration 0006 and owner isolation tests. Feedback is separate from AI evaluations, scores and PDF reports. Neon migration and live browser checks remain pending.
+
+## Account and data controls
+
+- Added password-confirmed account deletion with cascades, clear confirmation and sign-out; app-owned data is removed, but external provider copies, backups, logs and downloads are not.
+- Added isolated database and mocked UI tests; no database migration is needed.

@@ -90,6 +90,19 @@ export class AuthService {
     if (!user) throw new AppError(401, "UNAUTHENTICATED", "Please log in");
     return publicUser(user);
   }
+  /** Reauthenticate before permanently deleting an account and its owned data. */
+  async deleteAccount(id: string, password: string) {
+    const user = await this.users.findById(id);
+    if (!user) throw new AppError(401, "UNAUTHENTICATED", "Please log in");
+    if (!(await bcrypt.compare(password, user.passwordHash)))
+      throw new AppError(401, "INVALID_CREDENTIALS", "Incorrect password");
+    if (!(await this.users.deleteWithPasswordHash(id, user.passwordHash)))
+      throw new AppError(
+        409,
+        "ACCOUNT_CHANGED",
+        "Account changed. Please try again.",
+      );
+  }
   private sign(id: string) {
     return jwt.sign({}, this.secret, {
       algorithm: "HS256",

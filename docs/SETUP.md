@@ -1,6 +1,6 @@
 # Local setup
 
-1. Install Node.js 20 LTS and npm, and open the repository folder in VS Code.
+1. Install Node.js 22 LTS and npm, and open the repository folder in VS Code.
 2. Run `npm install` in the root.
 3. Copy `.env.example` to `apps/api/.env`. This file is ignored by Git; never share it or paste keys into chat.
 4. For the database, create a free account and project at https://console.neon.tech/ . In the project connection details, enable **pooled connection** and copy the PostgreSQL URI into `DATABASE_URL` in `apps/api/.env`. The Neon hostname must contain `-pooler`. For local development a local PostgreSQL URI is also accepted.

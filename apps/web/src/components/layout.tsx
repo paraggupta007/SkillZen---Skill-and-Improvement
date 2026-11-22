@@ -1,4 +1,5 @@
 // Public branding and authenticated navigation layout.
+import { useRef, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -6,6 +7,9 @@ import {
   LayoutDashboard,
   FileText,
   ListChecks,
+  Menu,
+  X,
+  Mail,
   LogOut,
   Plus,
   Sparkles,
@@ -32,6 +36,8 @@ export function Brand({ inverted = false }: { inverted?: boolean }) {
 }
 /** Navigation and page frame for signed-in screens. */
 export function AppLayout() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuToggle = useRef<HTMLButtonElement>(null);
   const user = useCurrentUser();
   const navigate = useNavigate();
   const client = useQueryClient();
@@ -59,6 +65,9 @@ export function AppLayout() {
           </NavLink>
           <NavLink to="/app/resumes">
             <FileText size={18} /> Resumes
+          </NavLink>
+          <NavLink to="/contact">
+            <Mail size={18} /> Contact developer
           </NavLink>
         </nav>
         <div className="sidebar-bottom">
@@ -95,31 +104,58 @@ export function AppLayout() {
         </div>
       </aside>
       <div className="app-main">
-        <header className="mobile-header">
-          <Brand />
-          <div className="mobile-actions">
-            <Link to="/app" className="back-link">
-              Dashboard
-            </Link>
-            <Link to="/app/mock-tests" className="back-link">
-              Mock tests
-            </Link>
-            <Link to="/app/resumes" className="back-link">
-              Resumes
-            </Link>
-            <Link to="/app/setup" className="button button-small button-dark">
-              New interview
-            </Link>
+        <header
+          className="mobile-header"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setMenuOpen(false);
+              menuToggle.current?.focus();
+            }
+          }}
+        >
+          <div className="mobile-header-top">
+            <Brand />
             <button
               type="button"
-              className="mobile-logout"
-              onClick={() => logout.mutate()}
-              disabled={logout.isPending}
-              aria-label="Sign out"
+              ref={menuToggle}
+              className="mobile-menu-toggle"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
+              onClick={() => setMenuOpen(!menuOpen)}
             >
-              <LogOut size={17} />
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}{" "}
+              <span>{menuOpen ? "Close" : "Menu"}</span>
             </button>
           </div>
+          <nav
+            id="mobile-navigation"
+            aria-label="Mobile navigation"
+            className="mobile-navigation"
+            hidden={!menuOpen}
+          >
+            <NavLink to="/app" end onClick={() => setMenuOpen(false)}>
+              Dashboard
+            </NavLink>
+            <NavLink to="/app/setup" onClick={() => setMenuOpen(false)}>
+              New interview
+            </NavLink>
+            <NavLink to="/app/mock-tests" onClick={() => setMenuOpen(false)}>
+              Mock tests
+            </NavLink>
+            <NavLink to="/app/resumes" onClick={() => setMenuOpen(false)}>
+              Resumes
+            </NavLink>
+            <NavLink to="/contact" onClick={() => setMenuOpen(false)}>
+              Contact developer
+            </NavLink>
+            <button
+              type="button"
+              onClick={() => logout.mutate()}
+              disabled={logout.isPending}
+            >
+              <LogOut size={17} /> Sign out
+            </button>
+          </nav>
         </header>
         {logout.isError && (
           <p className="mobile-logout-error" role="alert">

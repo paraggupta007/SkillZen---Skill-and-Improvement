@@ -23,6 +23,7 @@ export function Landing() {
         <nav aria-label="Public navigation">
           <a href="#how-it-works">How it works</a>
           <a href="#features">The experience</a>
+          <Link to="/contact">Contact</Link>
         </nav>
         <div className="landing-actions">
           <Link className="header-login" to="/login">
@@ -199,9 +200,8 @@ export function Landing() {
               <em>is worth preparing for.</em>
             </h2>
             <p>
-              SkillZen is being built to make preparation more personal. Mock
-              tests, voice practice and privacy-conscious camera feedback are
-              planned for future phases.
+              Make preparation more personal with mock tests, voice practice and
+              optional, privacy-conscious camera observations.
             </p>
             <Link to="/register" className="button button-light">
               Create your account <ArrowRight size={17} />
@@ -211,8 +211,8 @@ export function Landing() {
             <ShieldCheck size={28} />
             <strong>Practice should feel safe.</strong>
             <p>
-              Camera analysis is not available yet. When added, it will require
-              consent and process video on your device.
+              Camera coaching is optional. Video is processed on your device;
+              only the aggregate counts you choose to save are shared.
             </p>
           </div>
         </section>
@@ -220,6 +220,9 @@ export function Landing() {
       <footer className="landing-footer">
         <Brand />
         <span>Built for practice. Made for progress.</span>
+        <Link className="footer-contact" to="/contact">
+          Contact the developer
+        </Link>
         <span>© {new Date().getFullYear()} SkillZen</span>
       </footer>
     </div>

@@ -7,6 +7,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./components/layout";
 import { ProtectedRoute } from "./components/protected-route";
 import { Landing } from "./pages/landing";
+import { ContactPage } from "./pages/contact";
 import { AuthPage } from "./pages/auth";
 const Dashboard = lazy(() =>
   import("./pages/dashboard").then((module) => ({ default: module.Dashboard })),
@@ -25,6 +26,7 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/login" element={<AuthPage mode="login" />} />
         <Route path="/register" element={<AuthPage mode="register" />} />
         <Route element={<ProtectedRoute />}>

@@ -75,3 +75,9 @@
 
 - Added 3- or 5-question JavaScript and web practice tests from a small fixed bank, owner-scoped history, one-time server scoring, explanations and deletion.
 - Added migration 0005 and PGlite/browser-mock tests. Neon migration and a real browser workflow remain to be verified.
+
+## Contact, responsive navigation and deployment guidance
+
+- Added a public developer contact page with provided email, LinkedIn and education details, plus a branded favicon.
+- Reworked mobile/tablet workspace navigation, restored mobile login visibility and improved small-screen form legibility.
+- Updated Vercel + separate Node API deployment guidance; no production deployment has been performed.

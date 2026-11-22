@@ -14,6 +14,6 @@ A checked box means the work is implemented and verified, not just planned.
 - [x] Mock tests: small fixed JavaScript/web multiple-choice banks, saved attempts, scoring and explanations; automated tests pass; migration 0005 and real browser flow remain to be verified on Neon.
 - [ ] Interview/question feedback: user ratings and comments, separate from AI answer evaluations; design with implementation.
 - [ ] Phase 9: Optional advanced features (ask which features before starting).
-- [ ] Phase 10: Hardening, deployment and final report.
+- [ ] Phase 10: Hardening, deployment and final report — public contact page, favicon and responsive navigation added; Vercel frontend / separate Node API deployment documented but not deployed or end-to-end verified.
 
 Real AI and deployment need user-supplied setup. The earlier Neon migration was reported complete by the user; the user confirmed migration 0002 was applied locally. This sandbox cannot independently verify Neon. Do not interpret webcam estimates as verified attention, retinal tracking, or cheating detection.

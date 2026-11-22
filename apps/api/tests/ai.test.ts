@@ -201,3 +201,26 @@ describe("streamed structured output", () => {
     expect(output.score).toBe(7);
   });
 });
+
+describe("SSE network boundaries", () => {
+  it("parses CRLF event separators split across network chunks", async () => {
+    const { readSSE } = await import("../src/ai/providers/http-utils.js");
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const chunk of [
+          "data: first\r",
+          "\n\r",
+          "\ndata: second\r\n",
+          "\r\n",
+        ])
+          controller.enqueue(encoder.encode(chunk));
+        controller.close();
+      },
+    });
+    const messages: string[] = [];
+    for await (const message of readSSE(new Response(stream)))
+      messages.push(message);
+    expect(messages).toEqual(["first", "second"]);
+  });
+});

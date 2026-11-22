@@ -12,12 +12,33 @@ type EventData = {
   data: Record<string, unknown> | null;
   error: { code: string } | null;
 };
-function completeEvent(text: string): EventData {
-  const block = text
-    .split("\n\n")
-    .find((item) => item.startsWith("event: complete\n"));
-  if (!block) throw new Error("The interview stream did not complete");
-  return JSON.parse(block.split("\n")[1]!.slice(6)) as EventData;
+function completeEvent(text: string, stage: string): EventData {
+  const blocks = text.split("\n\n");
+  const complete = blocks.find((item) => item.startsWith("event: complete\n"));
+  if (!complete) {
+    const failed = blocks.find((item) => item.startsWith("event: error\n"));
+    let code = "STREAM_INCOMPLETE";
+    if (failed) {
+      try {
+        const event: unknown = JSON.parse(failed.split("\n")[1]!.slice(6));
+        if (typeof event === "object" && event !== null && "error" in event) {
+          const error = event.error;
+          if (
+            typeof error === "object" &&
+            error !== null &&
+            "code" in error &&
+            typeof error.code === "string" &&
+            /^[A-Z_]{1,40}$/.test(error.code)
+          )
+            code = error.code;
+        }
+      } catch {
+        /* Never print provider text or secrets. */
+      }
+    }
+    throw new Error(`${stage} failed (${code})`);
+  }
+  return JSON.parse(complete.split("\n")[1]!.slice(6)) as EventData;
 }
 async function main() {
   const env = loadEnv();
@@ -38,27 +59,23 @@ async function main() {
   let cleanupFailed = false;
   const agent = request.agent(createApp(container));
   try {
-    const registered = await agent
-      .post("/api/auth/register")
-      .send({
-        name: "Smoke Test",
-        email,
-        password: randomBytes(24).toString("hex"),
-      });
+    const registered = await agent.post("/api/auth/register").send({
+      name: "Smoke Test",
+      email,
+      password: randomBytes(24).toString("hex"),
+    });
     if (
       registered.status !== 201 ||
       typeof registered.body.data?.id !== "string"
     )
       throw new Error("Could not create temporary account");
     userId = registered.body.data.id as string;
-    const created = await agent
-      .post("/api/interviews")
-      .send({
-        role: "Software developer",
-        roundType: "technical",
-        difficulty: "easy",
-        totalQuestions: 1,
-      });
+    const created = await agent.post("/api/interviews").send({
+      role: "Software developer",
+      roundType: "technical",
+      difficulty: "easy",
+      totalQuestions: 1,
+    });
     if (created.status !== 201 || typeof created.body.data?.id !== "string")
       throw new Error("Could not create interview");
     const id = created.body.data.id as string;
@@ -68,6 +85,7 @@ async function main() {
           .get(`/api/interviews/${id}/next-question`)
           .timeout({ deadline: 60000 })
       ).text,
+      "Question generation",
     );
     if (!question.success || typeof question.data?.id !== "string")
       throw new Error("Question generation failed");
@@ -82,6 +100,7 @@ async function main() {
           })
           .timeout({ deadline: 60000 })
       ).text,
+      "Answer evaluation",
     );
     if (!result.success || !result.data?.metrics)
       throw new Error("Answer evaluation failed");

@@ -21,7 +21,8 @@ Technical, HR and behavioral rounds; registry-based factory; validated LLM and o
 - `apps/api/src/db/schema.ts`, `migrations/0002*`, migration metadata: role and uniqueness constraints.
 - `apps/api/tests/interview.test.ts`, `domain.test.ts`, `ai.test.ts`: fake-provider interview and domain tests.
 - `apps/api/tests/postgres.test.ts`: isolated PGlite migration and actual Drizzle repository test.
-- `apps/api/scripts/smoke-groq.ts`, `modules/users/drizzle-user-repository.ts`: optional live Neon/Groq check with restricted test-user cleanup.
+- `apps/api/scripts/smoke-groq.ts`, `scripts/diagnose-groq.ts`, `modules/users/drizzle-user-repository.ts`: optional live Neon/Groq check and safe provider diagnostics with restricted test-user cleanup.
+- `apps/api/src/ai/providers/http-utils.ts`: handles SSE CRLF separators split between network chunks.
 - `apps/api/package.json`, `tsconfig.json`, root lockfile: test dependency and smoke command.
 - `README.md`, `docs/API.md`, `DATABASE.md`, `ARCHITECTURE.md`, `SETUP.md`, `TESTING.md`, `PROGRESS.md`, `CHANGELOG.md`: document current implementation and outstanding verification.
 
@@ -39,8 +40,8 @@ Run `npm run lint`, `npm run type-check`, `npm test`, and `npm run build`. Autom
 
 ## Problems faced and how they were fixed
 
-The sandbox cannot reach Neon or live AI vendors. A local PGlite engine tests actual SQL migrations and repository operations, while Supertest uses a fake AI provider and in-memory repository for the whole HTTP flow. Neither substitutes for live network verification. The optional smoke script creates a temporary user and interview and attempts cleanup, but usage logs remain and cleanup may require manual attention.
+The sandbox cannot reach Neon or live AI vendors. The user reported the Neon migration succeeded but the live Groq smoke check failed with a generic stream error; credential-safe diagnostics have been added. A local PGlite engine tests actual SQL migrations and repository operations, while Supertest uses a fake AI provider and in-memory repository for the whole HTTP flow. Neither substitutes for live network verification. The optional smoke script creates a temporary user and interview and attempts cleanup, but usage logs remain and cleanup may require manual attention.
 
 ## What is next
 
-Apply migration 0002 and verify a real Groq interview on the user's computer. Phase 3 is not complete until that manual check succeeds. Then implement reports and analytics, followed by the frontend.
+Diagnose and verify a real Groq interview on the user's computer. Phase 3 is not complete until that manual check succeeds. Then implement reports and analytics, followed by the frontend.

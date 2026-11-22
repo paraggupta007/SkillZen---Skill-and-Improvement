@@ -1,6 +1,6 @@
 # Database
 
-Drizzle schema and versioned migrations currently cover the initial eight tables. The user indicated that earlier migrations were run locally; migration 0002 has been tested with PGlite but not yet applied or verified on Neon. Mock tests, candidate feedback and webcam metrics are planned for later migrations.
+Drizzle schema and versioned migrations currently cover the initial eight tables. The user indicated that earlier migrations were run locally; migration 0002 was tested with PGlite and the user reported a successful Neon migration. Mock tests, candidate feedback and webcam metrics are planned for later migrations.
 
 ```mermaid
 erDiagram
@@ -31,4 +31,4 @@ The user repository is the only authentication component that queries the `users
 
 ## Interview domain status
 
-Migration 0002 adds the interview role and unique indexes on question order, answer per question and evaluation per answer. Transactions lock the interview row before state transitions, and answers plus evaluations are written together. Migrations were exercised on isolated PGlite, not the user’s Neon database. Back up existing data before migrating; existing duplicate rows would need resolution before unique indexes can be created.
+Migration 0002 adds the interview role and unique indexes on question order, answer per question and evaluation per answer. Transactions lock the interview row before state transitions, and answers plus evaluations are written together. The user reported the migration succeeded on Neon; repository behavior was additionally exercised on isolated PGlite. Back up existing data before migrating; existing duplicate rows would need resolution before unique indexes can be created.

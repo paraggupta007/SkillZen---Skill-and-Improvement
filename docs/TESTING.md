@@ -18,3 +18,7 @@ Round and evaluator tests cover factory registration, rubrics, schema-validated 
 ## Optional Neon + Groq smoke check
 
 After applying the latest migration, configuring `DATABASE_URL`, `JWT_SECRET` and `GROQ_API_KEY` in `apps/api/.env`, run `npm run smoke:groq -w api`. It creates a randomly named temporary account and one interview, uses the real Groq API, and attempts to delete the temporary user and owned interview data afterward. AI usage metadata remains in `ai_usage_logs`; if cleanup fails, the command reports it and the temporary user must be removed manually. This test requires network access and free-tier availability and has not been run in this sandbox. Never paste credentials in chat.
+
+## Groq diagnostic
+
+If the smoke check reports an incomplete stream, run `npm run diagnose:groq -w api`. It makes two short real Groq requests (non-streaming and streaming) using the configured reasoning model and prints only success, safe HTTP status, timeout or a generic error. It never prints the key, prompt or model output. Requests count against the free-tier quota. The smoke check also identifies which interview stage failed without displaying provider output. The sandbox cannot run live Groq checks; the user must run this locally.

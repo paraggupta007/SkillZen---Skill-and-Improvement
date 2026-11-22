@@ -27,3 +27,9 @@
 - Added authenticated interview creation, history, detail, SSE questions and evaluations, and idempotent completion.
 - Added transactional persistence and migration 0002, tested against isolated PGlite; fake-AI HTTP integration and a manual Neon/Groq smoke command were added.
 - Neon migration 0002 and real Groq testing remain outstanding.
+
+### Phase 3 — Groq diagnostics
+
+- Added a credential-safe Groq connectivity/streaming diagnostic and stage-specific smoke errors.
+- Fixed provider SSE parsing when CRLF boundaries are split across network chunks, with a regression test.
+- The user confirmed the Neon migration succeeded; real Groq smoke verification is still pending.

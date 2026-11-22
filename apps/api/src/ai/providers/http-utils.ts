@@ -15,7 +15,11 @@ export async function* readSSE(response: Response): AsyncIterable<string> {
   try {
     while (true) {
       const { done, value } = await reader.read();
-      buffer += decoder.decode(value, { stream: !done }).replace(/\r\n/g, "\n");
+      // Normalize after appending so CRLF split across network chunks is handled.
+      buffer = (buffer + decoder.decode(value, { stream: !done })).replace(
+        /\r\n/g,
+        "\n",
+      );
       let index = buffer.indexOf("\n\n");
       while (index !== -1) {
         const event = buffer.slice(0, index);

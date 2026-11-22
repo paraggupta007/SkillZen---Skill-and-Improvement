@@ -11,7 +11,8 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
-    "smoke:groq": "tsx scripts/smoke-groq.ts"
+    "smoke:groq": "tsx scripts/smoke-groq.ts",
+    "diagnose:groq": "tsx scripts/diagnose-groq.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

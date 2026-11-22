@@ -17,11 +17,11 @@ Put these only in `apps/api/.env`, never browser variables or chat:
 - `OPENROUTER_API_KEY`: https://openrouter.ai/settings/keys — select only free models.
 - `JWT_SECRET` (required for auth): generate using `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` and put the output into `JWT_SECRET` in the file.
 
-A configured provider is not proof that a model is currently free, available, or within quota; check provider terms and limits. Automated AI tests use fakes and do not require these keys. Real AI calls are not yet verified and no public interview endpoint exists.
+A configured provider is not proof that a model is currently free, available, or within quota; check provider terms and limits. Automated AI tests use fakes and do not require these keys. The user reported a successful Neon/Groq interview smoke test, but the complete live workflow has not been independently verified.
 
 ## Interview API verification
 
-Run `npm run db:migrate` after updating the project, because Phase 3 adds migration 0002. Set `JWT_SECRET` and `GROQ_API_KEY` in `apps/api/.env`, then optionally run `npm run smoke:groq -w api` on a network that can reach Neon and Groq. The check creates a temporary user and interview and attempts to delete them afterward; AI usage metadata remains. See [TESTING.md](TESTING.md). This has not yet been verified against live services.
+Run `npm run db:migrate` after updating the project, because Phase 3 adds migration 0002. Set `JWT_SECRET` and `GROQ_API_KEY` in `apps/api/.env`, then optionally run `npm run smoke:groq -w api` on a network that can reach Neon and Groq. The check creates a temporary user and interview and attempts to delete them afterward; AI usage metadata remains. See [TESTING.md](TESTING.md). The user reported a successful smoke test; this workspace did not independently run it against live services.
 
 If the Groq smoke check fails, `npm run diagnose:groq -w api` prints a credential-safe status for direct and streamed Groq requests; see [TESTING.md](TESTING.md). Never paste keys or `.env` contents into chat.
 
@@ -33,13 +33,13 @@ Visit `http://localhost:5173`, create an account, choose an interview from the d
 
 ## Voice practice
 
-Use **Dictate answer** in a browser supporting Web Speech, or **Record with Groq** in a browser supporting MediaRecorder. Both require a user click and microphone permission. Browser recognition may use a browser-vendor network service. Groq recording sends audio to the API and Groq; it needs the existing `GROQ_API_KEY` in `apps/api/.env`. Recording stops after two minutes and uploads on stop; the API limits audio to 4 MB. For unsupported browsers or permission errors, type instead. Neither real microphone capture nor live Groq Whisper has been verified yet.
+Use **Dictate answer** in a browser supporting Web Speech, or **Record with Groq** in a browser supporting MediaRecorder. Both require a user click and microphone permission. Browser recognition may use a browser-vendor network service. Groq recording sends audio to the API and Groq; it needs the existing `GROQ_API_KEY` in `apps/api/.env`. Recording stops after two minutes and uploads on stop; the API limits audio to 4 MB. For unsupported browsers or permission errors, type instead. The user reported that live speech works; real Groq transcription and the complete browser workflow have not been independently verified. Interview questions also have an **Interviewer voice** picker and a stop button. Available English voices, their quality and gender depend on the browser and device; some speech services may use a network.
 
 A ready report includes a PDF download. The PDF uses built-in fonts with limited Unicode support. In the Resumes section, upload a text-based PDF (4 MB, 10 pages maximum); extracted text is stored until deletion. You may analyze it with an optional job description or select it for a new interview. Both operations send text to the configured AI provider. Deleting the resume does not remove interview content derived from it. Scanned PDFs are not supported.
 
 ## Camera coaching (in progress)
 
-After pulling the Phase 8 changes, run `npm install` and `npm run db:migrate` to apply migrations through 0004. During an in-progress interview, camera use is optional: check the consent box and click Start camera, grant browser permission, and use Stop when finished. The official face and pose models are downloaded from Google after starting; WebAssembly assets are served by the app. Video remains in the browser. A separate save action sends only aggregate counters for online and PDF reports; saved counters can be deleted. No retinal, attention or cheating conclusion is supported. Coarse pose and wrist observations are estimates, not gesture classification; a real-device check remains pending.
+After pulling the Phase 8 changes, run `npm install` and `npm run db:migrate` to apply migrations through 0004. During an in-progress interview, camera use is optional: check the consent box and click Start camera, grant browser permission, and use Stop when finished. The official face and pose models are downloaded from Google after starting; WebAssembly assets are served by the app. Video remains in the browser. A separate save action sends only aggregate counters for online and PDF reports; saved counters can be deleted. No retinal, attention or cheating conclusion is supported. Coarse pose and wrist observations are estimates, not gesture classification. Optional live tips flag sustained off-center framing, possible multiple face-like shapes, repeated visible wrist movement and approximate iris shifts; turn them off using the live tips checkbox. Detectors can miss people or mistake images for faces. The user reported that camera works live, but model accuracy and the latest tips require real-device verification.
 
 ## Mock tests
 

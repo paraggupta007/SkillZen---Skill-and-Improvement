@@ -49,7 +49,7 @@ PGlite/Supertest applies migration 0007 and checks copied-cookie and other-sessi
 
 ## Vercel API adaptation
 
-The Vercel CLI 66.6.0 local production build was exercised with `NODEJS_HELPERS=0`: it produced a Node 22 function, API rewrites, and traced the PDF script, worker and fonts. Its built Express handler passed local health, nested-route and malformed-JSON checks; PDF extraction passed after materializing the build's traced file mappings. PGlite tests also exercise request-bound report generation and retry. These checks do not exercise Vercel's live edge routing, helper settings, streaming, database connection, function packaging or browser cookies; test those after deploying. `npm audit --omit=dev` reported no vulnerabilities; the full audit reported four moderate development-tool dependency advisories.
+The Vercel CLI 66.6.0 local production build was exercised with `NODEJS_HELPERS=0`: it produced a Node 22 function, API rewrites, and traced the PDF script, worker and fonts. Its built Express handler passed local health, nested-route and malformed-JSON checks; PDF extraction passed after materializing the build's traced file mappings. PGlite tests also exercise request-bound report generation and retry. A subsequent deployed `/api/health` check returned JSON, but only confirms liveness. The local checks do not establish live streaming, database connection, full function packaging or browser cookies; test these on the intended deployed commit. `npm audit --omit=dev` reported no vulnerabilities; the full audit reported four moderate development-tool dependency advisories.
 
 ## Option feedback and shared rate limits
 

@@ -86,7 +86,7 @@ React Router provides public and protected routes. TanStack Query owns server st
 
 ## Speech
 
-The browser can read questions with speech synthesis and use Web Speech recognition after an explicit click. Some browser recognition implementations transmit audio to their own provider. A separate opt-in MediaRecorder path sends audio to an authenticated, owner-checked, rate-limited API and the server-only `ITranscriber` Groq adapter; it does not write audio to disk. Browser-derived speech metrics are approximate; no metrics are submitted after editing a transcript or appending to existing text. Live microphone and provider behavior remain unverified.
+The browser can read questions with speech synthesis and offers a choice of available English voices, preferring voices explicitly labelled natural, neural, enhanced or premium. Voice quality and availability depend on the device and some speech services may use a network. Web Speech recognition starts only after an explicit click. Some browser recognition implementations transmit audio to their own provider. A separate opt-in MediaRecorder path sends audio to an authenticated, owner-checked, rate-limited API and the server-only `ITranscriber` Groq adapter; it does not write audio to disk. Browser-derived speech metrics are approximate; no metrics are submitted after editing a transcript or appending to existing text. Live microphone and provider behavior remain unverified.
 
 ## Resume analysis and PDF export
 
@@ -94,7 +94,7 @@ An injected report PDF renderer creates an in-memory PDF after checking ownershi
 
 ## Camera coaching (Phase 8 in progress)
 
-After explicit consent and start, the browser loads MediaPipe Face and Pose Landmarkers and their official models from Google, captures video locally and samples face at approximately 5 fps and pose at approximately 1 fps. Face framing and iris-position counters are approximations, not attention or cheating detection. No frames or landmarks are sent to the server. The user can explicitly save/delete aggregate counters; a separate evaluator provides non-diagnostic framing suggestions on online and PDF reports, without affecting scores. Coarse shoulder/hip alignment, wrist movement and hand height are not gesture classification; pose can fall back to face-only if unavailable. Real camera and model loading remain unverified.
+After explicit consent and start, the browser loads MediaPipe Face and Pose Landmarkers and their official models from Google, captures video locally and samples face at approximately 5 fps and pose at approximately 1 fps. Face framing and iris-position counters are approximations, not attention or cheating detection. No frames or landmarks are sent to the server. The user can explicitly save/delete aggregate counters; a separate evaluator provides non-diagnostic framing suggestions on online and PDF reports, without affecting scores. Optional live tips use short rolling windows for framing, possible multiple faces, repeated wrist movement and iris shifts. Multiple face-like shapes can be missed or misidentified, and samples with multiple detected faces are excluded from aggregates. Coarse shoulder/hip alignment, wrist movement and hand height are not gesture classification; pose can fall back to face-only if unavailable. The user reported that camera works live; accuracy and latest tip behavior need real-device testing.
 
 ## Mock tests
 
@@ -102,7 +102,7 @@ A small curated multiple-choice bank is shuffled and snapshotted at creation. Th
 
 ## Candidate question feedback
 
-A dedicated service and repository validate question/interview ownership before reading or changing an optional rating/comment. Feedback is stored independently from answer evaluations and AI/report generation, and the UI loads it only when a feedback disclosure opens.
+A dedicated service and repository validate question/interview ownership before reading or changing an optional rating/comment. Feedback is stored independently from answer evaluations and AI/report generation, and the UI loads it only when a feedback disclosure opens. Mock-test option feedback is likewise owner-scoped, available after submission, and separate from scoring.
 
 ## Account deletion
 

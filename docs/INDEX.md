@@ -11,6 +11,9 @@
 - [Testing](TESTING.md)
 - [Viva questions](VIVA_QA.md)
 - [Project report](PROJECT_REPORT.md)
+
+Phase notes below document individual milestones and may contain historical verification status. Use [Progress and roadmap](PROGRESS.md) and [Testing](TESTING.md) for the current state.
+
 - [Phase 0: Foundation](phases/phase-00-foundation.md)
 - [Phase 1: Auth and users](phases/phase-01-auth.md)
 - [Phase 2: AI layer](phases/phase-02-ai.md)

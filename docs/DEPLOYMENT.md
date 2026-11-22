@@ -1,6 +1,6 @@
 # Deployment: Vercel frontend and API + Neon
 
-The Vercel project serves the Vite frontend and one Node function wrapping the Express API at the **same origin**. PostgreSQL (for example Neon) is still required. No separate Render service is required. This setup has been built locally with the Vercel CLI, but has not been verified on a live Vercel deployment.
+The Vercel project serves the Vite frontend and one Node function wrapping the Express API at the **same origin**. PostgreSQL (for example Neon) is still required. No separate Render service is required. A previous live `/api/health` check returned JSON, and the setup was built locally with the Vercel CLI. The currently deployed commit, database migrations and full production workflows remain unverified; health alone checks liveness, not the database or providers.
 
 ## 1. Database
 
@@ -61,7 +61,7 @@ Ensure local changes are understood before pulling, and confirm `apps/api/.env` 
 
 - Open `https://YOUR-FRONTEND/api/health`: expect JSON with `data.status` equal to `ok`, **not HTML**. Health checks liveness, not database/provider connectivity.
 - Register/login with a disposable account; reload and open a protected page; sign out and check the session is gone. Sessions use same-origin cookies on this configuration. Test on phone, tablet, and desktop.
-- Test a complete AI interview (including streaming), report, report PDF, mock test, resume upload and voice transcription. Test origin protection and isolation with a second account, and direct frontend route refresh. Use HTTPS for microphone/camera.
+- Test a complete AI interview (including streaming), report, report PDF, mock test, resume upload and voice transcription. Try the interviewer voice picker and optional live camera tips, including stopping the camera and disabling tips. Test origin protection and isolation with a second account, and direct frontend route refresh. Use HTTPS for microphone/camera. Voice choices vary by device; camera tips are approximate, not measures of attention or performance.
 - Uploads are limited to 4 MiB to stay below Vercel's default 4.5 MB function request limit. Vercel may reject oversized requests before Express; actual plan and platform limits apply.
 - The function has a 120-second configured maximum. Streamed AI responses and report generation can time out. On Vercel, report generation is awaited during the report request, not continued as a fire-and-forget task. Interrupted or failed requests can be retried; concurrent function instances can still duplicate AI calls. Reports are saved in PostgreSQL.
 - Production request rate counters are shared in PostgreSQL using HMAC-hashed identifiers and atomic updates. They fail closed on database errors. Expired counters are removed opportunistically in bounded batches, not on a guaranteed schedule; they may outlive account deletion until cleanup runs. Limits are not a substitute for a WAF, cost controls or security review. Caches and concurrency guards remain per-instance. Review privacy, costs, quotas, data retention and backups before public launch.

@@ -18,6 +18,10 @@ import { InterviewService } from "./modules/interviews/interview-service.js";
 import { DrizzleInterviewRepository } from "./modules/interviews/drizzle-interview-repository.js";
 import type { IInterviewRepository } from "./modules/interviews/interview-repository.js";
 import type { ILLMProvider } from "./ai/types.js";
+import {
+  GroqTranscriber,
+  type ITranscriber,
+} from "./modules/speech/transcriber.js";
 import { ReportService } from "./modules/reports/report-service.js";
 import { DrizzleReportRepository } from "./modules/reports/drizzle-report-repository.js";
 import type { IReportRepository } from "./modules/reports/report-repository.js";
@@ -41,6 +45,7 @@ export function createContainer(
     reportRepository?: IReportRepository;
     analyticsRepository?: IAnalyticsRepository;
     providers?: ILLMProvider[];
+    transcriber?: ITranscriber;
     subscribeReports?: boolean;
   } = {},
 ) {
@@ -126,6 +131,9 @@ export function createContainer(
     ? new AnalyticsService(analyticsRepo)
     : undefined;
   return {
+    transcriber:
+      options.transcriber ??
+      (env.GROQ_API_KEY ? new GroqTranscriber(env.GROQ_API_KEY) : undefined),
     reports: reportService,
     analytics: analyticsService,
     interviews: interviewService,

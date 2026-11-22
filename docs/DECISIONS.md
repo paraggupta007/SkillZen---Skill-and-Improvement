@@ -39,3 +39,7 @@
 - Choice: fetch-based SSE for both GET and POST; TanStack Query for server state and Zustand for the current answer draft.
 - Why: native EventSource cannot submit the answer as POST. Streamed model text is labeled provisional until a validated complete event arrives. Interrupted answer streams can be reconciled by refreshing the saved interview before retrying.
 - Reports poll every 20 seconds to leave headroom below the per-user request limit; the underlying process-local job state is not durable.
+
+## Voice and privacy
+
+Browser speech APIs vary in availability and may use a network service. We offer an explicit recording alternative that uploads to Groq only after the user chooses it; no audio is persisted by the application. Groq documents `whisper-large-v3-turbo` and free-tier audio limits at https://console.groq.com/docs/speech-to-text and https://console.groq.com/docs/rate-limits; availability and quotas may change. Word rate, fillers and pauses are rough English recognition heuristics, not diagnostic measurements; edited or mixed input has no speech metrics.

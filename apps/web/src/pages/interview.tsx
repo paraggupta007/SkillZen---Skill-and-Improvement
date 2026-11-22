@@ -8,6 +8,9 @@ import {
   CheckCircle2,
   Clock3,
   MessageSquareText,
+  Mic,
+  MicOff,
+  Volume2,
   Sparkles,
 } from "lucide-react";
 import { apiRequest } from "../services/api";
@@ -18,6 +21,12 @@ import type {
   InterviewDetail,
   Question,
 } from "../services/types";
+import {
+  speakQuestion,
+  useSpeech,
+  type SpeechMetrics,
+} from "../hooks/use-speech";
+import { useRecording } from "../hooks/use-recording";
 import { useInterviewStore } from "../store/interview-store";
 import { ErrorState, Eyebrow, Loading } from "../components/ui";
 /** Show the live question, answer editor and validated feedback. */
@@ -34,6 +43,26 @@ export function InterviewPage() {
   const [question, setQuestion] = useState<Question | null>(null);
   const [feedback, setFeedback] = useState<Evaluation | null>(null);
   const [preview, setPreview] = useState("");
+  const [speechMetrics, setSpeechMetrics] = useState<SpeechMetrics | null>(
+    null,
+  );
+  const dictationBase = useRef("");
+  const voice = useSpeech((text, metrics) => {
+    setDraft(
+      [dictationBase.current, text].filter(Boolean).join(" ").slice(0, 12000),
+    );
+    setSpeechMetrics(
+      dictationBase.current || text.length > 12000 ? null : metrics,
+    );
+  });
+  const recordedBase = useRef("");
+  const recording = useRecording(id, (text) => {
+    setDraft(
+      [recordedBase.current, text].filter(Boolean).join(" ").slice(0, 12000),
+    );
+    setSpeechMetrics(null);
+  });
+  const voiceBusy = voice.listening || recording.status !== "idle";
   const raw = useRef("");
   const requested = useRef("");
   const controller = useRef(new AbortController());
@@ -65,7 +94,11 @@ export function InterviewPage() {
     },
   });
   const submitAnswer = useMutation({
-    mutationFn: async (input: { questionId: string; answerText: string }) => {
+    mutationFn: async (input: {
+      questionId: string;
+      answerText: string;
+      speech?: SpeechMetrics;
+    }) => {
       raw.current = "";
       setPreview("");
       return streamRequest<Evaluation>(`/interviews/${id}/answers`, {
@@ -83,6 +116,7 @@ export function InterviewPage() {
       setPreview("");
       setQuestion(null);
       clear();
+      setSpeechMetrics(null);
       await client.invalidateQueries({ queryKey: ["interview", id] });
     },
   });
@@ -143,7 +177,11 @@ export function InterviewPage() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (active && draft.trim())
-      submitAnswer.mutate({ questionId: active.id, answerText: draft.trim() });
+      submitAnswer.mutate({
+        questionId: active.id,
+        answerText: draft.trim(),
+        ...(speechMetrics ? { speech: speechMetrics } : {}),
+      });
   }
   return (
     <div className="page interview-page">
@@ -303,6 +341,16 @@ export function InterviewPage() {
                     </p>
                   </>
                 )}
+                {active && (
+                  <button
+                    type="button"
+                    className="voice-button"
+                    disabled={voiceBusy}
+                    onClick={() => speakQuestion(active.text)}
+                  >
+                    <Volume2 size={16} /> Read question aloud
+                  </button>
+                )}
                 {nextQuestion.isError && (
                   <ErrorState
                     message={nextQuestion.error.message}
@@ -324,18 +372,109 @@ export function InterviewPage() {
                 <textarea
                   id="answer"
                   value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
+                  onChange={(event) => {
+                    setDraft(event.target.value);
+                    setSpeechMetrics(null);
+                  }}
                   maxLength={12000}
                   placeholder="Take a breath, and start typing your answer here..."
                   rows={8}
-                  disabled={!active || submitAnswer.isPending}
+                  disabled={
+                    !active || submitAnswer.isPending || voice.listening
+                  }
                 />
+                <div className="voice-controls">
+                  {voice.supported ? (
+                    <button
+                      type="button"
+                      className="voice-button"
+                      disabled={
+                        !active ||
+                        submitAnswer.isPending ||
+                        recording.status !== "idle"
+                      }
+                      onClick={() => {
+                        if (voice.listening) voice.stop();
+                        else {
+                          dictationBase.current = draft.trim();
+                          setSpeechMetrics(null);
+                          voice.start();
+                        }
+                      }}
+                    >
+                      {voice.listening ? (
+                        <MicOff size={16} />
+                      ) : (
+                        <Mic size={16} />
+                      )}{" "}
+                      {voice.listening ? "Stop dictation" : "Dictate answer"}
+                    </button>
+                  ) : (
+                    <span>
+                      Dictation is unavailable in this browser. You can type
+                      your answer.
+                    </span>
+                  )}
+                  <span>
+                    Browser speech recognition may send audio to its service.
+                    Stop anytime.
+                  </span>
+                </div>
+                {recording.supported && (
+                  <div className="voice-controls">
+                    <button
+                      type="button"
+                      className="voice-button"
+                      disabled={
+                        !active ||
+                        submitAnswer.isPending ||
+                        voice.listening ||
+                        recording.status === "starting" ||
+                        recording.status === "uploading"
+                      }
+                      onClick={() => {
+                        if (recording.status === "recording") recording.stop();
+                        else {
+                          recordedBase.current = draft.trim();
+                          setSpeechMetrics(null);
+                          void recording.start();
+                        }
+                      }}
+                    >
+                      <Mic size={16} />{" "}
+                      {recording.status === "recording"
+                        ? "Stop & transcribe"
+                        : recording.status === "uploading"
+                          ? "Transcribing..."
+                          : recording.status === "starting"
+                            ? "Starting microphone..."
+                            : "Record with Groq"}
+                    </button>
+                    <span>
+                      Audio is sent to Groq for transcription when recording
+                      stops (up to 2 minutes / 5 MB).
+                    </span>
+                  </div>
+                )}
+                {recording.error && (
+                  <p className="voice-error" role="alert">
+                    {recording.error}
+                  </p>
+                )}
+                {voice.error && (
+                  <p className="voice-error" role="alert">
+                    {voice.error}
+                  </p>
+                )}
                 <div className="answer-footer">
                   <span>{draft.length} / 12,000 characters</span>
                   <button
                     type="submit"
                     disabled={
-                      !active || !draft.trim() || submitAnswer.isPending
+                      !active ||
+                      !draft.trim() ||
+                      submitAnswer.isPending ||
+                      voiceBusy
                     }
                     className="button button-dark"
                   >

@@ -22,7 +22,7 @@ Unknown endpoints return HTTP 404:
 
 Malformed JSON returns 400 `INVALID_JSON`; oversized JSON returns 413 `PAYLOAD_TOO_LARGE`; rate-limited requests return 429 `RATE_LIMITED`; unhandled errors return 500 `INTERNAL_ERROR`.
 
-Resumes, speech transcription, PDF reports, mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
+Resumes, PDF reports, mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
 
 ## Authentication and profile
 
@@ -112,3 +112,13 @@ No request body. Returns 202 and pending if a report must be generated, or 200 a
 ### GET /api/analytics/summary
 
 Returns `{"success":true,"data":{"totalInterviews":2,"completedInterviews":1,"averageScore":8,"scoreTrend":[{"interviewId":"<uuid>","startedAt":"<ISO date>","score":8}]},"error":null}`. The average and trend include only completed interviews with generated reports; `averageScore` is null if none exist. Trend contains at most 20 scores, ordered oldest to newest. Errors include 401 `UNAUTHENTICATED` and 503 `ANALYTICS_UNAVAILABLE`.
+
+## Speech transcription
+
+### POST /api/interviews/:id/transcription
+
+Requires the session cookie, an owned in-progress interview and a configured server-side `GROQ_API_KEY`. Send the raw recording body with `Content-Type: audio/webm`, `audio/ogg`, or `audio/mp4`. The server enforces a 5 MB maximum, checks the container signature and applies a limit of 10 requests per user per 15 minutes. It forwards the audio to Groq Whisper (`whisper-large-v3-turbo`) for transcription; it does not save the recording to the database or disk. The browser asks for explicit microphone action and discloses the upload. Groq's own retention and terms apply.
+
+Success: `{"success":true,"data":{"text":"Recognized answer"},"error":null}`. Common errors: 400 `VALIDATION_ERROR` or `INVALID_AUDIO`, 401 `UNAUTHENTICATED`, 403 `ORIGIN_FORBIDDEN`, 404 `NOT_FOUND`, 409 `INTERVIEW_CLOSED`, 413 `PAYLOAD_TOO_LARGE`, 415 `UNSUPPORTED_AUDIO`, 429 `RATE_LIMITED`, 502 `TRANSCRIPTION_FAILED`, 503 `INTERVIEWS_UNAVAILABLE` or `TRANSCRIPTION_UNAVAILABLE`. Transcription has not been verified against a real Groq account.
+
+The existing answer endpoint accepts optional `speech` metrics (durationSeconds, wordCount, fillerCount and pauseCount). Browser dictation supplies rough metrics only for an unedited single dictation without existing text; edited or uploaded/transcribed answers omit them rather than fabricate measurements.

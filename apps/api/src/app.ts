@@ -4,6 +4,7 @@ import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
+import { createSpeechRoutes } from "./modules/speech/routes.js";
 import { createInterviewRoutes } from "./modules/interviews/routes.js";
 import { createReportRoutes } from "./modules/reports/routes.js";
 import { createAnalyticsRoutes } from "./modules/analytics/routes.js";
@@ -62,6 +63,14 @@ export function createApp(container: Container) {
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
   app.use("/api", createAuthRoutes(container.auth, container.env));
+  app.use(
+    "/api",
+    createSpeechRoutes(
+      container.auth,
+      container.interviews,
+      container.transcriber,
+    ),
+  );
   app.use("/api", createInterviewRoutes(container.interviews, container.auth));
   app.use("/api", createReportRoutes(container.reports, container.auth));
   app.use("/api", createAnalyticsRoutes(container.analytics, container.auth));

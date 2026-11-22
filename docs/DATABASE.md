@@ -36,3 +36,7 @@ Migration 0002 adds the interview role and unique indexes on question order, ans
 ## Reports and analytics
 
 Phase 4 uses the existing `reports` table and its unique `interview_id` index; it adds no schema migration. Report insertion is idempotent across concurrent generators. Analytics queries join reports to user-owned completed interviews. Failed/pending job status is in memory, not persisted; a missing report can be scheduled again after restart.
+
+## Voice
+
+Phase 6 adds no migration. Existing answer speech metrics and evaluation data are stored when supplied; audio recordings are not stored by the application. Text transcriptions enter the editable answer field and are saved only when the answer is submitted.

@@ -30,3 +30,7 @@ Completed interviews now schedule report generation. `GET /api/reports/:intervie
 ## Frontend MVP
 
 Visit `http://localhost:5173`, create an account, choose an interview from the dashboard and answer the streamed questions. A completed interview opens its report; pending reports refresh every 20 seconds and failures can be retried. Return to the dashboard to see session history and available scores. Authentication requires a working database, a JWT secret and an AI provider for real questions. The API is proxied by Vite during local development; no browser-side AI credentials are needed. The browser workflow has automated mocked tests but has not yet been verified end to end against a live provider.
+
+## Voice practice
+
+Use **Dictate answer** in a browser supporting Web Speech, or **Record with Groq** in a browser supporting MediaRecorder. Both require a user click and microphone permission. Browser recognition may use a browser-vendor network service. Groq recording sends audio to the API and Groq; it needs the existing `GROQ_API_KEY` in `apps/api/.env`. Recording stops after two minutes and uploads on stop; the API limits audio to 5 MB. For unsupported browsers or permission errors, type instead. Neither real microphone capture nor live Groq Whisper has been verified yet.

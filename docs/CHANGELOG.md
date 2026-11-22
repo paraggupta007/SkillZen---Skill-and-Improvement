@@ -54,3 +54,9 @@
 - Added responsive landing, sign-in, registration, dashboard, setup, streaming interview and report screens.
 - Added session guards, API/SSE clients, query cache, answer draft store, score trend and asynchronous report retry.
 - Added frontend tests and a Vercel SPA rewrite; live browser flow and production deployment still need verification.
+
+## Phase 6 — voice
+
+- Added explicit browser speech recognition and read-aloud controls with approximate optional speech coaching metrics.
+- Added opt-in, owner-checked, size-limited Groq Whisper transcription and microphone cleanup.
+- Added mocked voice lifecycle and API security tests; real microphone and live Whisper calls remain unverified.

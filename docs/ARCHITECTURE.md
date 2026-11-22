@@ -83,3 +83,7 @@ An `interview.completed` event schedules `ReportService`. It validates AI-genera
 ## Frontend
 
 React Router provides public and protected routes. TanStack Query owns server state, Zustand stores the current answer draft, and a fetch-based SSE parser handles both GET and POST streams. SSE deltas are provisional and the final validated event is authoritative. Dashboard charts use Recharts and are loaded with the dashboard route. The development Vite proxy forwards `/api` to Express; production can configure `VITE_API_URL` (the API base including `/api`) but cross-site cookie support depends on browser and deployment settings.
+
+## Speech
+
+The browser can read questions with speech synthesis and use Web Speech recognition after an explicit click. Some browser recognition implementations transmit audio to their own provider. A separate opt-in MediaRecorder path sends audio to an authenticated, owner-checked, rate-limited API and the server-only `ITranscriber` Groq adapter; it does not write audio to disk. Browser-derived speech metrics are approximate; no metrics are submitted after editing a transcript or appending to existing text. Live microphone and provider behavior remain unverified.

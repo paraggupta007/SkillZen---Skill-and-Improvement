@@ -17,5 +17,6 @@
 - [Phase 3: Interview domain](phases/phase-03-interview.md)
 - [Phase 4: Reports and analytics](phases/phase-04-reports.md)
 - [Phase 5: Frontend MVP](phases/phase-05-frontend.md)
+- [Phase 6: Voice](phases/phase-06-voice.md)
 
 More phase documents will be added alongside their code.

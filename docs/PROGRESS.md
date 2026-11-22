@@ -9,7 +9,7 @@ A checked box means the work is implemented and verified, not just planned.
 - [x] Phase 4: Reports, analytics and history — fake-provider/isolated PostgreSQL tests pass; live report generation not yet verified.
 - [x] Phase 5: Frontend MVP — responsive authentication, setup, streamed interview, dashboard and reports; automated browser-component tests pass, live browser flow still needs verification.
 - [x] Phase 6: Voice and speech metrics — browser dictation, read-aloud and opt-in Groq recording, tested with mocks; live microphones and Groq transcription remain unverified.
-- [ ] Phase 7: Resume, job description and PDF.
+- [ ] Phase 7: Resume, job description and PDF — PDF report export added; resume extraction/analysis remains to be built and Unicode PDF font coverage needs improvement.
 - [ ] Phase 8: Consent-based browser-only body-language estimates and reports.
 - [ ] Mock tests: test setup, questions, scoring and feedback; plan schema and APIs alongside implementation.
 - [ ] Interview/question feedback: user ratings and comments, separate from AI answer evaluations; design with implementation.

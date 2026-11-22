@@ -60,3 +60,7 @@
 - Added explicit browser speech recognition and read-aloud controls with approximate optional speech coaching metrics.
 - Added opt-in, owner-checked, size-limited Groq Whisper transcription and microphone cleanup.
 - Added mocked voice lifecycle and API security tests; real microphone and live Whisper calls remain unverified.
+
+## Phase 7 — in progress
+
+- Added owner-checked PDF report downloads; default PDF fonts have limited Unicode support. Resume analysis is not implemented yet.

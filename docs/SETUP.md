@@ -34,3 +34,5 @@ Visit `http://localhost:5173`, create an account, choose an interview from the d
 ## Voice practice
 
 Use **Dictate answer** in a browser supporting Web Speech, or **Record with Groq** in a browser supporting MediaRecorder. Both require a user click and microphone permission. Browser recognition may use a browser-vendor network service. Groq recording sends audio to the API and Groq; it needs the existing `GROQ_API_KEY` in `apps/api/.env`. Recording stops after two minutes and uploads on stop; the API limits audio to 5 MB. For unsupported browsers or permission errors, type instead. Neither real microphone capture nor live Groq Whisper has been verified yet.
+
+A ready report includes a PDF download. The PDF uses built-in fonts with limited Unicode support. Resume upload and analysis are still under development.

@@ -22,7 +22,7 @@ Unknown endpoints return HTTP 404:
 
 Malformed JSON returns 400 `INVALID_JSON`; oversized JSON returns 413 `PAYLOAD_TOO_LARGE`; rate-limited requests return 429 `RATE_LIMITED`; unhandled errors return 500 `INTERNAL_ERROR`.
 
-Resumes, PDF reports, mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
+Resumes, mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
 
 ## Authentication and profile
 
@@ -122,3 +122,7 @@ Requires the session cookie, an owned in-progress interview and a configured ser
 Success: `{"success":true,"data":{"text":"Recognized answer"},"error":null}`. Common errors: 400 `VALIDATION_ERROR` or `INVALID_AUDIO`, 401 `UNAUTHENTICATED`, 403 `ORIGIN_FORBIDDEN`, 404 `NOT_FOUND`, 409 `INTERVIEW_CLOSED`, 413 `PAYLOAD_TOO_LARGE`, 415 `UNSUPPORTED_AUDIO`, 429 `RATE_LIMITED`, 502 `TRANSCRIPTION_FAILED`, 503 `INTERVIEWS_UNAVAILABLE` or `TRANSCRIPTION_UNAVAILABLE`. Transcription has not been verified against a real Groq account.
 
 The existing answer endpoint accepts optional `speech` metrics (durationSeconds, wordCount, fillerCount and pauseCount). Browser dictation supplies rough metrics only for an unedited single dictation without existing text; edited or uploaded/transcribed answers omit them rather than fabricate measurements.
+
+### GET /api/reports/:interviewId/pdf
+
+Requires authentication and ownership. Downloads a ready completed interview report as `application/pdf` with a private, no-store response. The PDF route does not start report generation. Returns 409 `REPORT_NOT_READY` when no report is stored, 409 `INTERVIEW_INCOMPLETE` for an incomplete session, 404 for an unknown or unowned interview, and the usual validation/authentication errors. Current built-in PDF fonts have limited Unicode coverage; non-Latin text may not render correctly.

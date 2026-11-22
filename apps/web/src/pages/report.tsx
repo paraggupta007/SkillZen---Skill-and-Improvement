@@ -7,12 +7,13 @@ import {
   ArrowRight,
   CheckCircle2,
   Lightbulb,
+  Download,
   RefreshCw,
   Sparkles,
   Target,
   TrendingUp,
 } from "lucide-react";
-import { apiRequest } from "../services/api";
+import { apiBase, apiRequest } from "../services/api";
 import type { InterviewDetail, ReportState } from "../services/types";
 import { ErrorState, Eyebrow, Loading } from "../components/ui";
 /** Display a generated interview report, or its current generation status. */
@@ -107,6 +108,14 @@ export function ReportPage() {
       ) : (
         report.data?.status === "ready" && (
           <>
+            <div className="report-download">
+              <a
+                className="button button-outline button-small"
+                href={`${apiBase}/reports/${id}/pdf`}
+              >
+                <Download size={16} /> Download PDF
+              </a>
+            </div>
             <section className="report-hero">
               <div>
                 <span className="report-hero-label">

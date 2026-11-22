@@ -91,40 +91,32 @@ describe("report and analytics API", () => {
       expect((await request(app).get("/api/analytics/summary")).status).toBe(
         401,
       );
-      await owner
-        .post("/api/auth/register")
-        .send({
-          name: "Ada",
-          email: "ada@example.com",
-          password: "strong-password",
-        });
-      await other
-        .post("/api/auth/register")
-        .send({
-          name: "Bob",
-          email: "bob@example.com",
-          password: "strong-password",
-        });
-      const created = await owner
-        .post("/api/interviews")
-        .send({
-          role: "Developer",
-          roundType: "technical",
-          difficulty: "easy",
-          totalQuestions: 1,
-        });
+      await owner.post("/api/auth/register").send({
+        name: "Ada",
+        email: "ada@example.com",
+        password: "strong-password",
+      });
+      await other.post("/api/auth/register").send({
+        name: "Bob",
+        email: "bob@example.com",
+        password: "strong-password",
+      });
+      const created = await owner.post("/api/interviews").send({
+        role: "Developer",
+        roundType: "technical",
+        difficulty: "easy",
+        totalQuestions: 1,
+      });
       const id = created.body.data.id as string;
       expect((await owner.get(`/api/reports/${id}`)).status).toBe(409);
       expect((await other.get(`/api/reports/${id}`)).status).toBe(404);
       const question = completedData(
         (await owner.get(`/api/interviews/${id}/next-question`)).text,
       );
-      const response = await owner
-        .post(`/api/interviews/${id}/answers`)
-        .send({
-          questionId: question.id,
-          answerText: "Store results for reuse.",
-        });
+      const response = await owner.post(`/api/interviews/${id}/answers`).send({
+        questionId: question.id,
+        answerText: "Store results for reuse.",
+      });
       expect(completedData(response.text).metrics).toMatchObject({
         overall: 8,
       });
@@ -155,6 +147,15 @@ describe("report and analytics API", () => {
         overallScore: 8,
         strengths: ["Clear answer"],
       });
+      const pdf = await owner.get(`/api/reports/${id}/pdf`);
+      expect(pdf.status).toBe(200);
+      expect(pdf.headers["content-type"]).toContain("application/pdf");
+      expect(
+        Buffer.from(pdf.body as Uint8Array)
+          .subarray(0, 5)
+          .toString(),
+      ).toBe("%PDF-");
+      expect((await other.get(`/api/reports/${id}/pdf`)).status).toBe(404);
       const summary = await owner.get("/api/analytics/summary");
       expect(summary.body.data).toMatchObject({
         totalInterviews: 1,

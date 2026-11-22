@@ -54,6 +54,24 @@ export function createReportRoutes(
       res.status(result.status === "pending" ? 202 : 200).json(ok(result));
     }),
   );
+  router.get(
+    "/reports/:id/pdf",
+    limit,
+    asyncRoute(async (req, res) => {
+      const pdf = await ready().download(
+        currentUserId(res),
+        z.uuid().parse(req.params.id),
+      );
+      res
+        .set({
+          "Content-Type": "application/pdf",
+          "Content-Disposition": "attachment; filename=skillzen-report.pdf",
+          "Cache-Control": "private, no-store",
+          "X-Content-Type-Options": "nosniff",
+        })
+        .send(pdf);
+    }),
+  );
   router.post(
     "/reports/:id/retry",
     limit,

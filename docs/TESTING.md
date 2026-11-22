@@ -30,3 +30,5 @@ Phase 4 uses an isolated PGlite database and fake AI to test completion-triggere
 Phase 5 frontend tests exercise registration, protected-route redirects, setup, streamed answer submission, partial JSON display, CRLF chunk boundaries, streaming errors and interrupted responses. Run `npm test -w web`. These are mocked browser-component tests, not a full live browser/Neon/Groq test. Manually check desktop and mobile layout, account creation, session resume, answer feedback, reports and logout with your local configuration.
 
 Phase 6 tests mock browser recognition/recording lifecycle, explicit start, track cleanup and Groq upload, and exercise authenticated transcription, cross-user isolation, audio type/signature and size limits with PGlite. The Groq transport is mocked. Manual testing of device permissions, speech recognition, MediaRecorder formats and actual Whisper responses remains necessary.
+
+Phase 7 work in progress: report integration tests check PDF signature and cross-user ownership. Manually verify PDF layout, large content and non-Latin rendering; current built-in fonts have limited Unicode coverage.

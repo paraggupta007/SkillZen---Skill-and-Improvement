@@ -2202,3 +2202,9 @@ p {
   color: #a5574e;
   margin-top: 10px;
 }
+
+.report-download {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}

@@ -22,6 +22,7 @@ import {
   GroqTranscriber,
   type ITranscriber,
 } from "./modules/speech/transcriber.js";
+import { ReportPdfRenderer } from "./modules/reports/pdf-renderer.js";
 import { ReportService } from "./modules/reports/report-service.js";
 import { DrizzleReportRepository } from "./modules/reports/drizzle-report-repository.js";
 import type { IReportRepository } from "./modules/reports/report-repository.js";
@@ -118,6 +119,7 @@ export function createContainer(
           reportRepo,
           jsonGenerator,
           new ReportPrompt(prompts),
+          new ReportPdfRenderer(),
         )
       : undefined;
   if (reportService && options.subscribeReports !== false)

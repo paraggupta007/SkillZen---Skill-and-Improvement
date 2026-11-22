@@ -23,7 +23,7 @@ An `ITranscriber` interface allows the Groq adapter to be replaced and tested in
 
 ## Design decisions and trade-offs
 
-Microphone capture only starts after user action. Browser speech recognition may send audio to a browser-vendor service. The distinct Groq recording control discloses that audio will be uploaded on stop, including its automatic two-minute stop. Application audio is memory-only and is not persisted, but Groq's terms and retention apply. Server uploads are capped at 5 MB; signature checks are not full media validation. Word count, filler count and pauses are approximate English heuristics, not diagnoses; speech metrics are omitted when text is edited or combined with existing text. No metrics are fabricated for Groq transcription. Actual browser support and transcription quality vary.
+Microphone capture only starts after user action. Browser speech recognition may send audio to a browser-vendor service. The distinct Groq recording control discloses that audio will be uploaded on stop, including its automatic two-minute stop. Application audio is memory-only and is not persisted, but Groq's terms and retention apply. Server uploads are capped at 4 MB; signature checks are not full media validation. Word count, filler count and pauses are approximate English heuristics, not diagnoses; speech metrics are omitted when text is edited or combined with existing text. No metrics are fabricated for Groq transcription. Actual browser support and transcription quality vary.
 
 ## How to run and test it
 

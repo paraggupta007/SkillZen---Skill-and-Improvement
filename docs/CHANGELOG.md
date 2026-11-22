@@ -100,3 +100,8 @@
 
 - Logout now revokes all sessions of the account's current generation, including copied tokens. Stale logouts cannot revoke newer sessions; database errors are reported instead of falsely confirming logout.
 - Migration 0007 is required before starting the updated API. Old JWTs will be rejected and users need to sign in again. Requests authenticated before logout may still complete.
+
+## Same-origin Vercel API
+
+- Added one Node function for `/api` and preserved SPA navigation. Report generation is request-bound on Vercel instead of relying on background work after the response.
+- Reduced voice and PDF upload limits to 4 MiB for Vercel; live deployment, streaming, uploads and browser sessions still need verification. Process-local rate limits are not distributed abuse protection.

@@ -52,7 +52,7 @@ export function ResumesPage() {
   });
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (file && consent && file.size <= 5 * 1024 * 1024) upload.mutate(file);
+    if (file && consent && file.size <= 4 * 1024 * 1024) upload.mutate(file);
   }
   return (
     <div className="page narrow-page">
@@ -73,7 +73,7 @@ export function ResumesPage() {
           <span>01</span>
           <div>
             <h2>Upload a text-based PDF</h2>
-            <p>Maximum 5 MB and 10 pages. Scanned images are not supported.</p>
+            <p>Maximum 4 MB and 10 pages. Scanned images are not supported.</p>
           </div>
         </div>
         <label className="field-label">
@@ -85,9 +85,9 @@ export function ResumesPage() {
             onChange={(event) => setFile(event.target.files?.[0] ?? null)}
           />
         </label>
-        {file && file.size > 5 * 1024 * 1024 && (
+        {file && file.size > 4 * 1024 * 1024 && (
           <p className="voice-error" role="alert">
-            Choose a PDF smaller than 5 MB.
+            Choose a PDF smaller than 4 MB.
           </p>
         )}
         <label className="resume-consent">
@@ -107,7 +107,7 @@ export function ResumesPage() {
           type="submit"
           className="button button-dark button-small"
           disabled={
-            !file || !consent || file.size > 5 * 1024 * 1024 || upload.isPending
+            !file || !consent || file.size > 4 * 1024 * 1024 || upload.isPending
           }
         >
           <Upload size={15} />

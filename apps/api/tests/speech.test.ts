@@ -34,28 +34,22 @@ describe("speech transcription", () => {
       const app = createApp(container);
       const owner = request.agent(app);
       const other = request.agent(app);
-      await owner
-        .post("/api/auth/register")
-        .send({
-          name: "Ada",
-          email: "ada@example.com",
-          password: "password123",
-        });
-      await other
-        .post("/api/auth/register")
-        .send({
-          name: "Bob",
-          email: "bob@example.com",
-          password: "password123",
-        });
-      const created = await owner
-        .post("/api/interviews")
-        .send({
-          role: "Developer",
-          roundType: "technical",
-          difficulty: "easy",
-          totalQuestions: 1,
-        });
+      await owner.post("/api/auth/register").send({
+        name: "Ada",
+        email: "ada@example.com",
+        password: "password123",
+      });
+      await other.post("/api/auth/register").send({
+        name: "Bob",
+        email: "bob@example.com",
+        password: "password123",
+      });
+      const created = await owner.post("/api/interviews").send({
+        role: "Developer",
+        roundType: "technical",
+        difficulty: "easy",
+        totalQuestions: 1,
+      });
       const id = created.body.data.id as string;
       const path = `/api/interviews/${id}/transcription`;
       const audio = Buffer.concat([
@@ -98,7 +92,7 @@ describe("speech transcription", () => {
           await owner
             .post(path)
             .set("Content-Type", "audio/webm")
-            .send(Buffer.alloc(5 * 1024 * 1024 + 1))
+            .send(Buffer.alloc(4 * 1024 * 1024 + 1))
         ).status,
       ).toBe(413);
       expect(transcribe).toHaveBeenCalledTimes(1);

@@ -95,7 +95,7 @@ export function createSpeechRoutes(
     }),
     express.raw({
       type: ["audio/webm", "audio/ogg", "audio/mp4"],
-      limit: "5mb",
+      limit: "4mb",
     }),
     asyncRoute(async (req, res) => {
       const type = audioType(req);

@@ -125,22 +125,20 @@ describe("report and analytics API", () => {
       });
       expect(
         (
-          await owner
-            .put(`/api/interviews/${id}/camera-metrics`)
-            .send({
-              samples: 100,
-              faceVisible: 70,
-              centered: 60,
-              centeredKnown: 70,
-              gazeNearCamera: 40,
-              gazeKnown: 60,
-              headMovements: 3,
-              poseSamples: 20,
-              postureKnown: 12,
-              postureAligned: 8,
-              wristKnown: 15,
-              wristMovements: 2,
-            })
+          await owner.put(`/api/interviews/${id}/camera-metrics`).send({
+            samples: 100,
+            faceVisible: 70,
+            centered: 60,
+            centeredKnown: 70,
+            gazeNearCamera: 40,
+            gazeKnown: 60,
+            headMovements: 3,
+            poseSamples: 20,
+            postureKnown: 12,
+            postureAligned: 8,
+            wristKnown: 15,
+            wristMovements: 2,
+          })
         ).status,
       ).toBe(200);
       fake.failReports = true;
@@ -218,6 +216,85 @@ describe("report and analytics API", () => {
             .set("Origin", "https://evil.example")
         ).status,
       ).toBe(403);
+    } finally {
+      await pg.close();
+    }
+  }, 30000);
+  it("generates reports within serverless requests, supports retry, and isolates owners", async () => {
+    const pg = new PGlite();
+    try {
+      const testDb = drizzle(pg, { schema });
+      await migrate(testDb, { migrationsFolder: "./src/db/migrations" });
+      const db = testDb as unknown as ReturnType<typeof createDatabase>["db"];
+      const fake = new ReportFake();
+      const app = createApp(
+        createContainer(
+          loadEnv({
+            NODE_ENV: "test",
+            JWT_SECRET: "test-secret-which-is-at-least-32-characters",
+          }),
+          {
+            userRepository: new DrizzleUserRepository(db),
+            interviewRepository: new DrizzleInterviewRepository(db),
+            reportRepository: new DrizzleReportRepository(db),
+            providers: [fake],
+            subscribeReports: false,
+            reportExecution: "request",
+          },
+        ),
+      );
+      const owner = request.agent(app),
+        other = request.agent(app);
+      await owner
+        .post("/api/auth/register")
+        .send({
+          name: "Ada",
+          email: "ada@example.com",
+          password: "strong-password",
+        });
+      await other
+        .post("/api/auth/register")
+        .send({
+          name: "Bob",
+          email: "bob@example.com",
+          password: "strong-password",
+        });
+      const created = await owner
+        .post("/api/interviews")
+        .send({
+          role: "Developer",
+          roundType: "technical",
+          difficulty: "easy",
+          totalQuestions: 1,
+        });
+      const id = created.body.data.id as string;
+      const question = completedData(
+        (await owner.get(`/api/interviews/${id}/next-question`)).text,
+      );
+      await owner
+        .post(`/api/interviews/${id}/answers`)
+        .send({
+          questionId: question.id,
+          answerText: "Store results for reuse.",
+        });
+      expect((await owner.post(`/api/interviews/${id}/complete`)).status).toBe(
+        200,
+      );
+      expect(fake.reportCalls).toBe(0);
+      expect((await other.get(`/api/reports/${id}`)).status).toBe(404);
+      expect(fake.reportCalls).toBe(0);
+      fake.failReports = true;
+      const failed = await owner.get(`/api/reports/${id}`);
+      expect(failed.status).toBe(200);
+      expect(failed.body.data.status).toBe("failed");
+      fake.failReports = false;
+      const retry = await owner.post(`/api/reports/${id}/retry`);
+      expect(retry.status).toBe(200);
+      expect(retry.body.data.status).toBe("ready");
+      expect(
+        (await owner.get(`/api/reports/${id}`)).body.data.report.overallScore,
+      ).toBe(8);
+      expect((await owner.get(`/api/reports/${id}/pdf`)).status).toBe(200);
     } finally {
       await pg.close();
     }

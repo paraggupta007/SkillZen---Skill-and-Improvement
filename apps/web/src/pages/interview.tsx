@@ -461,7 +461,7 @@ export function InterviewPage() {
                     </button>
                     <span>
                       Audio is sent to Groq for transcription when recording
-                      stops (up to 2 minutes / 5 MB).
+                      stops (up to 2 minutes / 4 MB).
                     </span>
                   </div>
                 )}

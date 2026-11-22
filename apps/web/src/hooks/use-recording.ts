@@ -62,7 +62,7 @@ export function useRecording(
       instance.ondataavailable = (event) => {
         if (event.data.size) {
           size += event.data.size;
-          if (size > 5 * 1024 * 1024) {
+          if (size > 4 * 1024 * 1024) {
             exceeded = true;
             chunks.length = 0;
             if (instance.state === "recording") instance.stop();
@@ -88,7 +88,7 @@ export function useRecording(
           setStatus("idle");
           if (exceeded)
             setError(
-              "Recording exceeded the 5 MB limit. Please try a shorter answer.",
+              "Recording exceeded the 4 MB limit. Please try a shorter answer.",
             );
           return;
         }

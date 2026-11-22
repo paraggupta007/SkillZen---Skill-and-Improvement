@@ -24,7 +24,7 @@ Repository interfaces scope persistence to the owner. An extractor interface iso
 
 ## Design decisions and trade-offs
 
-Only text-based PDFs up to 5 MB, ten pages and 20,000 extracted characters are accepted. Extraction runs in a Node child with a 128 MB V8 heap limit, a 15-second deadline and two concurrent jobs per process; this is not a full OS sandbox. Only extracted text is stored, until the user deletes it. Analysis or selecting a resume for interview sends its text to the configured AI provider; provider terms apply. Deletion clears the resume record and references, not previously generated questions or reports. Match scores are rough AI estimates. Report PDF built-in fonts have limited Unicode coverage and may not render non-Latin text correctly.
+Only text-based PDFs up to 4 MB, ten pages and 20,000 extracted characters are accepted. Extraction runs in a Node child with a 128 MB V8 heap limit, a 15-second deadline and two concurrent jobs per process; this is not a full OS sandbox. Only extracted text is stored, until the user deletes it. Analysis or selecting a resume for interview sends its text to the configured AI provider; provider terms apply. Deletion clears the resume record and references, not previously generated questions or reports. Match scores are rough AI estimates. Report PDF built-in fonts have limited Unicode coverage and may not render non-Latin text correctly.
 
 ## How to run and test it
 

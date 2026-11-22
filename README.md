@@ -26,7 +26,7 @@ Parag Gupta · B.Tech, batch 2027 · GL Bajaj Institute of Engineering and Techn
 
 ## Deployment
 
-The frontend is prepared for Vercel; login and other server features require a separately hosted Node API and PostgreSQL. See [deployment instructions](docs/DEPLOYMENT.md), including cookie and same-site domain requirements. No deployment has been verified yet.
+The frontend and Express API have a same-origin Vercel configuration and require PostgreSQL such as Neon. See [deployment instructions](docs/DEPLOYMENT.md). The Vercel API configuration has not yet been verified live.
 
 ## Documentation
 

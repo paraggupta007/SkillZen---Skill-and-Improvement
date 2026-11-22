@@ -75,6 +75,7 @@ export function createContainer(
     providers?: ILLMProvider[];
     transcriber?: ITranscriber;
     subscribeReports?: boolean;
+    reportExecution?: "background" | "request";
   } = {},
 ) {
   const database = env.DATABASE_URL
@@ -167,6 +168,7 @@ export function createContainer(
           new ReportPrompt(prompts),
           new ReportPdfRenderer(),
           cameraService,
+          options.reportExecution === "request",
         )
       : undefined;
   if (reportService && options.subscribeReports !== false)

@@ -18,6 +18,7 @@ type State = "pending" | "failed";
 /** Generate and retrieve coaching reports without exposing underlying provider errors. */
 export class ReportService {
   private readonly jobs = new Map<string, State>();
+  private readonly requestJobs = new Map<string, Promise<void>>();
   /** Inject repository interfaces and the structured AI generator. */
   constructor(
     private readonly interviews: IInterviewRepository,
@@ -26,6 +27,7 @@ export class ReportService {
     private readonly prompt: ReportPrompt,
     private readonly pdf: IReportPdfRenderer,
     private readonly camera?: Pick<CameraService, "get">,
+    private readonly requestExecution = false,
   ) {}
   private key(userId: string, interviewId: string) {
     return `${userId}:${interviewId}`;
@@ -104,11 +106,31 @@ export class ReportService {
       ...report,
     });
   }
+  /** Request-bound generation for serverless: never depend on work after a response. */
+  private async generateDuringRequest(userId: string, id: string) {
+    const key = this.key(userId, id);
+    let job = this.requestJobs.get(key);
+    if (!job) {
+      job = this.generate(userId, id);
+      this.requestJobs.set(key, job);
+    }
+    try {
+      await job;
+      const report = await this.reports.findByInterview(id);
+      if (!report) throw new Error("Report was not saved");
+      return { status: "ready" as const, report };
+    } catch {
+      return { status: "failed" as const, error: "REPORT_GENERATION_FAILED" };
+    } finally {
+      if (this.requestJobs.get(key) === job) this.requestJobs.delete(key);
+    }
+  }
   /** Return a report, or the current pending/failed generation status. */
   async get(userId: string, id: string) {
     await this.ownedCompleted(userId, id);
     const report = await this.reports.findByInterview(id);
     if (report) return { status: "ready" as const, report };
+    if (this.requestExecution) return this.generateDuringRequest(userId, id);
     const state = this.jobs.get(this.key(userId, id));
     if (state === "failed")
       return { status: "failed" as const, error: "REPORT_GENERATION_FAILED" };
@@ -138,6 +160,7 @@ export class ReportService {
     await this.ownedCompleted(userId, id);
     const report = await this.reports.findByInterview(id);
     if (report) return { status: "ready" as const, report };
+    if (this.requestExecution) return this.generateDuringRequest(userId, id);
     this.schedule(userId, id, true);
     return { status: "pending" as const };
   }

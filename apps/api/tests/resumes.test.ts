@@ -123,7 +123,7 @@ describe("resume upload and coaching", () => {
           await owner
             .post("/api/resumes")
             .set("Content-Type", "application/pdf")
-            .send(Buffer.alloc(5 * 1024 * 1024 + 1))
+            .send(Buffer.alloc(4 * 1024 * 1024 + 1))
         ).status,
       ).toBe(413);
       const uploaded = await owner

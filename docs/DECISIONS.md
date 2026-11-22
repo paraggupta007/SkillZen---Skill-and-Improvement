@@ -46,7 +46,7 @@ Browser speech APIs vary in availability and may use a network service. We offer
 
 ## Resume extraction and privacy
 
-PDF input is limited to 5 MB, 10 pages and 20,000 extracted characters. PDF.js runs in a subprocess with a 128 MB V8 heap limit, 15-second deadline and two-process concurrency limit; this is resource isolation, not an OS security sandbox. Only extracted text is stored. Users can delete it, but generated interview material may retain derived information. AI match scores are estimates, never ATS or hiring decisions. Scanned PDFs and full Unicode report-font coverage are deferred.
+PDF input is limited to 4 MB, 10 pages and 20,000 extracted characters. PDF.js runs in a subprocess with a 128 MB V8 heap limit, 15-second deadline and two-process concurrency limit; this is resource isolation, not an OS security sandbox. Only extracted text is stored. Users can delete it, but generated interview material may retain derived information. AI match scores are estimates, never ATS or hiring decisions. Scanned PDFs and full Unicode report-font coverage are deferred.
 
 ## Camera observations
 

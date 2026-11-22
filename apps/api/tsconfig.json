@@ -10,6 +10,7 @@
     "src/**/*.ts",
     "tests/**/*.ts",
     "drizzle.config.ts",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "../web/api/**/*.ts"
   ]
 }

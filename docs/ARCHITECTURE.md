@@ -62,7 +62,7 @@ sequenceDiagram
   API-->>Web: Pending or completed report
 ```
 
-The in-process event bus starts report generation. The status map is not a durable job queue; requesting a completed interview’s missing report can schedule it again after restart. Multiple instances can duplicate AI work, although the database unique constraint prevents duplicate reports.
+On the long-running server the in-process event bus starts report generation; on Vercel generation runs within the report request instead, so it does not depend on background execution after a response. The status map is not a durable job queue; requesting a completed interview’s missing report can schedule it again after restart. Multiple instances can duplicate AI work, although the database unique constraint prevents duplicate reports.
 
 ## Authentication
 

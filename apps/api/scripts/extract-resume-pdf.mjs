@@ -5,7 +5,7 @@ try {
   let bytes = 0;
   for await (const chunk of process.stdin) {
     bytes += chunk.length;
-    if (bytes > 5 * 1024 * 1024) throw new Error("Too large");
+    if (bytes > 4 * 1024 * 1024) throw new Error("Too large");
     chunks.push(chunk);
   }
   const data = new Uint8Array(Buffer.concat(chunks));

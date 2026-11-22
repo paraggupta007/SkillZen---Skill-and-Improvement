@@ -46,3 +46,7 @@ Account deletion tests use PGlite to verify password checks, origin and owner pr
 ## Session revocation
 
 PGlite/Supertest applies migration 0007 and checks copied-cookie and other-session revocation, account isolation, fresh login, concurrent/stale/expired/forged and anonymous logout, origin protection, legacy token rejection and a simulated repository failure. It does not test live Neon or browser behavior; check those separately. Revocation does not cancel requests already authenticated and in flight.
+
+## Vercel API adaptation
+
+The Vercel CLI 66.6.0 local production build was exercised with `NODEJS_HELPERS=0`: it produced a Node 22 function, API rewrites, and traced the PDF script, worker and fonts. Its built Express handler passed local health, nested-route and malformed-JSON checks; PDF extraction passed after materializing the build's traced file mappings. PGlite tests also exercise request-bound report generation and retry. These checks do not exercise Vercel's live edge routing, helper settings, streaming, database connection, function packaging or browser cookies; test those after deploying. `npm audit --omit=dev` reported no vulnerabilities; the full audit reported four moderate development-tool dependency advisories.

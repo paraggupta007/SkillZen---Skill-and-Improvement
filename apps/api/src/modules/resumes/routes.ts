@@ -53,7 +53,7 @@ export function createResumeRoutes(
         );
       next();
     },
-    express.raw({ type: "application/pdf", limit: "5mb" }),
+    express.raw({ type: "application/pdf", limit: "4mb" }),
     asyncRoute(async (req, res) => {
       if (!Buffer.isBuffer(req.body))
         throw new AppError(400, "INVALID_PDF", "Please upload a valid PDF");

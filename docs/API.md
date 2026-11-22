@@ -102,11 +102,11 @@ All routes require the session cookie and are scoped to the authenticated user. 
 
 ### GET /api/reports/:interviewId
 
-A completed interview with a ready report returns 200: `{"success":true,"data":{"status":"ready","report":{"interviewId":"<uuid>","overallScore":8,"strengths":["Clear answer"],"weaknesses":["Limited depth"],"tips":["Give an example"],"summary":"Good start"}},"error":null}` (additional report fields may be present). Overall score is the rounded mean of per-answer overall scores on a 0–10 scale. If generation is running or restarted on demand, returns HTTP 202 with `{"success":true,"data":{"status":"pending"},"error":null}`. If the latest local attempt failed, returns HTTP 200 with `{"success":true,"data":{"status":"failed","error":"REPORT_GENERATION_FAILED"},"error":null}`; retry explicitly. Errors: 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 403 `ORIGIN_FORBIDDEN`, 404 `NOT_FOUND`, 409 `INTERVIEW_INCOMPLETE`, 429 `RATE_LIMITED`, 503 `REPORTS_UNAVAILABLE`. The GET can start generation and is origin-checked.
+A completed interview with a ready report returns 200: `{"success":true,"data":{"status":"ready","report":{"interviewId":"<uuid>","overallScore":8,"strengths":["Clear answer"],"weaknesses":["Limited depth"],"tips":["Give an example"],"summary":"Good start"}},"error":null}` (additional report fields may be present). Overall score is the rounded mean of per-answer overall scores on a 0–10 scale. If generation is running or restarted on demand, returns HTTP 202 with `{"success":true,"data":{"status":"pending"},"error":null}`. If the latest local attempt failed, returns HTTP 200 with `{"success":true,"data":{"status":"failed","error":"REPORT_GENERATION_FAILED"},"error":null}`; retry explicitly. Errors: 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 403 `ORIGIN_FORBIDDEN`, 404 `NOT_FOUND`, 409 `INTERVIEW_INCOMPLETE`, 429 `RATE_LIMITED`, 503 `REPORTS_UNAVAILABLE`. The GET can start generation and is origin-checked. On Vercel, generation is awaited within the request and returns ready or failed rather than pending; a timeout or interruption can be retried. Concurrent function instances can duplicate generation.
 
 ### POST /api/reports/:interviewId/retry
 
-No request body. Returns 202 and pending if a report must be generated, or 200 and ready if it already exists. The same validation, authentication, ownership, rate-limit and incomplete-interview errors apply.
+No request body. On the long-running server, returns 202 and pending if a report must be generated, or 200 and ready if it already exists. On Vercel, generation is awaited within the request and returns 200 with ready or failed; it can take time or time out. The same validation, authentication, ownership, rate-limit and incomplete-interview errors apply.
 
 ### GET /api/analytics/summary
 
@@ -116,7 +116,7 @@ Returns `{"success":true,"data":{"totalInterviews":2,"completedInterviews":1,"av
 
 ### POST /api/interviews/:id/transcription
 
-Requires the session cookie, an owned in-progress interview and a configured server-side `GROQ_API_KEY`. Send the raw recording body with `Content-Type: audio/webm`, `audio/ogg`, or `audio/mp4`. The server enforces a 5 MB maximum, checks the container signature and applies a limit of 10 requests per user per 15 minutes. It forwards the audio to Groq Whisper (`whisper-large-v3-turbo`) for transcription; it does not save the recording to the database or disk. The browser asks for explicit microphone action and discloses the upload. Groq's own retention and terms apply.
+Requires the session cookie, an owned in-progress interview and a configured server-side `GROQ_API_KEY`. Send the raw recording body with `Content-Type: audio/webm`, `audio/ogg`, or `audio/mp4`. The server enforces a 4 MB maximum, checks the container signature and applies a limit of 10 requests per user per 15 minutes. It forwards the audio to Groq Whisper (`whisper-large-v3-turbo`) for transcription; it does not save the recording to the database or disk. The browser asks for explicit microphone action and discloses the upload. Groq's own retention and terms apply.
 
 Success: `{"success":true,"data":{"text":"Recognized answer"},"error":null}`. Common errors: 400 `VALIDATION_ERROR` or `INVALID_AUDIO`, 401 `UNAUTHENTICATED`, 403 `ORIGIN_FORBIDDEN`, 404 `NOT_FOUND`, 409 `INTERVIEW_CLOSED`, 413 `PAYLOAD_TOO_LARGE`, 415 `UNSUPPORTED_AUDIO`, 429 `RATE_LIMITED`, 502 `TRANSCRIPTION_FAILED`, 503 `INTERVIEWS_UNAVAILABLE` or `TRANSCRIPTION_UNAVAILABLE`. Transcription has not been verified against a real Groq account.
 
@@ -132,7 +132,7 @@ All resume routes require an authenticated session. The application stores extra
 
 ### POST /api/resumes
 
-Send a raw text-based PDF body with `Content-Type: application/pdf` (not multipart). Up to 5 MB, 10 pages and 20,000 extracted characters; scanned/image-only and encrypted PDFs are not supported. Response 201: `{"success":true,"data":{"id":"<uuid>","fileName":"resume.pdf","parsedSkills":[],"matchScore":null,"createdAt":"<ISO date>"},"error":null}`. Extracted text is not returned. Errors include 400 `INVALID_PDF`, 401 `UNAUTHENTICATED`, 413 `PAYLOAD_TOO_LARGE`, 415 `UNSUPPORTED_FILE`, 429 `RATE_LIMITED`, 503 `EXTRACTOR_BUSY` or `RESUMES_UNAVAILABLE`. Upload and analysis share a 20 requests/user/15 minutes limit.
+Send a raw text-based PDF body with `Content-Type: application/pdf` (not multipart). Up to 4 MB, 10 pages and 20,000 extracted characters; scanned/image-only and encrypted PDFs are not supported. Response 201: `{"success":true,"data":{"id":"<uuid>","fileName":"resume.pdf","parsedSkills":[],"matchScore":null,"createdAt":"<ISO date>"},"error":null}`. Extracted text is not returned. Errors include 400 `INVALID_PDF`, 401 `UNAUTHENTICATED`, 413 `PAYLOAD_TOO_LARGE`, 415 `UNSUPPORTED_FILE`, 429 `RATE_LIMITED`, 503 `EXTRACTOR_BUSY` or `RESUMES_UNAVAILABLE`. Upload and analysis share a 20 requests/user/15 minutes limit.
 
 ### GET /api/resumes
 

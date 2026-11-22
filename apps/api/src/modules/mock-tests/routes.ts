@@ -1,3 +1,4 @@
+import type { RateLimitStoreFactory } from "../../rate-limit/postgres-store.js";
 import {
   Router,
   type Request,
@@ -20,6 +21,7 @@ function asyncRoute(fn: (req: Request, res: Response) => Promise<void>) {
 export function createMockTestRoutes(
   auth: AuthService | undefined,
   service: MockTestService | undefined,
+  rateLimitStoreFactory?: RateLimitStoreFactory,
 ) {
   const router = Router();
   router.use(
@@ -31,6 +33,7 @@ export function createMockTestRoutes(
     requireUser(auth),
   );
   const limit = rateLimit({
+    store: rateLimitStoreFactory?.("mock-tests"),
     windowMs: 15 * 60 * 1000,
     limit: 100,
     standardHeaders: true,
@@ -106,6 +109,73 @@ export function createMockTestRoutes(
           ),
         ),
       );
+    }),
+  );
+  const feedbackPath =
+    "/mock-tests/:id/questions/:questionIndex/options/:optionIndex/feedback";
+  function feedbackIds(req: Request) {
+    const index = z
+      .string()
+      .regex(/^[0-9]$/)
+      .transform(Number);
+    return {
+      id: z.uuid().parse(req.params.id),
+      questionIndex: index.parse(req.params.questionIndex),
+      optionIndex: index.parse(req.params.optionIndex),
+    };
+  }
+  router.get(
+    feedbackPath,
+    asyncRoute(async (req, res) => {
+      const { id, questionIndex, optionIndex } = feedbackIds(req);
+      res.json(
+        ok(
+          await ready().getFeedback(
+            currentUserId(res),
+            id,
+            questionIndex,
+            optionIndex,
+          ),
+        ),
+      );
+    }),
+  );
+  router.put(
+    feedbackPath,
+    asyncRoute(async (req, res) => {
+      const { id, questionIndex, optionIndex } = feedbackIds(req);
+      const { rating, comment } = z
+        .object({
+          rating: z.number().int().min(1).max(5),
+          comment: z.string().trim().max(1000).default(""),
+        })
+        .strict()
+        .parse(req.body);
+      res.json(
+        ok(
+          await ready().saveFeedback(
+            currentUserId(res),
+            id,
+            questionIndex,
+            optionIndex,
+            rating,
+            comment,
+          ),
+        ),
+      );
+    }),
+  );
+  router.delete(
+    feedbackPath,
+    asyncRoute(async (req, res) => {
+      const { id, questionIndex, optionIndex } = feedbackIds(req);
+      await ready().deleteFeedback(
+        currentUserId(res),
+        id,
+        questionIndex,
+        optionIndex,
+      );
+      res.json(ok({ deleted: true }));
     }),
   );
   router.delete(

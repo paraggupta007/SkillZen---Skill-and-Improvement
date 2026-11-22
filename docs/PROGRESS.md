@@ -21,3 +21,7 @@ Real AI and deployment need user-supplied setup. The earlier Neon migration was 
 ## Session revocation hardening
 
 Implemented database-backed, all-device logout and user-facing sign-out disclosure. Migration 0007 is required before starting the updated API; existing cookies will be rejected. PGlite and automated tests cover revocation and stale-token behavior, but Neon and real-browser deployment remain unverified. Already-authenticated in-flight requests may finish.
+
+## Mock option feedback and shared limits
+
+Implemented owner-only feedback on individual options after a mock test is submitted, plus PostgreSQL-backed production rate limits. Migrations 0008–0009 are tested in PGlite but have not been run on the user's Neon database by this workspace. Live Vercel/browser/provider workflows and public-launch security remain unverified.

@@ -1,3 +1,4 @@
+import type { RateLimitStoreFactory } from "../../rate-limit/postgres-store.js";
 // Authenticated, size-limited audio transcription endpoint.
 import express, {
   Router,
@@ -43,9 +44,11 @@ export function createSpeechRoutes(
   auth: AuthService | undefined,
   interviews: InterviewService | undefined,
   transcriber: ITranscriber | undefined,
+  rateLimitStoreFactory?: RateLimitStoreFactory,
 ) {
   const router = Router();
   const limiter = rateLimit({
+    store: rateLimitStoreFactory?.("speech"),
     windowMs: 15 * 60 * 1000,
     limit: 10,
     standardHeaders: true,

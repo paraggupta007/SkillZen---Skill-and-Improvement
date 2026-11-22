@@ -1,3 +1,4 @@
+import type { RateLimitStoreFactory } from "../../rate-limit/postgres-store.js";
 // Authenticated HTTP and SSE adapters for interview use cases.
 import {
   Router,
@@ -47,6 +48,7 @@ function asyncRoute(fn: (req: Request, res: Response) => Promise<void>) {
 export function createInterviewRoutes(
   service: InterviewService | undefined,
   auth: AuthService | undefined,
+  rateLimitStoreFactory?: RateLimitStoreFactory,
 ) {
   const router = Router();
   function ready() {
@@ -60,6 +62,7 @@ export function createInterviewRoutes(
   }
   router.use("/interviews", requireUser(auth));
   const aiLimit = rateLimit({
+    store: rateLimitStoreFactory?.("interviews"),
     windowMs: 15 * 60 * 1000,
     limit: 60,
     standardHeaders: true,

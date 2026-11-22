@@ -1,3 +1,4 @@
+import type { RateLimitStoreFactory } from "../../rate-limit/postgres-store.js";
 // Authenticated resume upload and analysis HTTP adapters.
 import express, {
   Router,
@@ -21,10 +22,12 @@ function asyncRoute(fn: (req: Request, res: Response) => Promise<void>) {
 export function createResumeRoutes(
   service: ResumeService | undefined,
   auth: AuthService | undefined,
+  rateLimitStoreFactory?: RateLimitStoreFactory,
 ) {
   const router = Router();
   router.use("/resumes", requireUser(auth));
   const limit = rateLimit({
+    store: rateLimitStoreFactory?.("resumes"),
     windowMs: 15 * 60 * 1000,
     limit: 20,
     standardHeaders: true,

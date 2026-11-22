@@ -1,3 +1,4 @@
+import type { RateLimitStoreFactory } from "../../rate-limit/postgres-store.js";
 // Consent-based, aggregate-only camera metrics API.
 import {
   Router,
@@ -56,6 +57,7 @@ function asyncRoute(fn: (req: Request, res: Response) => Promise<void>) {
 export function createCameraRoutes(
   auth: AuthService | undefined,
   service: CameraService | undefined,
+  rateLimitStoreFactory?: RateLimitStoreFactory,
 ) {
   const router = Router();
   const path = "/interviews/:id/camera-metrics";
@@ -64,6 +66,7 @@ export function createCameraRoutes(
     next();
   });
   const limit = rateLimit({
+    store: rateLimitStoreFactory?.("camera"),
     windowMs: 15 * 60 * 1000,
     limit: 60,
     standardHeaders: true,

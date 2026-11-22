@@ -1,3 +1,4 @@
+import type { RateLimitStoreFactory } from "../../rate-limit/postgres-store.js";
 // Authenticated report retrieval and retry HTTP endpoints.
 import {
   Router,
@@ -21,10 +22,12 @@ function asyncRoute(fn: (req: Request, res: Response) => Promise<void>) {
 export function createReportRoutes(
   service: ReportService | undefined,
   auth: AuthService | undefined,
+  rateLimitStoreFactory?: RateLimitStoreFactory,
 ) {
   const router = Router();
   router.use("/reports", requireUser(auth));
   const limit = rateLimit({
+    store: rateLimitStoreFactory?.("reports"),
     windowMs: 15 * 60 * 1000,
     limit: 60,
     standardHeaders: true,

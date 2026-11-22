@@ -62,3 +62,7 @@ After password reauthentication, deleting a user cascades through their owned re
 ## Session revocation
 
 Migration `0007_romantic_echo.sql` adds a non-null `users.session_version` counter. A conditional atomic increment on logout revokes all sessions from that generation, and protected requests compare their JWT generation to the database. Apply this migration before starting the new API; existing JWTs without a generation will no longer authenticate and users must sign in again. A login concurrent with logout can receive an already-revoked token and may need to be retried. Already authenticated in-flight requests may still finish. PGlite tests do not establish Neon deployment status.
+
+## Option feedback and shared limits
+
+Migration `0008_mixed_dragon_lord.sql` adds owner-scoped optional ratings/comments per mock-test option, identified by test snapshot indices. Records cascade with the attempt, do not affect scores and are not sent to AI. Migration `0009_easy_iron_man.sql` adds shared production rate-limit counters. Keys are scoped HMAC hashes; expired counters are cleaned opportunistically in bounded batches and may remain after account deletion until cleanup runs. Apply both migrations before starting this API version. PGlite tests do not verify live Neon.

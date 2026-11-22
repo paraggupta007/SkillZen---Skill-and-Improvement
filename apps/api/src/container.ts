@@ -1,4 +1,8 @@
 import {
+  PostgresRateLimitStore,
+  type RateLimitStoreFactory,
+} from "./rate-limit/postgres-store.js";
+import {
   QuestionFeedbackService,
   type IQuestionFeedbackRepository,
 } from "./modules/question-feedback/question-feedback-service.js";
@@ -76,6 +80,7 @@ export function createContainer(
     transcriber?: ITranscriber;
     subscribeReports?: boolean;
     reportExecution?: "background" | "request";
+    rateLimitStoreFactory?: RateLimitStoreFactory;
   } = {},
 ) {
   const database = env.DATABASE_URL
@@ -187,7 +192,14 @@ export function createContainer(
   const feedbackRepo =
     options.questionFeedbackRepository ??
     (database ? new DrizzleQuestionFeedbackRepository(database.db) : undefined);
+  const rateLimitStoreFactory =
+    options.rateLimitStoreFactory ??
+    (env.NODE_ENV === "production" && database && env.JWT_SECRET
+      ? (scope: string) =>
+          new PostgresRateLimitStore(database.pool, env.JWT_SECRET!, scope)
+      : undefined);
   return {
+    rateLimitStoreFactory,
     questionFeedback: feedbackRepo
       ? new QuestionFeedbackService(feedbackRepo)
       : undefined,

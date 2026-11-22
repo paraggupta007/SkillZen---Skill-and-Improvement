@@ -35,6 +35,8 @@ export function createApp(container: Container) {
   );
   app.use(
     rateLimit({
+      store: container.rateLimitStoreFactory?.("global"),
+      skip: (req) => req.path === "/api/health",
       windowMs: 15 * 60 * 1000,
       limit: 300,
       standardHeaders: true,
@@ -66,13 +68,45 @@ export function createApp(container: Container) {
   });
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
-  app.use("/api", createAuthRoutes(container.auth, container.env));
-  app.use("/api", createMockTestRoutes(container.auth, container.mockTests));
-  app.use("/api", createResumeRoutes(container.resumes, container.auth));
-  app.use("/api", createCameraRoutes(container.auth, container.camera));
   app.use(
     "/api",
-    createQuestionFeedbackRoutes(container.auth, container.questionFeedback),
+    createAuthRoutes(
+      container.auth,
+      container.env,
+      container.rateLimitStoreFactory,
+    ),
+  );
+  app.use(
+    "/api",
+    createMockTestRoutes(
+      container.auth,
+      container.mockTests,
+      container.rateLimitStoreFactory,
+    ),
+  );
+  app.use(
+    "/api",
+    createResumeRoutes(
+      container.resumes,
+      container.auth,
+      container.rateLimitStoreFactory,
+    ),
+  );
+  app.use(
+    "/api",
+    createCameraRoutes(
+      container.auth,
+      container.camera,
+      container.rateLimitStoreFactory,
+    ),
+  );
+  app.use(
+    "/api",
+    createQuestionFeedbackRoutes(
+      container.auth,
+      container.questionFeedback,
+      container.rateLimitStoreFactory,
+    ),
   );
   app.use(
     "/api",
@@ -80,10 +114,25 @@ export function createApp(container: Container) {
       container.auth,
       container.interviews,
       container.transcriber,
+      container.rateLimitStoreFactory,
     ),
   );
-  app.use("/api", createInterviewRoutes(container.interviews, container.auth));
-  app.use("/api", createReportRoutes(container.reports, container.auth));
+  app.use(
+    "/api",
+    createInterviewRoutes(
+      container.interviews,
+      container.auth,
+      container.rateLimitStoreFactory,
+    ),
+  );
+  app.use(
+    "/api",
+    createReportRoutes(
+      container.reports,
+      container.auth,
+      container.rateLimitStoreFactory,
+    ),
+  );
   app.use("/api", createAnalyticsRoutes(container.analytics, container.auth));
   app.get("/api/health", (_req, res) => {
     res.json(ok({ status: "ok" }));

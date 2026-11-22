@@ -76,7 +76,9 @@ export function SettingsPage() {
         <p>
           Copies already downloaded, backups, operational logs and information
           sent to AI or transcription providers may remain under their own
-          retention policies. In-flight requests may already have sent data.
+          retention policies. Short-lived hashed security rate-limit counters
+          may also remain temporarily. In-flight requests may already have sent
+          data.
         </p>
         <form onSubmit={submit}>
           <label className="field-label">

@@ -105,3 +105,8 @@
 
 - Added one Node function for `/api` and preserved SPA navigation. Report generation is request-bound on Vercel instead of relying on background work after the response.
 - Reduced voice and PDF upload limits to 4 MiB for Vercel; live deployment, streaming, uploads and browser sessions still need verification. Process-local rate limits are not distributed abuse protection.
+
+## Feedback and shared rate limits
+
+- Added private editable/deletable feedback on options in completed mock tests, independent of score and AI.
+- Production limits now use shared database counters, replacing process-local rate-limit stores. Migrations 0008 and 0009 are required before deploying; live Neon and Vercel flows still need verification.

@@ -12,7 +12,32 @@ export type MockTest = {
   createdAt: Date;
   completedAt: Date | null;
 };
+export type OptionFeedback = {
+  testId: string;
+  questionIndex: number;
+  optionIndex: number;
+  rating: number;
+  comment: string;
+  updatedAt: Date;
+};
 export interface IMockTestRepository {
+  getFeedback(
+    id: string,
+    questionIndex: number,
+    optionIndex: number,
+  ): Promise<OptionFeedback | undefined>;
+  saveFeedback(
+    id: string,
+    questionIndex: number,
+    optionIndex: number,
+    rating: number,
+    comment: string,
+  ): Promise<OptionFeedback>;
+  deleteFeedback(
+    id: string,
+    questionIndex: number,
+    optionIndex: number,
+  ): Promise<void>;
   create(
     userId: string,
     topic: string,
@@ -115,6 +140,62 @@ export class MockTestService {
         "This test has already been submitted or removed",
       );
     return this.view(completed);
+  }
+  private async feedbackTarget(
+    userId: string,
+    id: string,
+    questionIndex: number,
+    optionIndex: number,
+  ) {
+    const test = await this.owned(userId, id);
+    if (!test.completedAt)
+      throw new AppError(
+        409,
+        "TEST_INCOMPLETE",
+        "Submit the test before leaving option feedback",
+      );
+    if (!test.questions[questionIndex]?.options[optionIndex])
+      throw new AppError(404, "NOT_FOUND", "Option not found");
+  }
+  async getFeedback(
+    userId: string,
+    id: string,
+    questionIndex: number,
+    optionIndex: number,
+  ) {
+    await this.feedbackTarget(userId, id, questionIndex, optionIndex);
+    return {
+      feedback:
+        (await this.repo.getFeedback(id, questionIndex, optionIndex)) ?? null,
+    };
+  }
+  async saveFeedback(
+    userId: string,
+    id: string,
+    questionIndex: number,
+    optionIndex: number,
+    rating: number,
+    comment: string,
+  ) {
+    await this.feedbackTarget(userId, id, questionIndex, optionIndex);
+    return {
+      feedback: await this.repo.saveFeedback(
+        id,
+        questionIndex,
+        optionIndex,
+        rating,
+        comment,
+      ),
+    };
+  }
+  async deleteFeedback(
+    userId: string,
+    id: string,
+    questionIndex: number,
+    optionIndex: number,
+  ) {
+    await this.feedbackTarget(userId, id, questionIndex, optionIndex);
+    await this.repo.deleteFeedback(id, questionIndex, optionIndex);
   }
   async delete(userId: string, id: string) {
     if (!(await this.repo.delete(userId, id)))

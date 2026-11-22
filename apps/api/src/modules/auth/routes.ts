@@ -1,3 +1,4 @@
+import type { RateLimitStoreFactory } from "../../rate-limit/postgres-store.js";
 // HTTP validation, cookies and route wiring for authentication and profiles.
 import {
   Router,
@@ -48,7 +49,11 @@ function asyncRoute(handler: (req: Request, res: Response) => Promise<void>) {
   };
 }
 /** Construct auth and profile routes around an injected service. */
-export function createAuthRoutes(service: AuthService | undefined, env: Env) {
+export function createAuthRoutes(
+  service: AuthService | undefined,
+  env: Env,
+  rateLimitStoreFactory?: RateLimitStoreFactory,
+) {
   const router = Router();
   const cookieOptions: CookieOptions = {
     httpOnly: true,
@@ -58,6 +63,7 @@ export function createAuthRoutes(service: AuthService | undefined, env: Env) {
     maxAge: 60 * 60 * 1000,
   };
   const authLimit = rateLimit({
+    store: rateLimitStoreFactory?.("auth"),
     windowMs: 15 * 60 * 1000,
     limit: 20,
     standardHeaders: true,

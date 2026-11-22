@@ -52,3 +52,7 @@ Apply migrations through 0006. Open “Rate this question” during an interview
 ## Account deletion
 
 In Account settings, enter your current password, type `DELETE` and check the confirmation box to permanently delete your account and app-owned database records. There is no recovery. Provider data, backups, operational logs and files already downloaded are not removed. Test with a disposable account, not your main account.
+
+## Mock-test option feedback
+
+Apply migrations through 0009, submit a mock test, and open a rate-option disclosure beneath a question. An optional 1–5 rating and comment can be edited or deleted; it is private to your attempt, not sent to AI, not automatically sent to the developer, and does not change your score.

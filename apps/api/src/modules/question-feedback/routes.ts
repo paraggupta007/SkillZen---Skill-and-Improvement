@@ -1,3 +1,4 @@
+import type { RateLimitStoreFactory } from "../../rate-limit/postgres-store.js";
 import {
   Router,
   type Request,
@@ -20,6 +21,7 @@ function asyncRoute(fn: (req: Request, res: Response) => Promise<void>) {
 export function createQuestionFeedbackRoutes(
   auth: AuthService | undefined,
   service: QuestionFeedbackService | undefined,
+  rateLimitStoreFactory?: RateLimitStoreFactory,
 ) {
   const router = Router();
   const path = "/interviews/:id/questions/:questionId/feedback";
@@ -32,6 +34,7 @@ export function createQuestionFeedbackRoutes(
     requireUser(auth),
   );
   const limit = rateLimit({
+    store: rateLimitStoreFactory?.("question-feedback"),
     windowMs: 15 * 60 * 1000,
     limit: 100,
     standardHeaders: true,

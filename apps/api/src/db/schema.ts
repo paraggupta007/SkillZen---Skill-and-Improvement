@@ -229,3 +229,54 @@ export const questionFeedback = pgTable(
     ),
   ],
 );
+
+/** Private optional feedback on an option in a completed mock-test snapshot. */
+export const mockOptionFeedback = pgTable(
+  "mock_option_feedback",
+  {
+    testId: uuid("test_id")
+      .notNull()
+      .references(() => mockTests.id, { onDelete: "cascade" }),
+    questionIndex: integer("question_index").notNull(),
+    optionIndex: integer("option_index").notNull(),
+    rating: integer("rating").notNull(),
+    comment: text("comment").notNull().default(""),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("mock_option_feedback_unique").on(
+      t.testId,
+      t.questionIndex,
+      t.optionIndex,
+    ),
+    check(
+      "mock_option_feedback_question_check",
+      sql`${t.questionIndex} between 0 and 4`,
+    ),
+    check(
+      "mock_option_feedback_option_check",
+      sql`${t.optionIndex} between 0 and 3`,
+    ),
+    check(
+      "mock_option_feedback_rating_check",
+      sql`${t.rating} between 1 and 5`,
+    ),
+    check(
+      "mock_option_feedback_comment_check",
+      sql`char_length(${t.comment}) <= 1000`,
+    ),
+  ],
+);
+
+/** Short-lived hashed shared rate-limit counters, not raw IP addresses. */
+export const rateLimitBuckets = pgTable(
+  "rate_limit_buckets",
+  {
+    key: text("key").primaryKey(),
+    hits: integer("hits").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (t) => [index("rate_limit_buckets_expires_idx").on(t.expiresAt)],
+);

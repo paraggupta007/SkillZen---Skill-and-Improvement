@@ -63,3 +63,7 @@ One editable/deletable rating and optional comment per interview question is sto
 ## Account deletion and data boundaries
 
 Account deletion requires a current password, explicit UI confirmation and a conditional database delete. Cascades remove account-owned app data; provider copies, backups, logs and downloaded files are outside this operation. Logout revokes all account sessions in the token’s generation using a conditional database update; stale tokens cannot revoke newer sessions. Deleting the user also prevents old tokens from authenticating. In-flight authenticated requests may still finish.
+
+## Shared limits and option feedback
+
+Production rate limits use atomic PostgreSQL counters shared across instances. The database is now a dependency of protected traffic and errors fail closed. HMAC keys avoid storing raw IPs; expired rows are cleared opportunistically rather than on a strict schedule. This is not a WAF or a complete security solution. Mock-test option feedback is private per attempt and separate from scoring and provider input.

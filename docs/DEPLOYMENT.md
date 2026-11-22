@@ -4,7 +4,7 @@ The Vercel project serves the Vite frontend and one Node function wrapping the E
 
 ## 1. Database
 
-Back up the target database. Apply migrations through `0007_romantic_echo.sql` from a trusted machine, using the same pooled Neon `DATABASE_URL` that will be configured in Vercel. Do not share the connection string. From the repository root:
+Back up the target database. Apply migrations through `0009_easy_iron_man.sql` from a trusted machine, using the same pooled Neon `DATABASE_URL` that will be configured in Vercel. Do not share the connection string. From the repository root:
 
 ```bash
 npm ci --include=dev
@@ -49,11 +49,13 @@ After configuring variables and linking the right project:
 
 ```bash
 cd ~/Desktop/SkillZen-full
-git pull
+git pull --ff-only
+npm ci --include=dev
+env -u DATABASE_URL npm run db:migrate
 vercel --prod
 ```
 
-Ensure local changes are understood before pulling. `vercel --prod` publishes the selected project's production deployment. If old API instances are also serving the database, replace them: older versions may not enforce session revocation.
+Ensure local changes are understood before pulling, and confirm `apps/api/.env` points to the intended production database before migrating. Migrations 0008 and 0009 must be applied before the new API starts. The database-backed limiter fails closed if its table or database is unavailable. `vercel --prod` publishes the selected project's production deployment. If old API instances are also serving the database, replace them: older versions may not enforce session revocation.
 
 ## 4. Verify and limitations
 
@@ -62,7 +64,7 @@ Ensure local changes are understood before pulling. `vercel --prod` publishes th
 - Test a complete AI interview (including streaming), report, report PDF, mock test, resume upload and voice transcription. Test origin protection and isolation with a second account, and direct frontend route refresh. Use HTTPS for microphone/camera.
 - Uploads are limited to 4 MiB to stay below Vercel's default 4.5 MB function request limit. Vercel may reject oversized requests before Express; actual plan and platform limits apply.
 - The function has a 120-second configured maximum. Streamed AI responses and report generation can time out. On Vercel, report generation is awaited during the report request, not continued as a fire-and-forget task. Interrupted or failed requests can be retried; concurrent function instances can still duplicate AI calls. Reports are saved in PostgreSQL.
-- Rate limits, caches and concurrency guards are **per instance**, not distributed. This is not a production-grade abuse-control mechanism; use a shared rate limiter and review security, costs, quotas, data retention and backups before public launch.
+- Production request rate counters are shared in PostgreSQL using HMAC-hashed identifiers and atomic updates. They fail closed on database errors. Expired counters are removed opportunistically in bounded batches, not on a guaranteed schedule; they may outlive account deletion until cleanup runs. Limits are not a substitute for a WAF, cost controls or security review. Caches and concurrency guards remain per-instance. Review privacy, costs, quotas, data retention and backups before public launch.
 - Function packaging includes the PDF extraction script, PDF.js worker and fonts. Extraction, model loading and uploads must be checked live; the child process is resource-bounded, not an OS security sandbox. Vercel Function limits, region, pricing and Fluid compute settings may change.
 - `/api/health` returns HTML: ensure the new code and `apps/web/vercel.json` were deployed and `VITE_API_URL` is `/api`. If the function crashes, inspect Vercel runtime logs without sharing secrets. Confirm `NODEJS_HELPERS=0` was present at build time and redeploy after changing it.
 

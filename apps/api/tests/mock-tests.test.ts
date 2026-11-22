@@ -62,6 +62,10 @@ describe("mock tests", () => {
       expect(created.headers["cache-control"]).toBe("private, no-store");
       const path = `/api/mock-tests/${created.body.data.id}`;
       expect(created.body.data.questions).toHaveLength(3);
+      const feedbackPath = `${path}/questions/0/options/0/feedback`;
+      expect((await owner.get(feedbackPath)).status).toBe(409);
+      expect((await request(app).get(feedbackPath)).status).toBe(401);
+      expect((await other.get(feedbackPath)).status).toBe(404);
       expect(JSON.stringify(created.body.data)).not.toMatch(
         /correct|explanation/,
       );
@@ -97,6 +101,46 @@ describe("mock tests", () => {
       expect(completed.body.data.questions[2].selected).toBeNull();
       expect(completed.body.data.questions[0].explanation).toBeTruthy();
       expect((await owner.get(path)).body.data.score).toBe(1);
+      expect((await owner.get(feedbackPath)).body.data.feedback).toBeNull();
+      expect((await other.put(feedbackPath).send({ rating: 5 })).status).toBe(
+        404,
+      );
+      expect((await owner.put(feedbackPath).send({ rating: 6 })).status).toBe(
+        400,
+      );
+      expect(
+        (
+          await owner
+            .put(feedbackPath)
+            .send({ rating: 4, comment: "x".repeat(1001) })
+        ).status,
+      ).toBe(400);
+      expect(
+        (await owner.get(`${path}/questions/7/options/0/feedback`)).status,
+      ).toBe(404);
+      expect(
+        (await owner.get(`${path}/questions/0/options/7/feedback`)).status,
+      ).toBe(404);
+      expect(
+        (await owner.get(`${path}/questions/-1/options/0/feedback`)).status,
+      ).toBe(400);
+      const saved = await owner
+        .put(feedbackPath)
+        .send({ rating: 4, comment: "  clear option  " });
+      expect(saved.status).toBe(200);
+      expect(saved.body.data.feedback).toMatchObject({
+        questionIndex: 0,
+        optionIndex: 0,
+        rating: 4,
+        comment: "clear option",
+      });
+      await owner.put(feedbackPath).send({ rating: 2, comment: "ambiguous" });
+      expect((await owner.get(feedbackPath)).body.data.feedback.rating).toBe(2);
+      expect((await other.delete(feedbackPath)).status).toBe(404);
+      expect((await owner.get(path)).body.data.score).toBe(1);
+      expect((await owner.delete(feedbackPath)).status).toBe(200);
+      expect((await owner.get(feedbackPath)).body.data.feedback).toBeNull();
+      await owner.put(feedbackPath).send({ rating: 5 });
       expect(
         (await owner.post(`${path}/submit`).send({ answers })).status,
       ).toBe(409);
@@ -113,6 +157,9 @@ describe("mock tests", () => {
       expect(submissions.map((r) => r.status).sort()).toEqual([200, 409]);
       expect((await owner.delete(path)).status).toBe(200);
       expect((await owner.get(path)).status).toBe(404);
+      expect(
+        await testDb.select().from(schema.mockOptionFeedback),
+      ).toHaveLength(0);
     } finally {
       await pg.close();
     }

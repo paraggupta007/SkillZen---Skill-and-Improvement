@@ -107,3 +107,7 @@ A dedicated service and repository validate question/interview ownership before 
 ## Account deletion
 
 `AuthService` rechecks the password and asks the user repository to delete by account ID and unchanged password hash. The database cascades related records in one delete. Session-bearing endpoints recheck account existence, so old cookies cannot access an account after deletion. Data outside the application database is not erased and provider requests already in flight cannot necessarily be recalled.
+
+## Shared production rate limiting
+
+Each production rate limiter gets its own scoped PostgreSQL store. Atomic upserts maintain shared fixed windows across function instances, with HMAC-hashed client identifiers and opportunistic bounded expiry cleanup. Database failures fail closed. Development/tests may use memory stores. The health endpoint remains a liveness check and skips this limiter. Rate limits cannot replace perimeter protection or capacity planning.

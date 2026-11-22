@@ -30,6 +30,12 @@ describe("mock tests page", () => {
     const fetchMock = vi.fn(
       async (url: string | URL | Request, init?: RequestInit) => {
         const path = String(url);
+        if (path.endsWith("/feedback")) {
+          if (init?.method === "PUT")
+            return json({ feedback: { rating: 4, comment: "Clear option" } });
+          if (init?.method === "DELETE") return json({ deleted: true });
+          return json({ feedback: null });
+        }
         if (path.endsWith("/submit")) {
           expect(JSON.parse(String(init?.body))).toEqual({
             answers: [0, null, null],
@@ -75,6 +81,24 @@ describe("mock tests page", () => {
     await user.click(screen.getByRole("button", { name: "Submit test" }));
     await screen.findByText(/Your score: 1 of 3 correct/);
     expect(screen.getAllByText("Explanation here")).toHaveLength(3);
+    await user.click(screen.getAllByText("Rate option 1: First")[0]!);
+    const rating = await screen.findByRole("radio", { name: "4" });
+    await user.click(rating);
+    await user.type(
+      screen.getByLabelText("Comment (optional)"),
+      "Clear option",
+    );
+    await user.click(screen.getByRole("button", { name: "Save feedback" }));
+    await screen.findByText("Option feedback saved.");
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("/mock-tests/abc/questions/0/options/0/feedback"),
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ rating: 4, comment: "Clear option" }),
+      }),
+    );
+    await user.click(screen.getByRole("button", { name: "Delete feedback" }));
+    await screen.findByText("Option feedback deleted.");
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         expect.stringContaining("/mock-tests"),

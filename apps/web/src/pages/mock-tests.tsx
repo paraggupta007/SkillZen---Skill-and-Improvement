@@ -1,8 +1,9 @@
 // Practice tests: setup, history, taking a test and reviewing explanations.
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../services/api";
+import { MockOptionFeedback } from "../components/question-feedback";
 import { ErrorState, Eyebrow, formatDate, Loading } from "../components/ui";
 
 type Summary = {
@@ -164,10 +165,6 @@ function Attempt({ id }: { id: string }) {
       navigate("/app/mock-tests");
     },
   });
-  function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    submit.mutate();
-  }
   if (test.isLoading) return <Loading />;
   if (test.isError || !test.data)
     return (
@@ -194,44 +191,59 @@ function Attempt({ id }: { id: string }) {
             : "Choose an answer for each question, or leave it blank. Answers are only saved when you submit; leaving this page discards your selections."}
         </p>
       </div>
-      <form onSubmit={onSubmit}>
+      <div>
         {data.questions.map((q, i) => (
-          <fieldset
-            className="form-panel mock-question"
-            key={i}
-            disabled={!!data.completedAt || submit.isPending}
-          >
-            <legend>Question {i + 1}</legend>
-            <h2>{q.prompt}</h2>
-            {q.options.map((option, n) => (
-              <label className="mock-option" key={n}>
-                <input
-                  type="radio"
-                  name={`question-${i}`}
-                  checked={
-                    data.completedAt ? q.selected === n : answers[i] === n
-                  }
-                  onChange={() =>
-                    setAnswers((previous) => ({ ...previous, [i]: n }))
-                  }
-                />{" "}
-                {option}
-              </label>
-            ))}
+          <section key={i}>
+            <fieldset
+              className="form-panel mock-question"
+              disabled={!!data.completedAt || submit.isPending}
+            >
+              <legend>Question {i + 1}</legend>
+              <h2>{q.prompt}</h2>
+              {q.options.map((option, n) => (
+                <label className="mock-option" key={n}>
+                  <input
+                    type="radio"
+                    name={`question-${i}`}
+                    checked={
+                      data.completedAt ? q.selected === n : answers[i] === n
+                    }
+                    onChange={() =>
+                      setAnswers((previous) => ({ ...previous, [i]: n }))
+                    }
+                  />{" "}
+                  {option}
+                </label>
+              ))}
+              {data.completedAt && (
+                <div className="mock-explanation">
+                  <strong>
+                    {q.selected === q.correct
+                      ? "Correct"
+                      : q.selected === null
+                        ? "Unanswered"
+                        : "Not quite"}
+                  </strong>
+                  <p>Correct answer: {q.options[q.correct!]}</p>
+                  <p>{q.explanation}</p>
+                </div>
+              )}
+            </fieldset>
             {data.completedAt && (
-              <div className="mock-explanation">
-                <strong>
-                  {q.selected === q.correct
-                    ? "Correct"
-                    : q.selected === null
-                      ? "Unanswered"
-                      : "Not quite"}
-                </strong>
-                <p>Correct answer: {q.options[q.correct!]}</p>
-                <p>{q.explanation}</p>
+              <div className="form-panel">
+                <h3>Feedback on options (optional)</h3>
+                {q.options.map((option, n) => (
+                  <MockOptionFeedback
+                    key={n}
+                    testId={id}
+                    questionIndex={i}
+                    optionIndex={n}
+                    option={option}
+                  />
+                ))}
               </div>
             )}
-          </fieldset>
+          </section>
         ))}
         {submit.isError && (
           <ErrorState
@@ -240,11 +252,16 @@ function Attempt({ id }: { id: string }) {
           />
         )}
         {!data.completedAt && (
-          <button className="button button-dark" disabled={submit.isPending}>
+          <button
+            type="button"
+            className="button button-dark"
+            disabled={submit.isPending}
+            onClick={() => submit.mutate()}
+          >
             {submit.isPending ? "Submitting..." : "Submit test"}
           </button>
         )}
-      </form>
+      </div>
       <div className="mock-delete">
         {remove.isError && <ErrorState message={remove.error.message} />}
         <button

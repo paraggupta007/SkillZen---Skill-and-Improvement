@@ -21,12 +21,54 @@ export function QuestionFeedback({
   questionId: string;
   summary?: string;
 }) {
+  return (
+    <FeedbackEditor
+      path={`/interviews/${interviewId}/questions/${questionId}/feedback`}
+      identity={questionId}
+      summary={summary}
+      target="question"
+    />
+  );
+}
+
+/** The same private editor is used for a completed mock-test option. */
+export function MockOptionFeedback({
+  testId,
+  questionIndex,
+  optionIndex,
+  option,
+}: {
+  testId: string;
+  questionIndex: number;
+  optionIndex: number;
+  option: string;
+}) {
+  return (
+    <FeedbackEditor
+      path={`/mock-tests/${testId}/questions/${questionIndex}/options/${optionIndex}/feedback`}
+      identity={`${testId}-${questionIndex}-${optionIndex}`}
+      summary={`Rate option ${optionIndex + 1}: ${option}`}
+      target="option"
+    />
+  );
+}
+
+function FeedbackEditor({
+  path,
+  identity,
+  summary,
+  target,
+}: {
+  path: string;
+  identity: string;
+  summary: string;
+  target: "question" | "option";
+}) {
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState<number | null>(null);
   const [comment, setComment] = useState("");
   const client = useQueryClient();
-  const key = ["question-feedback", interviewId, questionId];
-  const path = `/interviews/${interviewId}/questions/${questionId}/feedback`;
+  const key = ["candidate-feedback", path];
   const saved = useQuery({
     queryKey: key,
     queryFn: () => apiRequest<Result>(path),
@@ -88,14 +130,14 @@ export function QuestionFeedback({
             <form onSubmit={submit}>
               <fieldset className="question-rating" disabled={busy}>
                 <legend>
-                  How useful was this question? <span>(required)</span>
+                  How useful was this {target}? <span>(required)</span>
                 </legend>
                 <div>
                   {[1, 2, 3, 4, 5].map((value) => (
                     <label key={value}>
                       <input
                         type="radio"
-                        name={`rating-${questionId}`}
+                        name={`rating-${identity}`}
                         value={value}
                         checked={rating === value}
                         onChange={() => setRating(value)}
@@ -136,9 +178,19 @@ export function QuestionFeedback({
                   </button>
                 )}
               </div>
-              {save.isSuccess && <p role="status">Question feedback saved.</p>}
+              {save.isSuccess && (
+                <p role="status">
+                  {target === "question"
+                    ? "Question feedback saved."
+                    : "Option feedback saved."}
+                </p>
+              )}
               {remove.isSuccess && (
-                <p role="status">Question feedback deleted.</p>
+                <p role="status">
+                  {target === "question"
+                    ? "Question feedback deleted."
+                    : "Option feedback deleted."}
+                </p>
               )}
               {save.isError && <ErrorState message={save.error.message} />}
               {remove.isError && <ErrorState message={remove.error.message} />}

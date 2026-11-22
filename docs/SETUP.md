@@ -40,3 +40,7 @@ A ready report includes a PDF download. The PDF uses built-in fonts with limited
 ## Camera coaching (in progress)
 
 After pulling the Phase 8 changes, run `npm install` and `npm run db:migrate` to apply migrations through 0004. During an in-progress interview, camera use is optional: check the consent box and click Start camera, grant browser permission, and use Stop when finished. The official face and pose models are downloaded from Google after starting; WebAssembly assets are served by the app. Video remains in the browser. A separate save action sends only aggregate counters for online and PDF reports; saved counters can be deleted. No retinal, attention or cheating conclusion is supported. Coarse pose and wrist observations are estimates, not gesture classification; a real-device check remains pending.
+
+## Mock tests
+
+After pulling, run `npm install` and `npm run db:migrate` to apply migration 0005. Under Mock tests, select JavaScript basics or Web fundamentals and 3 or 5 questions. Draft selections are not saved until submission. Review the score and explanations, revisit an attempt from history, or delete it. The small fixed bank may repeat questions and is not a secure examination.

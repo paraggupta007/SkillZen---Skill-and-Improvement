@@ -10,8 +10,8 @@ A checked box means the work is implemented and verified, not just planned.
 - [x] Phase 5: Frontend MVP — responsive authentication, setup, streamed interview, dashboard and reports; automated browser-component tests pass, live browser flow still needs verification.
 - [x] Phase 6: Voice and speech metrics — browser dictation, read-aloud and opt-in Groq recording, tested with mocks; live microphones and Groq transcription remain unverified.
 - [x] Phase 7: Resume, job description and PDF — fake-AI and PDF extraction tests pass; real provider/browser workflow unverified and report PDF fonts have limited Unicode coverage.
-- [ ] Phase 8: Consent-based browser-only body-language estimates and reports — local face/iris and coarse pose/wrist observations, optional aggregate sharing and online/PDF reporting implemented; real-camera validation pending; user reported completing migrations 0003 and 0004 locally (output not supplied); Neon changes not independently verified.
-- [ ] Mock tests: test setup, questions, scoring and feedback; plan schema and APIs alongside implementation.
+- [ ] Phase 8: Consent-based browser-only body-language estimates and reports — local face/iris and coarse pose/wrist observations, optional aggregate sharing and online/PDF reporting implemented; user reported completing migration and camera/report test instructions; detailed results and tracking accuracy not independently verified.
+- [x] Mock tests: small fixed JavaScript/web multiple-choice banks, saved attempts, scoring and explanations; automated tests pass; migration 0005 and real browser flow remain to be verified on Neon.
 - [ ] Interview/question feedback: user ratings and comments, separate from AI answer evaluations; design with implementation.
 - [ ] Phase 9: Optional advanced features (ask which features before starting).
 - [ ] Phase 10: Hardening, deployment and final report.

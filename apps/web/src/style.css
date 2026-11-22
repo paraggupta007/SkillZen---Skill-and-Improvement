@@ -2335,3 +2335,35 @@ p {
 .camera-metrics p {
   margin-top: 6px;
 }
+
+.mock-question {
+  margin-bottom: 1.25rem;
+  min-width: 0;
+}
+.mock-question legend {
+  font-weight: 700;
+  padding: 0 0.5rem;
+}
+.mock-question h2 {
+  font-size: 1.1rem;
+  margin: 0.25rem 0 1rem;
+}
+.mock-option {
+  display: flex;
+  gap: 0.65rem;
+  align-items: baseline;
+  margin: 0.8rem 0;
+  cursor: pointer;
+}
+.mock-explanation {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.6rem;
+  background: #f1f6f2;
+}
+.mock-explanation p {
+  margin: 0.4rem 0 0;
+}
+.mock-delete {
+  margin-top: 1.5rem;
+}

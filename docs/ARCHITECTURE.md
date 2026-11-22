@@ -95,3 +95,7 @@ An injected report PDF renderer creates an in-memory PDF after checking ownershi
 ## Camera coaching (Phase 8 in progress)
 
 After explicit consent and start, the browser loads MediaPipe Face and Pose Landmarkers and their official models from Google, captures video locally and samples face at approximately 5 fps and pose at approximately 1 fps. Face framing and iris-position counters are approximations, not attention or cheating detection. No frames or landmarks are sent to the server. The user can explicitly save/delete aggregate counters; a separate evaluator provides non-diagnostic framing suggestions on online and PDF reports, without affecting scores. Coarse shoulder/hip alignment, wrist movement and hand height are not gesture classification; pose can fall back to face-only if unavailable. Real camera and model loading remain unverified.
+
+## Mock tests
+
+A small curated multiple-choice bank is shuffled and snapshotted at creation. The authenticated service strips answer keys until submission, validates choices and scores server-side. A conditional database update prevents concurrent submissions from overwriting a completed attempt; history and deletion are owner-scoped. This is practice content, not a secure or adaptive assessment. No AI service is used.

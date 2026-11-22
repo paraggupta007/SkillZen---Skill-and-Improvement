@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   LayoutDashboard,
   FileText,
+  ListChecks,
   LogOut,
   Plus,
   Sparkles,
@@ -53,6 +54,9 @@ export function AppLayout() {
           <NavLink to="/app/setup">
             <Plus size={18} /> New interview
           </NavLink>
+          <NavLink to="/app/mock-tests">
+            <ListChecks size={18} /> Mock tests
+          </NavLink>
           <NavLink to="/app/resumes">
             <FileText size={18} /> Resumes
           </NavLink>
@@ -96,6 +100,9 @@ export function AppLayout() {
           <div className="mobile-actions">
             <Link to="/app" className="back-link">
               Dashboard
+            </Link>
+            <Link to="/app/mock-tests" className="back-link">
+              Mock tests
             </Link>
             <Link to="/app/resumes" className="back-link">
               Resumes

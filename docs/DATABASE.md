@@ -1,6 +1,6 @@
 # Database
 
-Drizzle schema and versioned migrations currently cover the initial eight tables. The user indicated that earlier migrations were run locally; migration 0002 was tested with PGlite and the user reported a successful Neon migration. Mock tests, candidate feedback and webcam metrics are planned for later migrations.
+Drizzle schema and versioned migrations cover users, interviews, related reports, resumes, camera aggregates and mock tests. The user reported applying migrations through 0004 locally; this sandbox cannot independently verify Neon. Candidate interview/question feedback is planned.
 
 ```mermaid
 erDiagram
@@ -46,3 +46,7 @@ Phase 7 uses the existing resume table and foreign key; it adds no migration. Re
 ## Camera observations (Phase 8 in progress)
 
 Migration `0003_tricky_lorna_dane.sql` adds `camera_observations`, keyed to one interview with cascading deletion. It stores only explicitly shared bounded counters and an update time; no video, frames, or landmarks. Users can delete the observations separately. Migration `0004_violet_the_leader.sql` adds pose, wrist and hand-height aggregate counters, defaulting existing rows to zero. Apply migrations through 0004 to Neon before saving or retrieving camera data.
+
+## Mock tests
+
+Migration `0005_green_chimera.sql` adds owner-scoped `mock_tests`: topic, a question/answer-key snapshot, final selected answers, score, and timestamps. A conditional update permits completion only once. Attempts cascade on user deletion and may be deleted individually. Draft selections are not persisted. Migration 0005 has only been tested with PGlite so far.

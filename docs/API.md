@@ -22,7 +22,7 @@ Unknown endpoints return HTTP 404:
 
 Malformed JSON returns 400 `INVALID_JSON`; oversized JSON returns 413 `PAYLOAD_TOO_LARGE`; rate-limited requests return 429 `RATE_LIMITED`; unhandled errors return 500 `INTERNAL_ERROR`.
 
-Mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
+Candidate interview/question feedback endpoints are planned and do not exist yet.
 
 ## Authentication and profile
 
@@ -152,3 +152,14 @@ Deletes the owned resume row and extracted text, clearing its interview referenc
 `GET /api/interviews/:id/camera-metrics` returns `{ "metrics": null, "suggestions": [] }` when no observations were shared, or bounded aggregate counters with non-diagnostic framing suggestions. All requests require authentication and ownership; responses are private/no-store. `PUT` accepts only numeric integer counters: `samples`, `faceVisible`, `centered`, `centeredKnown`, `gazeNearCamera`, `gazeKnown`, `headMovements`, and optional pose counters `poseSamples`, `postureKnown`, `postureAligned`, `wristKnown`, `wristMovements`, `handRaisedKnown`, `handRaised` (default 0 for older clients; 0–18,000; samples at least 1; numerators and denominators must be consistent). Images, video, landmarks and unexpected fields are rejected. Only in-progress interviews accept new counts. `DELETE` removes stored counts for an owned interview, including after completion. Common errors: 400 `VALIDATION_ERROR`, 401 `UNAUTHENTICATED`, 404 `NOT_FOUND`, 409 `INTERVIEW_CLOSED`, 429 `RATE_LIMITED`, 503 `CAMERA_METRICS_UNAVAILABLE`. The route does not verify the user-supplied counters.
 
 The frontend shares counts only after explicit user action. The online report displays optional observations separately from the score; new PDF downloads include currently saved observations and omit them after deletion. Estimates are not proof of attention, cheating, identity, or medical retinal assessment. Coarse body alignment and wrist/hand-height observations are not gesture classification. Apply migrations through 0004 before using persistence.
+
+## Mock tests
+
+All endpoints require authentication, use private/no-store responses and are limited to 100 requests per user per 15 minutes. Apply migration 0005 before use.
+
+- `POST /api/mock-tests` accepts `{ "topic": "javascript" | "web", "count": 3 | 5 }`; returns 201 with an attempt and randomly ordered question snapshot.
+- `GET /api/mock-tests` lists up to the 100 newest owned attempts. `GET /api/mock-tests/:id` returns an owned attempt. Before submission, questions include only prompt and options, not the answer or explanation.
+- `POST /api/mock-tests/:id/submit` accepts `{ "answers": [0, null, 1] }`: exactly one zero-based option index or null per question, in question order. The server scores one point per correct answer, stores the result once and returns selections, correct indices and explanations. Unanswered questions count as incorrect. Repeat submissions return 409 `TEST_COMPLETED`.
+- `DELETE /api/mock-tests/:id` removes the owned attempt and result. Unknown or unowned IDs return 404; invalid requests return 400, missing authentication 401, missing database configuration 503 and rate limiting 429.
+
+Questions are a small fixed public bank for practice; answers are not sent in pre-submission API responses but must not be treated as secret or as secure examination material. Draft selections remain only in the page and are lost on reload or navigation.

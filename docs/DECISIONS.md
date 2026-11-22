@@ -4,7 +4,7 @@
 
 - Context: the original specification uses PrepPilot; the owner chose SkillZen and requested mock tests and feedback on interview questions/options.
 - Options: preserve old name or use the owner's name.
-- Choice: SkillZen. Add mock tests and candidate feedback to the roadmap; do not pretend they exist yet.
+- Choice: SkillZen. Basic mock tests now use a small curated bank; candidate interview/question feedback remains on the roadmap.
 - Why: it matches the current project goal.
 
 ## Database
@@ -51,3 +51,7 @@ PDF input is limited to 5 MB, 10 pages and 20,000 extracted characters. PDF.js r
 ## Camera observations
 
 Video and landmarks stay in the browser. The user separately chooses whether to save coarse counts; they can delete those counts. The face and pose models are downloaded from Google after opt-in, and WebAssembly files are served locally. Estimates are uncertain and are not biometric identification, medical retinal analysis, evidence of attention, or cheating detection. The observations do not change interview scores. Rough shoulder/hip alignment, wrist movement and hand-height counts are not gesture classification and require real-device validation.
+
+## Mock-test scope
+
+The initial test feature uses a small curated, publicly visible bank rather than AI-generated questions. Scores are simple correctness counts, not a hiring or ability determination. Snapshots preserve results if the bank changes; draft answers stay on the page until submitted.

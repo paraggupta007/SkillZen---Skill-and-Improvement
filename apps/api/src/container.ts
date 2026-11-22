@@ -1,3 +1,8 @@
+import {
+  MockTestService,
+  type IMockTestRepository,
+} from "./modules/mock-tests/mock-test-service.js";
+import { DrizzleMockTestRepository } from "./modules/mock-tests/drizzle-mock-test-repository.js";
 // Composition root: construct and share long-lived dependencies here.
 import { GroqProvider } from "./ai/providers/groq-provider.js";
 import { GeminiProvider } from "./ai/providers/gemini-provider.js";
@@ -58,6 +63,7 @@ export function createContainer(
     reportRepository?: IReportRepository;
     resumeRepository?: IResumeRepository;
     cameraRepository?: ICameraRepository;
+    mockTestRepository?: IMockTestRepository;
     resumeExtractor?: IResumeTextExtractor;
     analyticsRepository?: IAnalyticsRepository;
     providers?: ILLMProvider[];
@@ -167,7 +173,11 @@ export function createContainer(
   const analyticsService = analyticsRepo
     ? new AnalyticsService(analyticsRepo)
     : undefined;
+  const mockTestRepo =
+    options.mockTestRepository ??
+    (database ? new DrizzleMockTestRepository(database.db) : undefined);
   return {
+    mockTests: mockTestRepo ? new MockTestService(mockTestRepo) : undefined,
     camera: cameraService,
     resumes: resumeService,
     transcriber:

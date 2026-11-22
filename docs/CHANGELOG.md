@@ -70,3 +70,8 @@
 
 - Added explicitly consented local MediaPipe face-framing and iris-position observations, with opt-in aggregate sharing and deletion.
 - Added migrations 0003–0004, coarse local pose/wrist observations and non-diagnostic suggestions in online and PDF reports. Full gesture classification and real-camera testing remain pending.
+
+## Mock tests — initial implementation
+
+- Added 3- or 5-question JavaScript and web practice tests from a small fixed bank, owner-scoped history, one-time server scoring, explanations and deletion.
+- Added migration 0005 and PGlite/browser-mock tests. Neon migration and a real browser workflow remain to be verified.

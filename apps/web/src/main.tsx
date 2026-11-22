@@ -15,6 +15,7 @@ import { ResumesPage } from "./pages/resumes";
 import { Setup } from "./pages/setup";
 import { InterviewPage } from "./pages/interview";
 import { ReportPage } from "./pages/report";
+import { MockTestsPage, MockTestPage } from "./pages/mock-tests";
 import "./style.css";
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
@@ -36,6 +37,8 @@ createRoot(document.getElementById("root")!).render(
                 </Suspense>
               }
             />
+            <Route path="mock-tests" element={<MockTestsPage />} />
+            <Route path="mock-tests/:id" element={<MockTestPage />} />
             <Route path="resumes" element={<ResumesPage />} />
             <Route path="setup" element={<Setup />} />
             <Route path="interview/:id" element={<InterviewPage />} />

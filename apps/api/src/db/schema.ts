@@ -178,3 +178,29 @@ export const cameraObservations = pgTable("camera_observations", {
     .notNull()
     .defaultNow(),
 });
+
+/** A practice test stores a question snapshot and final answers, scoped to its owner. */
+export const mockTests = pgTable(
+  "mock_tests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    topic: text("topic").notNull(),
+    questions: jsonb("questions")
+      .$type<
+        import("../modules/mock-tests/question-bank.js").PracticeQuestion[]
+      >()
+      .notNull(),
+    answers: jsonb("answers").$type<(number | null)[]>(),
+    score: integer("score"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("mock_tests_user_created_idx").on(t.userId, t.createdAt.desc()),
+  ],
+);

@@ -22,3 +22,5 @@
 - [Phase 8: Camera coaching (in progress)](phases/phase-08-camera.md)
 
 More phase documents will be added alongside their code.
+
+- [Mock tests: initial implementation](phases/mock-tests.md)

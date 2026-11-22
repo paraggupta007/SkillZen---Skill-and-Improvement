@@ -1,3 +1,4 @@
+import { createMockTestRoutes } from "./modules/mock-tests/routes.js";
 // Assemble the HTTP middleware and public health endpoint.
 import express from "express";
 import helmet from "helmet";
@@ -65,6 +66,7 @@ export function createApp(container: Container) {
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
   app.use("/api", createAuthRoutes(container.auth, container.env));
+  app.use("/api", createMockTestRoutes(container.auth, container.mockTests));
   app.use("/api", createResumeRoutes(container.resumes, container.auth));
   app.use("/api", createCameraRoutes(container.auth, container.camera));
   app.use(

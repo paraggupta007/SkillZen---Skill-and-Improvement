@@ -2684,3 +2684,42 @@ p {
     min-height: 100dvh;
   }
 }
+
+.landing-user {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #627367;
+  font-size: 12px;
+  font-weight: 650;
+}
+.landing-signout,
+.landing-session-retry {
+  border: 0;
+  background: transparent;
+  color: #436b51;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 0;
+  white-space: nowrap;
+}
+.landing-session-status {
+  font-size: 12px;
+  color: #627367;
+}
+.landing-session-message {
+  margin: 0 6%;
+  color: #a5574e;
+  font-size: 12px;
+}
+@media (max-width: 900px) {
+  .landing-actions {
+    gap: 14px;
+  }
+}
+@media (max-width: 650px) {
+  .landing-user {
+    display: none;
+  }
+}

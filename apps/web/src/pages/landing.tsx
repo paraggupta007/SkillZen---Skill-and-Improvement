@@ -1,5 +1,8 @@
 // Public introduction to SkillZen and its current capabilities.
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ApiError, apiRequest } from "../services/api";
+import { useCurrentUser } from "../services/queries";
 import {
   ArrowDown,
   ArrowRight,
@@ -16,6 +19,19 @@ import { Brand } from "../components/layout";
 import { Eyebrow } from "../components/ui";
 /** Public landing page with a clearly marked illustrative interview preview. */
 export function Landing() {
+  const user = useCurrentUser();
+  const client = useQueryClient();
+  const navigate = useNavigate();
+  const logout = useMutation({
+    mutationFn: () => apiRequest("/auth/logout", { method: "POST" }),
+    onSuccess: () => {
+      client.clear();
+      navigate("/login");
+    },
+  });
+  const guest = user.error instanceof ApiError && user.error.status === 401;
+  const signedIn = !!user.data && !user.isError;
+  const sessionUnavailable = user.isError && !guest;
   return (
     <div className="landing">
       <header className="landing-header">
@@ -26,14 +42,55 @@ export function Landing() {
           <Link to="/contact">Contact</Link>
         </nav>
         <div className="landing-actions">
-          <Link className="header-login" to="/login">
-            Log in
-          </Link>
-          <Link className="button button-dark button-small" to="/register">
-            Get started <ArrowRight size={15} />
-          </Link>
+          {signedIn ? (
+            <>
+              <span className="landing-user">Hi, {user.data.name}</span>
+              <Link className="button button-dark button-small" to="/app">
+                Dashboard <ArrowRight size={15} />
+              </Link>
+              <button
+                type="button"
+                className="landing-signout"
+                onClick={() => logout.mutate()}
+                disabled={logout.isPending}
+              >
+                Sign out
+              </button>
+            </>
+          ) : guest ? (
+            <>
+              <Link className="header-login" to="/login">
+                Log in
+              </Link>
+              <Link className="button button-dark button-small" to="/register">
+                Get started <ArrowRight size={15} />
+              </Link>
+            </>
+          ) : sessionUnavailable ? (
+            <button
+              type="button"
+              className="landing-session-retry"
+              onClick={() => void user.refetch()}
+            >
+              Retry session check
+            </button>
+          ) : (
+            <span className="landing-session-status" role="status">
+              Checking session...
+            </span>
+          )}
         </div>
       </header>
+      {sessionUnavailable && (
+        <p className="landing-session-message" role="alert">
+          We couldn’t check your session. Please try again.
+        </p>
+      )}
+      {logout.isError && (
+        <p className="landing-session-message" role="alert">
+          Could not sign out. Please try again.
+        </p>
+      )}
       <main>
         <section className="hero">
           <div className="hero-copy">
@@ -49,8 +106,12 @@ export function Landing() {
               come.
             </p>
             <div className="hero-actions">
-              <Link className="button button-dark" to="/register">
-                Start practicing <ArrowRight size={17} />
+              <Link
+                className="button button-dark"
+                to={guest ? "/register" : "/app"}
+              >
+                {signedIn ? "Continue practicing" : "Start practicing"}{" "}
+                <ArrowRight size={17} />
               </Link>
               <a className="button button-ghost" href="#how-it-works">
                 See how it works <ArrowDown size={16} />
@@ -203,8 +264,16 @@ export function Landing() {
               Make preparation more personal with mock tests, voice practice and
               optional, privacy-conscious camera observations.
             </p>
-            <Link to="/register" className="button button-light">
-              Create your account <ArrowRight size={17} />
+            <Link
+              to={guest ? "/register" : "/app"}
+              className="button button-light"
+            >
+              {signedIn
+                ? "Go to dashboard"
+                : guest
+                  ? "Create your account"
+                  : "Go to your workspace"}{" "}
+              <ArrowRight size={17} />
             </Link>
           </div>
           <div className="closing-aside">

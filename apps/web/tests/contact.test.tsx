@@ -41,8 +41,24 @@ describe("developer contact and responsive navigation", () => {
     );
     expect(linkedin.getAttribute("rel")).toContain("noopener");
   });
-  it("links to contact and login on the landing page", () => {
+  it("links to contact and login on the landing page", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(
+            JSON.stringify({
+              success: false,
+              data: null,
+              error: { code: "UNAUTHENTICATED", message: "Please log in" },
+            }),
+            { status: 401 },
+          ),
+        ),
+    );
     render(wrap(<Landing />));
+    await screen.findByRole("link", { name: "Log in" });
     expect(
       screen
         .getAllByRole("link", { name: /contact/i })
@@ -55,17 +71,15 @@ describe("developer contact and responsive navigation", () => {
   it("opens and closes an accessible mobile navigation menu", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(
-            JSON.stringify({
-              success: true,
-              data: { name: "Ada" },
-              error: null,
-            }),
-          ),
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            success: true,
+            data: { name: "Ada" },
+            error: null,
+          }),
         ),
+      ),
     );
     render(
       <QueryClientProvider

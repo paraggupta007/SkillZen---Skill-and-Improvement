@@ -81,3 +81,7 @@
 - Added a public developer contact page with provided email, LinkedIn and education details, plus a branded favicon.
 - Reworked mobile/tablet workspace navigation, restored mobile login visibility and improved small-screen form legibility.
 - Updated Vercel + separate Node API deployment guidance; no production deployment has been performed.
+
+## Signed-in home navigation
+
+- The home page now checks the current session and shows a dashboard link and sign-out action for signed-in users; clicking the SkillZen logo no longer makes the page appear logged out. A session-check failure is shown separately from a signed-out state.

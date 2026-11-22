@@ -98,7 +98,7 @@ export function AppLayout() {
             </span>
             <span>
               <strong>{user.data?.name ?? "Your account"}</strong>
-              <small>Sign out</small>
+              <small>Sign out on all devices</small>
             </span>
             <LogOut size={16} />
           </button>
@@ -162,7 +162,7 @@ export function AppLayout() {
               onClick={() => logout.mutate()}
               disabled={logout.isPending}
             >
-              <LogOut size={17} /> Sign out
+              <LogOut size={17} /> Sign out on all devices
             </button>
           </nav>
         </header>

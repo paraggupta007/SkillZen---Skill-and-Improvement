@@ -15,8 +15,7 @@ export function requireUser(auth: AuthService | undefined): RequestHandler {
       const token: unknown = req.cookies?.skillzen_session;
       if (typeof token !== "string")
         throw new AppError(401, "UNAUTHENTICATED", "Please log in");
-      const userId = auth.verify(token);
-      await auth.me(userId);
+      const userId = await auth.verify(token);
       res.locals.userId = userId;
       next();
     })().catch(next);

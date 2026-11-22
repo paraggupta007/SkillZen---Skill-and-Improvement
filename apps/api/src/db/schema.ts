@@ -25,6 +25,7 @@ export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email", { length: 320 }).notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  sessionVersion: integer("session_version").notNull().default(0),
   name: varchar("name", { length: 120 }).notNull(),
   targetRole: text("target_role"),
   experienceLevel: text("experience_level"),

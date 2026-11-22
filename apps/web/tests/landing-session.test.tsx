@@ -94,7 +94,7 @@ describe("landing page session", () => {
     await screen.findByText("Hi, Parag");
     await userEvent
       .setup()
-      .click(screen.getByRole("button", { name: "Sign out" }));
+      .click(screen.getByRole("button", { name: "Sign out on all devices" }));
     expect(await screen.findByText("Login page")).toBeTruthy();
     expect(fetcher).toHaveBeenCalledWith(
       expect.stringContaining("/auth/logout"),
@@ -108,7 +108,9 @@ describe("landing page session", () => {
     expect(
       screen.getByRole("link", { name: /get started/i }).getAttribute("href"),
     ).toBe("/register");
-    expect(screen.queryByRole("button", { name: "Sign out" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Sign out on all devices" }),
+    ).toBeNull();
   });
   it("does not mistake a network error for logout and allows retry", async () => {
     const fetcher = vi

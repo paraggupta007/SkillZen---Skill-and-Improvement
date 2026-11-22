@@ -17,3 +17,7 @@ A checked box means the work is implemented and verified, not just planned.
 - [ ] Phase 10: Hardening, deployment and final report — public contact page, favicon, responsive navigation and password-confirmed account deletion added; Vercel frontend / separate Node API deployment documented but not deployed or end-to-end verified.
 
 Real AI and deployment need user-supplied setup. The earlier Neon migration was reported complete by the user; the user confirmed migration 0002 was applied locally. This sandbox cannot independently verify Neon. Do not interpret webcam estimates as verified attention, retinal tracking, or cheating detection.
+
+## Session revocation hardening
+
+Implemented database-backed, all-device logout and user-facing sign-out disclosure. Migration 0007 is required before starting the updated API; existing cookies will be rejected. PGlite and automated tests cover revocation and stale-token behavior, but Neon and real-browser deployment remain unverified. Already-authenticated in-flight requests may finish.

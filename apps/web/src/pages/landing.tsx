@@ -54,10 +54,12 @@ export function Landing() {
               <button
                 type="button"
                 className="landing-signout"
+                aria-label="Sign out on all devices"
+                title="Signs out all devices"
                 onClick={() => logout.mutate()}
                 disabled={logout.isPending}
               >
-                Sign out
+                Sign out all
               </button>
             </>
           ) : guest ? (

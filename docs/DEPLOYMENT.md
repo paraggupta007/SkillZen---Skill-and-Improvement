@@ -4,14 +4,14 @@ Vercel serves the **frontend**; this repository's Express API is a long-running 
 
 ## 1. Prepare the database
 
-Use a Neon pooled PostgreSQL connection URL and back up existing data. Apply all migrations through `0006_peaceful_shinobi_shaw.sql` **once** from a trusted machine or deployment job using the intended production `DATABASE_URL`:
+Use a Neon pooled PostgreSQL connection URL and back up existing data. Apply all migrations through `0007_romantic_echo.sql` **once** from a trusted machine or deployment job using the intended production `DATABASE_URL`:
 
 ```bash
 npm ci --include=dev
 npm run db:migrate
 ```
 
-`apps/api/.env` is loaded when running locally, or set the variables privately in the deployment environment. If `NODE_ENV=production`, the migration command also requires the production `JWT_SECRET` to satisfy configuration validation. Never commit secrets or put them in `VITE_` variables. Do not share credentials in chat. The user reported completing migration instructions through 0006; this sandbox has not independently verified the Neon state. A health response does not verify database access.
+`apps/api/.env` is loaded when running locally, or set the variables privately in the deployment environment. If `NODE_ENV=production`, the migration command also requires the production `JWT_SECRET` to satisfy configuration validation. Never commit secrets or put them in `VITE_` variables. Do not share credentials in chat. The user reported completing migration instructions through 0006; this sandbox has not independently verified the Neon state. Migration 0007 has not been verified on Neon. Apply it before starting the updated API. Existing sessions will be invalidated and users must sign in again. Replace all old API instances when deploying: an old instance does not enforce revocation and may issue incompatible tokens. A health response does not verify database access.
 
 ## 2. Host the API on Render
 
@@ -50,7 +50,7 @@ The API's `CLIENT_URL` must exactly match the address users open, including sche
 
 A Vercel `*.vercel.app` frontend and Render `*.onrender.com` API are cross-site. Even though production cookies use `SameSite=None; Secure`, browsers may block them as third-party cookies, especially on mobile. **Recommended:** use HTTPS custom domains under the same registrable domain, e.g. `app.example.com` on Vercel and `api.example.com` on Render, set `CLIENT_URL` to the frontend origin and `VITE_API_URL` to the API URL. This still requires exact CORS settings and real-device verification; it is not a guarantee. A same-origin reverse proxy is another option, but is not configured in this repository and needs careful testing of streaming, cookies, uploads and timeouts. Do not expose a public launch as working until authentication succeeds in target browsers with default privacy settings.
 
-After deployment, verify from mobile, tablet and desktop: direct `/contact` navigation and refresh; registration, login, logout and a protected page; a complete streamed interview and report/PDF; mock-test creation, submission and deletion; resume and voice uploads; explicit camera permission, model downloads, saving/deleting observations. Use HTTPS for camera/microphone. Test a second account for ownership isolation and check that no secrets appear in frontend assets or browser requests. Verify service logs, rate limits and provider quotas; never use real sensitive resumes or answers during initial tests. Test account deletion with a disposable account and verify backup/provider retention. Review privacy notices, account recovery, abuse controls, data retention, backups and security before offering this publicly: this is a work-in-progress project, not a production security audit.
+After deployment, verify from mobile, tablet and desktop: direct `/contact` navigation and refresh; registration, login, all-device logout (including a second session) and a protected page; a complete streamed interview and report/PDF; mock-test creation, submission and deletion; resume and voice uploads; explicit camera permission, model downloads, saving/deleting observations. Use HTTPS for camera/microphone. Test a second account for ownership isolation and check that no secrets appear in frontend assets or browser requests. Verify service logs, rate limits and provider quotas; never use real sensitive resumes or answers during initial tests. Test account deletion with a disposable account and verify backup/provider retention. Review privacy notices, account recovery, abuse controls, data retention, backups and security before offering this publicly: this is a work-in-progress project, not a production security audit.
 
 ## Troubleshooting
 

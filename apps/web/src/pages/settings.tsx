@@ -52,7 +52,8 @@ export function SettingsPage() {
           <div>
             <h2>Your profile</h2>
             <p>
-              Signed in as {user.data?.name} · {user.data?.email}
+              Signed in as {user.data?.name} · {user.data?.email}. Signing out
+              ends all sessions on your devices.
             </p>
           </div>
         </div>

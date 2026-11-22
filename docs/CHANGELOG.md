@@ -95,3 +95,8 @@
 
 - Added password-confirmed account deletion with cascades, clear confirmation and sign-out; app-owned data is removed, but external provider copies, backups, logs and downloads are not.
 - Added isolated database and mocked UI tests; no database migration is needed.
+
+## Session revocation
+
+- Logout now revokes all sessions of the account's current generation, including copied tokens. Stale logouts cannot revoke newer sessions; database errors are reported instead of falsely confirming logout.
+- Migration 0007 is required before starting the updated API. Old JWTs will be rejected and users need to sign in again. Requests authenticated before logout may still complete.

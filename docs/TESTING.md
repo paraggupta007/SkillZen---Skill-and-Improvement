@@ -42,3 +42,7 @@ Contact page and mobile navigation have component tests for provided links, publ
 Question-feedback tests cover owner/question isolation, validation, save/update/delete, post-completion use, cascade deletion, and mocked UI editing and report access. Migration 0006 has been tested in PGlite, not yet on Neon; the real browser workflow remains unverified.
 
 Account deletion tests use PGlite to verify password checks, origin and owner protection, cascading related records and rejection of copied cookies after deletion. A mocked component test verifies confirmation, errors and client-state cleanup. Live Neon, backups and provider retention have not been verified.
+
+## Session revocation
+
+PGlite/Supertest applies migration 0007 and checks copied-cookie and other-session revocation, account isolation, fresh login, concurrent/stale/expired/forged and anonymous logout, origin protection, legacy token rejection and a simulated repository failure. It does not test live Neon or browser behavior; check those separately. Revocation does not cancel requests already authenticated and in flight.

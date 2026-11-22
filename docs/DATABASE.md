@@ -58,3 +58,7 @@ Migration `0006_peaceful_shinobi_shaw.sql` adds one `question_feedback` record p
 ## Account deletion
 
 After password reauthentication, deleting a user cascades through their owned resumes, interviews, questions, answers, evaluations, reports, camera observations, question feedback and mock tests. AI usage metadata is not tied to an account and is retained. Database backups, operational logs, previously downloaded files and copies held by AI or transcription providers are not deleted by this operation.
+
+## Session revocation
+
+Migration `0007_romantic_echo.sql` adds a non-null `users.session_version` counter. A conditional atomic increment on logout revokes all sessions from that generation, and protected requests compare their JWT generation to the database. Apply this migration before starting the new API; existing JWTs without a generation will no longer authenticate and users must sign in again. A login concurrent with logout can receive an already-revoked token and may need to be retried. Already authenticated in-flight requests may still finish. PGlite tests do not establish Neon deployment status.

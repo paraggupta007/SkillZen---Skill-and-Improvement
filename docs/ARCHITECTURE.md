@@ -66,7 +66,7 @@ The in-process event bus starts report generation. The status map is not a durab
 
 ## Authentication
 
-Routes validate input and call `AuthService`, which depends on `IUserRepository`. `DrizzleUserRepository` is injected by the container; tests inject an in-memory implementation. Passwords use bcrypt, and one-hour JWTs are stored in httpOnly cookies. Logout clears the browser cookie but does not revoke copied tokens.
+Routes validate input and call `AuthService`, which depends on `IUserRepository`. `DrizzleUserRepository` is injected by the container; tests inject an in-memory implementation. Passwords use bcrypt, and one-hour JWTs are stored in httpOnly cookies. Each authenticated request checks the signed session generation against the database. Logout atomically increments the account generation and clears the cookie, revoking all sessions in that generation. An already authenticated in-flight request can still finish. A login racing with logout may receive a token that is immediately invalid; retry login.
 
 ## AI routing
 

@@ -8,7 +8,7 @@ import type {
   User,
 } from "../users/user-repository.js";
 /** Account details safe to send to a client. */
-export type PublicUser = Omit<User, "passwordHash">;
+export type PublicUser = Omit<User, "passwordHash" | "sessionVersion">;
 function publicUser(user: User): PublicUser {
   return {
     id: user.id,
@@ -40,7 +40,10 @@ export class AuthService {
       name: input.name,
       passwordHash: await bcrypt.hash(input.password, 12),
     });
-    return { user: publicUser(user), token: this.sign(user.id) };
+    return {
+      user: publicUser(user),
+      token: this.sign(user.id, user.sessionVersion),
+    };
   }
   /** Verify credentials without disclosing whether an email is registered. */
   async login(input: { email: string; password: string }) {
@@ -57,10 +60,12 @@ export class AuthService {
         "INVALID_CREDENTIALS",
         "Invalid email or password",
       );
-    return { user: publicUser(user), token: this.sign(user.id) };
+    return {
+      user: publicUser(user),
+      token: this.sign(user.id, user.sessionVersion),
+    };
   }
-  /** Verify a signed session and return its subject. */
-  verify(token: string): string {
+  private claims(token: string): { userId: string; version: number } {
     try {
       const payload = jwt.verify(token, this.secret, {
         algorithms: ["HS256"],
@@ -70,13 +75,34 @@ export class AuthService {
       if (
         typeof payload === "string" ||
         typeof payload.sub !== "string" ||
-        !/^[0-9a-f-]{36}$/i.test(payload.sub)
+        !/^[0-9a-f-]{36}$/i.test(payload.sub) ||
+        !Number.isSafeInteger(payload.version) ||
+        payload.version < 0
       )
-        throw new Error("Invalid subject");
-      return payload.sub;
+        throw new Error("Invalid session claims");
+      return { userId: payload.sub, version: payload.version as number };
     } catch {
       throw new AppError(401, "UNAUTHENTICATED", "Please log in");
     }
+  }
+  /** Verify both the signed token and its current database session generation. */
+  async verify(token: string): Promise<string> {
+    const { userId, version } = this.claims(token);
+    const user = await this.users.findById(userId);
+    if (!user || user.sessionVersion !== version)
+      throw new AppError(401, "UNAUTHENTICATED", "Please log in");
+    return userId;
+  }
+  /** Revoke all sessions from this token's generation; stale tokens cannot revoke newer sessions. */
+  async logout(token: string) {
+    let claims: { userId: string; version: number };
+    try {
+      claims = this.claims(token);
+    } catch (error) {
+      if (error instanceof AppError && error.code === "UNAUTHENTICATED") return;
+      throw error;
+    }
+    await this.users.revokeSessions(claims.userId, claims.version);
   }
   /** Return the current user's profile. */
   async me(id: string) {
@@ -103,8 +129,8 @@ export class AuthService {
         "Account changed. Please try again.",
       );
   }
-  private sign(id: string) {
-    return jwt.sign({}, this.secret, {
+  private sign(id: string, version: number) {
+    return jwt.sign({ version }, this.secret, {
       algorithm: "HS256",
       subject: id,
       issuer: "skillzen",

@@ -102,26 +102,33 @@ export function createAuthRoutes(service: AuthService | undefined, env: Env) {
       res.cookie(cookieName, result.token, cookieOptions).json(ok(result.user));
     }),
   );
-  router.post("/auth/logout", (_req, res) => {
-    res
-      .clearCookie(cookieName, {
-        httpOnly: cookieOptions.httpOnly,
-        secure: cookieOptions.secure,
-        sameSite: cookieOptions.sameSite,
-        path: cookieOptions.path,
-      })
-      .json(ok({ loggedOut: true }));
-  });
+  router.post(
+    "/auth/logout",
+    asyncRoute(async (req, res) => {
+      const token: unknown = req.cookies?.[cookieName];
+      if (typeof token === "string") await ready().logout(token);
+      res
+        .clearCookie(cookieName, {
+          httpOnly: cookieOptions.httpOnly,
+          secure: cookieOptions.secure,
+          sameSite: cookieOptions.sameSite,
+          path: cookieOptions.path,
+        })
+        .json(ok({ loggedOut: true }));
+    }),
+  );
   router.get(
     "/users/me",
     asyncRoute(async (req, res) => {
-      res.json(ok(await ready().me(current(req))));
+      res.json(ok(await ready().me(await current(req))));
     }),
   );
   router.patch(
     "/users/me",
     asyncRoute(async (req, res) => {
-      res.json(ok(await ready().update(current(req), profile.parse(req.body))));
+      res.json(
+        ok(await ready().update(await current(req), profile.parse(req.body))),
+      );
     }),
   );
   router.delete(
@@ -132,7 +139,7 @@ export function createAuthRoutes(service: AuthService | undefined, env: Env) {
         .object({ password })
         .strict()
         .parse(req.body);
-      await ready().deleteAccount(current(req), providedPassword);
+      await ready().deleteAccount(await current(req), providedPassword);
       res
         .clearCookie(cookieName, {
           httpOnly: cookieOptions.httpOnly,

@@ -1,5 +1,5 @@
 // Drizzle implementation of the user repository; all account SQL stays here.
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { createDatabase } from "../../db/client.js";
 import { users } from "../../db/schema.js";
 import { AppError } from "../../core/errors.js";
@@ -48,6 +48,13 @@ export class DrizzleUserRepository implements IUserRepository {
     return (
       await this.db.update(users).set(input).where(eq(users.id, id)).returning()
     )[0];
+  }
+  /** Atomically invalidate sessions from this generation only. */
+  async revokeSessions(id: string, expectedVersion: number) {
+    await this.db
+      .update(users)
+      .set({ sessionVersion: sql`${users.sessionVersion} + 1` })
+      .where(and(eq(users.id, id), eq(users.sessionVersion, expectedVersion)));
   }
   /** Delete the authenticated account only if its verified password hash is unchanged. */
   async deleteWithPasswordHash(id: string, passwordHash: string) {

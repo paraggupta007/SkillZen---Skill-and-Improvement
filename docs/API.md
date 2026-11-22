@@ -39,7 +39,7 @@ Request: `{"email":"ada@example.com","password":"strong-password"}`. Response: H
 
 ### POST /api/auth/logout
 
-No body. Response: HTTP 200, `{"success":true,"data":{"loggedOut":true},"error":null}` and a cleared cookie. This stateless logout does not revoke a copied JWT; it expires in one hour.
+No body. Response: HTTP 200, `{"success":true,"data":{"loggedOut":true},"error":null}` and a cleared cookie. For a valid current session, this revokes all sessions for that account and clears the cookie. Invalid, expired, stale or missing cookies are cleared without affecting newer sessions. Database failures return an error rather than reporting a successful revocation. Requests already authenticated before logout may still finish.
 
 ### GET /api/users/me
 
@@ -175,6 +175,6 @@ Candidate feedback is separate from AI answer evaluations and does not affect th
 
 ## Account deletion
 
-`DELETE /api/users/me` requires the session cookie and body `{ "password": "current-password" }`; no user ID is accepted. The password is rechecked before the account and app-owned records are deleted. On success it clears the cookie and returns `{ "deleted": true }`. Invalid credentials or a missing/invalid session return 401, invalid input 400, concurrent account changes 409, and excessive authentication attempts 429. Normal origin protection applies. Because protected routes check that the account still exists, a copied old session cookie cannot access the deleted account; ordinary logout still does not revoke copied tokens.
+`DELETE /api/users/me` requires the session cookie and body `{ "password": "current-password" }`; no user ID is accepted. The password is rechecked before the account and app-owned records are deleted. On success it clears the cookie and returns `{ "deleted": true }`. Invalid credentials or a missing/invalid session return 401, invalid input 400, concurrent account changes 409, and excessive authentication attempts 429. Normal origin protection applies. Because protected routes check that the account still exists, a copied old session cookie cannot access the deleted account; ordinary logout also revokes the current session generation.
 
 Deletion does not erase provider-held data, backups, operational logs, downloaded documents or non-user-linked AI usage metadata; already-running requests may have transmitted data. It cannot be undone.

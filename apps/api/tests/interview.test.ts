@@ -35,6 +35,7 @@ class MemoryUsers implements IUserRepository {
     const user: User = {
       ...input,
       id: randomUUID(),
+      sessionVersion: 0,
       targetRole: null,
       experienceLevel: null,
       skills: [],
@@ -42,6 +43,11 @@ class MemoryUsers implements IUserRepository {
     };
     this.users.set(user.id, user);
     return user;
+  }
+  async revokeSessions(id: string, expectedVersion: number) {
+    const user = this.users.get(id);
+    if (user?.sessionVersion === expectedVersion)
+      this.users.set(id, { ...user, sessionVersion: expectedVersion + 1 });
   }
   async deleteWithPasswordHash(id: string, passwordHash: string) {
     const user = this.users.get(id);

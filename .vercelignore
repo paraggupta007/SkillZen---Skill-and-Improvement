@@ -1,0 +1,10 @@
+# Local secrets must never be uploaded by the Vercel CLI.
+.env
+.env.*
+**/.env
+**/.env.*
+# Generated local outputs; Vercel rebuilds from source.
+**/dist/**
+**/coverage/**
+*.log
+**/*.log

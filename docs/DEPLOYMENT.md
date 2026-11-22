@@ -27,7 +27,7 @@ Connect this repository and the desired deployment branch. For the existing Verc
 | Build Command | `npm run build` |
 | Output Directory | `dist` |
 
-The Vercel CLI should be linked to this project from the repository root. For Git deployments, ensure the production branch is the intended branch; a different branch may deploy a different app. For CLI deployments, the source comes from the current local folder, including uncommitted changes.
+The Vercel CLI should be linked to this project from the repository root. The root `.vercelignore` excludes local environment files from CLI uploads; never assume `.gitignore` alone protects a CLI deployment. For Git deployments, ensure the production branch is the intended branch; a different branch may deploy a different app. For CLI deployments, the source comes from the current local folder, including uncommitted changes.
 
 ## 3. Production environment variables
 

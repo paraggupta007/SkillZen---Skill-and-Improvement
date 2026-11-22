@@ -16,4 +16,6 @@ export interface IUserRepository {
     passwordHash: string;
   }): Promise<User>;
   update(id: string, input: ProfileUpdate): Promise<User | undefined>;
+  deleteWithPasswordHash(id: string, passwordHash: string): Promise<boolean>;
+  revokeSessions(id: string, expectedVersion: number): Promise<void>;
 }

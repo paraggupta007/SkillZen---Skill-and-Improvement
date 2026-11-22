@@ -159,10 +159,44 @@ describe("provider HTTP adapters", () => {
       const result = await groq.generate(req);
       expect(result.text).toBe("hello");
       expect(result.tokensIn).toBe(2);
+      const firstRequest = fetchMock.mock.calls[0]?.[1] as RequestInit;
+      const firstBody: unknown = JSON.parse(String(firstRequest.body));
+      expect(firstBody).toMatchObject({ model: "openai/gpt-oss-120b" });
       const chunks: string[] = [];
       for await (const chunk of groq.stream(req)) chunks.push(chunk);
       expect(chunks).toEqual(["Hi"]);
+      const streamRequest = fetchMock.mock.calls[1]?.[1] as RequestInit;
+      const streamBody: unknown = JSON.parse(String(streamRequest.body));
+      expect(streamBody).toMatchObject({
+        model: "openai/gpt-oss-120b",
+        stream: true,
+      });
       expect(JSON.stringify(result)).not.toContain("server-secret");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+  it("uses the smaller available Groq model for quick tasks", async () => {
+    const { GroqProvider } =
+      await import("../src/ai/providers/groq-provider.js");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({ choices: [{ message: { content: "ok" } }] }),
+          { status: 200 },
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const result = await new GroqProvider("server-secret").generate({
+        ...req,
+        task: "quick",
+      });
+      const sent = fetchMock.mock.calls[0]?.[1] as RequestInit;
+      const body: unknown = JSON.parse(String(sent.body));
+      expect(body).toMatchObject({ model: "openai/gpt-oss-20b" });
+      expect(result.model).toBe("openai/gpt-oss-20b");
     } finally {
       vi.unstubAllGlobals();
     }
@@ -185,5 +219,42 @@ describe("provider HTTP adapters", () => {
     expect(logs).toHaveLength(3);
     expect(JSON.stringify(logs)).not.toContain(req.prompt);
     expect(JSON.stringify(logs)).not.toContain("secret error");
+  });
+});
+
+describe("streamed structured output", () => {
+  it("repairs a streamed invalid response and returns only validated data", async () => {
+    const fake = new FakeLLMProvider(['{"score":"bad"}', '{"score":7}']);
+    const chunks: string[] = [];
+    const output = await new JsonGenerator(fake, new PromptBuilder()).generate(
+      req,
+      z.object({ score: z.number().int().min(0).max(10) }),
+      (chunk) => chunks.push(chunk),
+    );
+    expect(chunks).toEqual(['{"score":"bad"}']);
+    expect(output.score).toBe(7);
+  });
+});
+
+describe("SSE network boundaries", () => {
+  it("parses CRLF event separators split across network chunks", async () => {
+    const { readSSE } = await import("../src/ai/providers/http-utils.js");
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const chunk of [
+          "data: first\r",
+          "\n\r",
+          "\ndata: second\r\n",
+          "\r\n",
+        ])
+          controller.enqueue(encoder.encode(chunk));
+        controller.close();
+      },
+    });
+    const messages: string[] = [];
+    for await (const message of readSSE(new Response(stream)))
+      messages.push(message);
+    expect(messages).toEqual(["first", "second"]);
   });
 });

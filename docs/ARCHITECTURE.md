@@ -1,15 +1,15 @@
 # Architecture
 
-Currently implemented: frontend scaffold, HTTP foundation, auth and user repository, AI provider chain, round and evaluator strategies, DI composition root, event bus and database schema/client. The interview sequence and domain components below are targets, not implemented features.
+Currently implemented: responsive React frontend, HTTP foundation, auth and user repository, AI provider chain, round and evaluator strategies, interview API and repository, asynchronous report generation, analytics, DI composition root, event bus and database schema/client.
 
 ## System
 
 ```mermaid
 flowchart LR
-  Browser[React + Vite] -->|REST and future SSE| API[Express API]
+  Browser[React + Vite] -->|REST and SSE| API[Express API]
   API --> DB[(PostgreSQL / Neon pool)]
-  API -. planned .-> AI[Free AI provider chain]
-  Browser -. planned local analysis .-> Camera[Webcam metrics]
+  API --> AI[Free AI provider chain]
+  Browser -. optional local analysis .-> Camera[Webcam face and pose observations]
 ```
 
 ## Layers
@@ -23,9 +23,9 @@ flowchart TD
   Interfaces --> Providers[Provider adapters]
 ```
 
-The auth service and user repository now implement this layering. Interview services and endpoints are planned; round and evaluation strategies are implemented but not wired to HTTP. AI adapters are implemented but have not been verified against live providers.
+The auth service and user repository now implement this layering. The interview service depends on repository and evaluator interfaces; its PostgreSQL repository locks the parent interview for state changes. The user reported a successful live Groq interview smoke test; the other providers and live report generation are not yet verified.
 
-## Planned class diagram
+## Class diagram
 
 ```mermaid
 classDiagram
@@ -40,7 +40,7 @@ classDiagram
   CompositeEvaluator --> IEvaluator
 ```
 
-## Planned interview sequence
+## Interview sequence
 
 ```mermaid
 sequenceDiagram
@@ -57,15 +57,57 @@ sequenceDiagram
   API->>AI: Evaluate and prepare next question
   API-->>Web: Stream feedback
   Web->>API: Complete interview
-  API-->>Web: Report status
+  API->>AI: Generate report asynchronously
+  Web->>API: Poll report status
+  API-->>Web: Pending or completed report
 ```
 
-The in-process event bus exists, but report generation and a durable job queue do not yet exist. Async work must account for process restarts before deployment.
+On the long-running server the in-process event bus starts report generation; on Vercel generation runs within the report request instead, so it does not depend on background execution after a response. The status map is not a durable job queue; requesting a completed interview’s missing report can schedule it again after restart. Multiple instances can duplicate AI work, although the database unique constraint prevents duplicate reports.
 
 ## Authentication
 
-Routes validate input and call `AuthService`, which depends on `IUserRepository`. `DrizzleUserRepository` is injected by the container; tests inject an in-memory implementation. Passwords use bcrypt, and one-hour JWTs are stored in httpOnly cookies. Logout clears the browser cookie but does not revoke copied tokens.
+Routes validate input and call `AuthService`, which depends on `IUserRepository`. `DrizzleUserRepository` is injected by the container; tests inject an in-memory implementation. Passwords use bcrypt, and one-hour JWTs are stored in httpOnly cookies. Each authenticated request checks the signed session generation against the database. Logout atomically increments the account generation and clears the cookie, revoking all sessions in that generation. An already authenticated in-flight request can still finish. A login racing with logout may receive a token that is immediately invalid; retry login.
 
 ## AI routing
 
-`LLMRouter` tries registered providers in configured order, twice each, with timeouts and independent circuit breakers. It records metadata through a repository interface. `JsonGenerator` validates outputs and requests one repair. Cached completions are opt-in and scoped; live streams are not cached. AI vendor keys are server-side only. No API route currently invokes the AI layer.
+`LLMRouter` tries registered providers in configured order, twice each, with timeouts and independent circuit breakers. It records metadata through a repository interface. `JsonGenerator` validates outputs and requests one repair. Cached completions are opt-in and scoped; live streams are not cached. AI vendor keys are server-side only. Interview routes invoke this AI layer.
+
+## Interview flow
+
+`InterviewService` validates ownership through `IInterviewRepository`. Each answer is evaluated while a possible next question is prepared; the best-effort candidate is scoped to the user and kept in a bounded process-local cache for 60 seconds. Feedback is not delayed waiting for prefetch. The cache may miss after restart or across instances, and prefetch does not yet start while the user is still speaking. SSE deltas are provisional raw model text; only validated completion events are persisted. The event bus is not a durable queue.
+
+## Reports and analytics
+
+An `interview.completed` event schedules `ReportService`. It validates AI-generated strengths, weaknesses, tips and summary, and computes the 0–10 overall score as the rounded mean of answer scores. Status is process-local; a failed job can be retried and a missing report is scheduled on access. Only the latest ten truncated turns are sent to the report prompt to limit tokens, while the score uses all answers. `IReportRepository` and `IAnalyticsRepository` isolate database access. Live report generation is not yet manually verified.
+
+## Frontend
+
+React Router provides public and protected routes. TanStack Query owns server state, Zustand stores the current answer draft, and a fetch-based SSE parser handles both GET and POST streams. SSE deltas are provisional and the final validated event is authoritative. Dashboard charts use Recharts and are loaded with the dashboard route. The development Vite proxy forwards `/api` to Express; production can configure `VITE_API_URL` (the API base including `/api`) but cross-site cookie support depends on browser and deployment settings.
+
+## Speech
+
+The browser can read questions with speech synthesis and offers a choice of available English voices, preferring voices explicitly labelled natural, neural, enhanced or premium. Voice quality and availability depend on the device and some speech services may use a network. Web Speech recognition starts only after an explicit click. Some browser recognition implementations transmit audio to their own provider. A separate opt-in MediaRecorder path sends audio to an authenticated, owner-checked, rate-limited API and the server-only `ITranscriber` Groq adapter; it does not write audio to disk. Browser-derived speech metrics are approximate; no metrics are submitted after editing a transcript or appending to existing text. Live microphone and provider behavior remain unverified.
+
+## Resume analysis and PDF export
+
+An injected report PDF renderer creates an in-memory PDF after checking ownership and report readiness. The download route does not start a report job. Built-in PDF fonts currently have limited Unicode coverage. A separate resource-limited child process extracts text from uploaded PDFs; it is not an OS security sandbox. A repository stores extracted text by owner, and the AI prompt treats resume/JD contents as untrusted.
+
+## Camera coaching (Phase 8 in progress)
+
+After explicit consent and start, the browser loads MediaPipe Face and Pose Landmarkers and their official models from Google, captures video locally and samples face at approximately 5 fps and pose at approximately 1 fps. Face framing and iris-position counters are approximations, not attention or cheating detection. No frames or landmarks are sent to the server. The user can explicitly save/delete aggregate counters; a separate evaluator provides non-diagnostic framing suggestions on online and PDF reports, without affecting scores. Optional live tips use short rolling windows for framing, possible multiple faces, repeated wrist movement and iris shifts. Multiple face-like shapes can be missed or misidentified, and samples with multiple detected faces are excluded from aggregates. Coarse shoulder/hip alignment, wrist movement and hand height are not gesture classification; pose can fall back to face-only if unavailable. The user reported that camera works live; accuracy and latest tip behavior need real-device testing.
+
+## Mock tests
+
+A small curated multiple-choice bank is shuffled and snapshotted at creation. The authenticated service strips answer keys until submission, validates choices and scores server-side. A conditional database update prevents concurrent submissions from overwriting a completed attempt; history and deletion are owner-scoped. This is practice content, not a secure or adaptive assessment. No AI service is used.
+
+## Candidate question feedback
+
+A dedicated service and repository validate question/interview ownership before reading or changing an optional rating/comment. Feedback is stored independently from answer evaluations and AI/report generation, and the UI loads it only when a feedback disclosure opens. Mock-test option feedback is likewise owner-scoped, available after submission, and separate from scoring.
+
+## Account deletion
+
+`AuthService` rechecks the password and asks the user repository to delete by account ID and unchanged password hash. The database cascades related records in one delete. Session-bearing endpoints recheck account existence, so old cookies cannot access an account after deletion. Data outside the application database is not erased and provider requests already in flight cannot necessarily be recalled.
+
+## Shared production rate limiting
+
+Each production rate limiter gets its own scoped PostgreSQL store. Atomic upserts maintain shared fixed windows across function instances, with HMAC-hashed client identifiers and opportunistic bounded expiry cleanup. Database failures fail closed. Development/tests may use memory stores. The health endpoint remains a liveness check and skips this limiter. Rate limits cannot replace perimeter protection or capacity planning.

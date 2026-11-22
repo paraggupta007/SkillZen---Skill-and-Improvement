@@ -1,42 +1,47 @@
-# Phase 3: Interview domain (in progress)
+# Phase 3: Interview domain and API
 
 ## Goal
 
-Build extensible interview rounds and evaluations, then expose a complete authenticated interview flow.
+Build extensible interview rounds, answer evaluation and an authenticated interview API.
 
 ## What was built
 
-The first part adds an abstract interview round and technical, HR and behavioral strategies; a registry-based factory; a validated LLM answer evaluator; an optional rule-based speech evaluator; and a composite evaluator. Fake-model unit tests cover the strategies and composition. These classes are not yet connected to interview endpoints.
+Technical, HR and behavioral rounds; registry-based factory; validated LLM and optional rule-based speech evaluators; interview creation, history, detail, streamed questions and answer evaluations, follow-up links, and idempotent completion. Evaluation and best-effort next-question prefetch run concurrently. The frontend is not built yet.
 
 ## Files created/changed
 
-- `apps/api/src/domain/rounds/interview-round.ts`: round contract, context and common prompt flow.
-- `apps/api/src/domain/rounds/technical-round.ts`, `hr-round.ts`, `behavioral-round.ts`: round-specific rubrics.
-- `apps/api/src/domain/rounds/round-factory.ts`: registered round creation.
-- `apps/api/src/domain/evaluation/evaluator.ts`: evaluator contracts and metric types.
-- `apps/api/src/domain/evaluation/llm-answer-evaluator.ts`: validated AI answer scoring.
-- `apps/api/src/domain/evaluation/speech-metrics-evaluator.ts`: optional rule-based speech coaching.
-- `apps/api/src/domain/evaluation/composite-evaluator.ts`: combines independent evaluators.
-- `apps/api/src/container.ts`: registers rounds and evaluator strategies.
-- `apps/api/tests/domain.test.ts`: strategy, extension and evaluator tests.
-- `README.md`, `docs/INDEX.md`, `docs/ARCHITECTURE.md`, `docs/API.md`, `docs/DATABASE.md`, `docs/PROGRESS.md`, `docs/TESTING.md`, `docs/CHANGELOG.md`: document implemented scope and remaining work.
+- `apps/api/src/domain/rounds/*`: round contract, question/evaluation prompts, three strategies and factory.
+- `apps/api/src/domain/evaluation/*`: evaluator contracts, validated answer scores, optional speech coaching and composite.
+- `apps/api/src/modules/interviews/interview-repository.ts`: repository interface and interview types.
+- `apps/api/src/modules/interviews/drizzle-interview-repository.ts`: PostgreSQL persistence, transactions and per-interview row locks.
+- `apps/api/src/modules/interviews/interview-service.ts`: ownership, question and answer flows, parallel prefetch and completion events.
+- `apps/api/src/modules/interviews/routes.ts`: authenticated, validated HTTP and SSE routes.
+- `apps/api/src/ai/json-generator.ts`: provisional streaming plus validated final JSON and repair.
+- `apps/api/src/app.ts`, `container.ts`: routes, cross-origin protection and dependency registrations.
+- `apps/api/src/db/schema.ts`, `migrations/0002*`, migration metadata: role and uniqueness constraints.
+- `apps/api/tests/interview.test.ts`, `domain.test.ts`, `ai.test.ts`: fake-provider interview and domain tests.
+- `apps/api/tests/postgres.test.ts`: isolated PGlite migration and actual Drizzle repository test.
+- `apps/api/scripts/smoke-groq.ts`, `scripts/diagnose-groq.ts`, `modules/users/drizzle-user-repository.ts`: optional live Neon/Groq check and safe provider diagnostics with restricted test-user cleanup.
+- `apps/api/src/ai/providers/http-utils.ts`: handles SSE CRLF separators split between network chunks.
+- `apps/api/package.json`, `tsconfig.json`, root lockfile: test dependency and smoke command.
+- `README.md`, `docs/API.md`, `DATABASE.md`, `ARCHITECTURE.md`, `SETUP.md`, `TESTING.md`, `PROGRESS.md`, `CHANGELOG.md`: document current implementation and outstanding verification.
 
 ## Key concepts and OOP patterns used (and why)
 
-Round strategies share a template for prompt construction and specialize their rubric. The factory registers new round constructors without a switch statement. Evaluators implement one interface, and a composite combines their independent results. The service container injects dependencies.
+Round strategies share a prompt-building template and specialize their rubric. The factory registers constructors without a switch statement. Evaluators implement one interface, and a composite combines independent results. Services depend on repository interfaces; the container injects implementations. The observer bus publishes completion events.
 
 ## Design decisions and trade-offs
 
-Scores are checked against a Zod schema before being returned by the LLM evaluator. Speech coaching is heuristic and optional; it makes no claims about personality or ability. Duplicate metric names are rejected to avoid silent overwrites. No speech recognition or persistence is implemented yet. Prompt-injection boundaries reduce risk but are not a security guarantee.
+Scores are checked before persistence. Row locks and unique indexes guard duplicate question/answer writes; the answer and its evaluation are saved atomically. The number of questions includes follow-ups. Prefetch starts after answer submission, not while the candidate is speaking, is process-local and may miss across instances. Raw SSE deltas are provisional untrusted model JSON; only the validated completion event is authoritative. Prompt boundaries reduce risk but cannot guarantee immunity to injection. The in-process event bus is not durable, and report generation is not yet implemented. Speech coaching is optional and heuristic.
 
 ## How to run and test it
 
-Run `npm run lint`, `npm run type-check`, `npm test` and `npm run build`. Tests use a fake LLM and do not need API keys. The round classes are internal only; there is no complete interview API to try yet.
+Run `npm run lint`, `npm run type-check`, `npm test`, and `npm run build`. Automated tests use fake AI and isolated PGlite; they do not require keys. After backing up the database, apply `npm run db:migrate` to Neon and follow [TESTING.md](../TESTING.md) for the optional real Groq/Neon smoke check. See [API.md](../API.md) for endpoint and SSE contracts.
 
 ## Problems faced and how they were fixed
 
-The sandbox cannot reach live AI vendors, so this portion is tested with deterministic fake output. Real Groq and Neon-backed interview tests remain outstanding. No claims are made about end-to-end latency or a completed interview until the remaining work exists and is tested.
+The sandbox cannot reach Neon or live AI vendors. The user reported the Neon migration succeeded but the live Groq smoke check failed with a generic stream error; credential-safe diagnostics have been added. A later HTTP 404 is consistent with Groq retiring the original Llama model IDs on free/developer tiers; the provider now uses Groq’s GPT-OSS replacements. The user later reported that the Neon and Groq interview smoke check passed. A local PGlite engine tests actual SQL migrations and repository operations, while Supertest uses a fake AI provider and in-memory repository for the whole HTTP flow. Neither substitutes for live network verification. The optional smoke script creates a temporary user and interview and attempts cleanup, but usage logs remain and cleanup may require manual attention.
 
 ## What is next
 
-Implement interview repositories, authenticated create/next-question/answer/complete endpoints, adaptive follow-ups, streaming, concurrency-safe persistence and end-to-end tests. Then manually verify a real Groq interview on a machine with vendor access.
+The user reported a successful real Neon/Groq interview smoke check. Next implement reports and analytics, followed by the frontend.

@@ -11,8 +11,10 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  check,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const interviewStatus = pgEnum("interview_status", [
   "in_progress",
@@ -23,6 +25,7 @@ export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email", { length: 320 }).notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  sessionVersion: integer("session_version").notNull().default(0),
   name: varchar("name", { length: 120 }).notNull(),
   targetRole: text("target_role"),
   experienceLevel: text("experience_level"),
@@ -54,6 +57,7 @@ export const interviews = pgTable(
     resumeId: uuid("resume_id").references(() => resumes.id, {
       onDelete: "set null",
     }),
+    role: text("role").notNull().default("General"),
     roundType: text("round_type").notNull(),
     difficulty: text("difficulty").notNull(),
     totalQuestions: integer("total_questions").notNull(),
@@ -85,7 +89,9 @@ export const questions = pgTable(
     ),
     generatedBy: text("generated_by").notNull(),
   },
-  (t) => [index("questions_interview_order_idx").on(t.interviewId, t.orderNo)],
+  (t) => [
+    uniqueIndex("questions_interview_order_idx").on(t.interviewId, t.orderNo),
+  ],
 );
 export const answers = pgTable(
   "answers",
@@ -101,22 +107,26 @@ export const answers = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("answers_question_idx").on(t.questionId)],
+  (t) => [uniqueIndex("answers_question_idx").on(t.questionId)],
 );
-export const evaluations = pgTable("evaluations", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  answerId: uuid("answer_id")
-    .notNull()
-    .references(() => answers.id, { onDelete: "cascade" }),
-  correctness: integer("correctness").notNull(),
-  clarity: integer("clarity").notNull(),
-  depth: integer("depth").notNull(),
-  relevance: integer("relevance").notNull(),
-  overall: integer("overall").notNull(),
-  feedback: text("feedback").notNull(),
-  idealAnswer: text("ideal_answer").notNull(),
-  raw: jsonb("raw").notNull(),
-});
+export const evaluations = pgTable(
+  "evaluations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    answerId: uuid("answer_id")
+      .notNull()
+      .references(() => answers.id, { onDelete: "cascade" }),
+    correctness: integer("correctness").notNull(),
+    clarity: integer("clarity").notNull(),
+    depth: integer("depth").notNull(),
+    relevance: integer("relevance").notNull(),
+    overall: integer("overall").notNull(),
+    feedback: text("feedback").notNull(),
+    idealAnswer: text("ideal_answer").notNull(),
+    raw: jsonb("raw").notNull(),
+  },
+  (t) => [uniqueIndex("evaluations_answer_idx").on(t.answerId)],
+);
 export const reports = pgTable(
   "reports",
   {
@@ -147,3 +157,126 @@ export const aiUsageLogs = pgTable("ai_usage_logs", {
     .notNull()
     .defaultNow(),
 });
+
+/** Optional user-shared camera observation counters; no images or landmarks. */
+export const cameraObservations = pgTable("camera_observations", {
+  interviewId: uuid("interview_id")
+    .primaryKey()
+    .references(() => interviews.id, { onDelete: "cascade" }),
+  samples: integer("samples").notNull(),
+  faceVisible: integer("face_visible").notNull(),
+  centered: integer("centered").notNull(),
+  centeredKnown: integer("centered_known").notNull(),
+  gazeNearCamera: integer("gaze_near_camera").notNull(),
+  gazeKnown: integer("gaze_known").notNull(),
+  headMovements: integer("head_movements").notNull(),
+  poseSamples: integer("pose_samples").notNull().default(0),
+  postureKnown: integer("posture_known").notNull().default(0),
+  postureAligned: integer("posture_aligned").notNull().default(0),
+  wristKnown: integer("wrist_known").notNull().default(0),
+  wristMovements: integer("wrist_movements").notNull().default(0),
+  handRaisedKnown: integer("hand_raised_known").notNull().default(0),
+  handRaised: integer("hand_raised").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/** A practice test stores a question snapshot and final answers, scoped to its owner. */
+export const mockTests = pgTable(
+  "mock_tests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    topic: text("topic").notNull(),
+    questions: jsonb("questions")
+      .$type<
+        import("../modules/mock-tests/question-bank.js").PracticeQuestion[]
+      >()
+      .notNull(),
+    answers: jsonb("answers").$type<(number | null)[]>(),
+    score: integer("score"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("mock_tests_user_created_idx").on(t.userId, t.createdAt.desc()),
+  ],
+);
+
+/** Optional candidate opinion of an interview question; independent of AI evaluation. */
+export const questionFeedback = pgTable(
+  "question_feedback",
+  {
+    questionId: uuid("question_id")
+      .primaryKey()
+      .references(() => questions.id, { onDelete: "cascade" }),
+    rating: integer("rating").notNull(),
+    comment: text("comment").notNull().default(""),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    check("question_feedback_rating_check", sql`${t.rating} between 1 and 5`),
+    check(
+      "question_feedback_comment_length_check",
+      sql`char_length(${t.comment}) <= 1000`,
+    ),
+  ],
+);
+
+/** Private optional feedback on an option in a completed mock-test snapshot. */
+export const mockOptionFeedback = pgTable(
+  "mock_option_feedback",
+  {
+    testId: uuid("test_id")
+      .notNull()
+      .references(() => mockTests.id, { onDelete: "cascade" }),
+    questionIndex: integer("question_index").notNull(),
+    optionIndex: integer("option_index").notNull(),
+    rating: integer("rating").notNull(),
+    comment: text("comment").notNull().default(""),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("mock_option_feedback_unique").on(
+      t.testId,
+      t.questionIndex,
+      t.optionIndex,
+    ),
+    check(
+      "mock_option_feedback_question_check",
+      sql`${t.questionIndex} between 0 and 4`,
+    ),
+    check(
+      "mock_option_feedback_option_check",
+      sql`${t.optionIndex} between 0 and 3`,
+    ),
+    check(
+      "mock_option_feedback_rating_check",
+      sql`${t.rating} between 1 and 5`,
+    ),
+    check(
+      "mock_option_feedback_comment_check",
+      sql`char_length(${t.comment}) <= 1000`,
+    ),
+  ],
+);
+
+/** Short-lived hashed shared rate-limit counters, not raw IP addresses. */
+export const rateLimitBuckets = pgTable(
+  "rate_limit_buckets",
+  {
+    key: text("key").primaryKey(),
+    hits: integer("hits").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (t) => [index("rate_limit_buckets_expires_idx").on(t.expiresAt)],
+);

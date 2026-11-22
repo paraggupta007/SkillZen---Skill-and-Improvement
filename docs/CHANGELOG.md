@@ -21,3 +21,97 @@
 
 - Added round strategies, registry factory and composable AI/speech evaluators with fake-model unit tests.
 - Interview persistence, API flows and real-provider verification are still pending.
+
+### Phase 3 — interview API (pending live verification)
+
+- Added authenticated interview creation, history, detail, SSE questions and evaluations, and idempotent completion.
+- Added transactional persistence and migration 0002, tested against isolated PGlite; fake-AI HTTP integration and a manual Neon/Groq smoke command were added.
+- Neon migration 0002 and real Groq testing remain outstanding.
+
+### Phase 3 — Groq diagnostics
+
+- Added a credential-safe Groq connectivity/streaming diagnostic and stage-specific smoke errors.
+- Fixed provider SSE parsing when CRLF boundaries are split across network chunks, with a regression test.
+- The user confirmed the Neon migration succeeded; real Groq smoke verification is still pending.
+
+### Phase 3 — update deprecated Groq models
+
+- Switched Groq reasoning and quick tasks to the provider's recommended GPT-OSS 120B and 20B model IDs; added request-body regression tests.
+- The change is based on Groq's published deprecation notice; it has not yet been verified with the user's live account.
+
+### Phase 3 — live smoke verification
+
+- User reported that the Neon and Groq interview smoke check passed after the model update.
+
+## Phase 4 — reports and analytics
+
+- Completion events schedule validated report generation, with pending/failed/ready status and explicit retry.
+- Added report and dashboard analytics repositories, authenticated APIs and isolated PostgreSQL/fake-AI integration tests.
+- Background state is process-local; live report generation and a durable worker remain unverified/not implemented.
+
+## Phase 5 — frontend MVP
+
+- Added responsive landing, sign-in, registration, dashboard, setup, streaming interview and report screens.
+- Added session guards, API/SSE clients, query cache, answer draft store, score trend and asynchronous report retry.
+- Added frontend tests and a Vercel SPA rewrite; live browser flow and production deployment still need verification.
+
+## Phase 6 — voice
+
+- Added explicit browser speech recognition and read-aloud controls with approximate optional speech coaching metrics.
+- Added opt-in, owner-checked, size-limited Groq Whisper transcription and microphone cleanup.
+- Added mocked voice lifecycle and API security tests; real microphone and live Whisper calls remain unverified.
+
+## Phase 7 — resume and PDF
+
+- Added owner-checked PDF report downloads; default PDF fonts have limited Unicode support.
+- Added text-based PDF resume upload, deletion, AI coaching and optional resume context for interviews. Extraction uses a resource-bounded subprocess; live provider analysis is unverified.
+
+## Phase 8 — in progress
+
+- Added explicitly consented local MediaPipe face-framing and iris-position observations, with opt-in aggregate sharing and deletion.
+- Added migrations 0003–0004, coarse local pose/wrist observations and non-diagnostic suggestions in online and PDF reports. Full gesture classification and real-camera testing remain pending.
+
+## Mock tests — initial implementation
+
+- Added 3- or 5-question JavaScript and web practice tests from a small fixed bank, owner-scoped history, one-time server scoring, explanations and deletion.
+- Added migration 0005 and PGlite/browser-mock tests. Neon migration and a real browser workflow remain to be verified.
+
+## Contact, responsive navigation and deployment guidance
+
+- Added a public developer contact page with provided email, LinkedIn and education details, plus a branded favicon.
+- Reworked mobile/tablet workspace navigation, restored mobile login visibility and improved small-screen form legibility.
+- Updated Vercel + separate Node API deployment guidance; no production deployment has been performed.
+
+## Signed-in home navigation
+
+- The home page now checks the current session and shows a dashboard link and sign-out action for signed-in users; clicking the SkillZen logo no longer makes the page appear logged out. A session-check failure is shown separately from a signed-out state.
+
+## Interview question feedback
+
+- Added optional, editable and deletable 1–5 ratings and comments for individual interview questions during practice and on reports.
+- Added migration 0006 and owner isolation tests. Feedback is separate from AI evaluations, scores and PDF reports. Neon migration and live browser checks remain pending.
+
+## Account and data controls
+
+- Added password-confirmed account deletion with cascades, clear confirmation and sign-out; app-owned data is removed, but external provider copies, backups, logs and downloads are not.
+- Added isolated database and mocked UI tests; no database migration is needed.
+
+## Session revocation
+
+- Logout now revokes all sessions of the account's current generation, including copied tokens. Stale logouts cannot revoke newer sessions; database errors are reported instead of falsely confirming logout.
+- Migration 0007 is required before starting the updated API. Old JWTs will be rejected and users need to sign in again. Requests authenticated before logout may still complete.
+
+## Same-origin Vercel API
+
+- Added one Node function for `/api` and preserved SPA navigation. Report generation is request-bound on Vercel instead of relying on background work after the response.
+- Reduced voice and PDF upload limits to 4 MiB for Vercel; live deployment, streaming, uploads and browser sessions still need verification. Process-local rate limits are not distributed abuse protection.
+
+## Feedback and shared rate limits
+
+- Added private editable/deletable feedback on options in completed mock tests, independent of score and AI.
+- Production limits now use shared database counters, replacing process-local rate-limit stores. Migrations 0008 and 0009 are required before deploying; live Neon and Vercel flows still need verification.
+
+## Interview voice and live camera tips
+
+- Added an English browser-voice picker, preferring voices explicitly labelled natural, neural, enhanced or premium when present. Voice names, gender, quality and availability are device/browser dependent; browser speech services may be local or network-based.
+- Added opt-out local live tips for sustained framing, potentially multiple faces, repeated visible wrist movement and approximate side-to-side iris changes. Models may miss people or mistake images for faces; these tips do not assess attention, identity, cheating or interview performance. Multi-face samples are omitted from aggregate counts, and only explicitly saved aggregates leave the device.

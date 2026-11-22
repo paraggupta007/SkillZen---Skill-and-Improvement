@@ -15,6 +15,62 @@
       "when": 1795261762632,
       "tag": "0001_nebulous_nightmare",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795265401287,
+      "tag": "0002_lethal_vargas",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795318323346,
+      "tag": "0003_tricky_lorna_dane",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795318906704,
+      "tag": "0004_violet_the_leader",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795319378144,
+      "tag": "0005_green_chimera",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795322671719,
+      "tag": "0006_peaceful_shinobi_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795323542525,
+      "tag": "0007_romantic_echo",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795329230422,
+      "tag": "0008_mixed_dragon_lord",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795329325805,
+      "tag": "0009_easy_iron_man",
+      "breakpoints": true
     }
   ]
 }

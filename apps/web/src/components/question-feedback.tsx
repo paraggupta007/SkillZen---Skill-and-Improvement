@@ -73,8 +73,9 @@ export function QuestionFeedback({
         <div className="question-feedback-body">
           <p>
             Your optional rating and comment are saved in your account. You can
-            edit or delete them. They are not sent to the AI or used in your
-            score. Avoid sensitive information.
+            edit or delete them. They are not sent to the AI, used in your
+            score, or automatically sent to the developer. Avoid sensitive
+            information.
           </p>
           {saved.isLoading ? (
             <Loading label="Loading question feedback..." />

@@ -87,8 +87,8 @@ export function ReportPage() {
         <section className="panel report-question-feedback">
           <h2>Feedback on the questions</h2>
           <p>
-            Tell us which questions were useful. This is separate from your
-            answer evaluation and does not change your score.
+            Keep notes on which questions were useful. This is separate from
+            your answer evaluation and does not change your score.
           </p>
           {interview.data.turns.map(({ question }) => (
             <QuestionFeedback

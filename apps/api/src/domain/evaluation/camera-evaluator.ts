@@ -20,6 +20,17 @@ export class CameraEvaluator implements ICameraEvaluator {
       tips.push(
         "Consider adjusting the camera framing to keep your face comfortably visible.",
       );
+    if (
+      metrics.postureKnown >= 10 &&
+      metrics.postureAligned / metrics.postureKnown < 0.5
+    )
+      tips.push(
+        "If useful, check your camera angle and choose a comfortable sitting position; alignment estimates can be inaccurate.",
+      );
+    if (metrics.wristKnown >= 10)
+      tips.push(
+        "Use gestures that feel natural; wrist movement counts do not measure communication skill.",
+      );
     if (!tips.length)
       tips.push(
         "Check that your camera setup is comfortable and works for you.",

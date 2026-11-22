@@ -45,4 +45,4 @@ Phase 7 uses the existing resume table and foreign key; it adds no migration. Re
 
 ## Camera observations (Phase 8 in progress)
 
-Migration `0003_tricky_lorna_dane.sql` adds `camera_observations`, keyed to one interview with cascading deletion. It stores only explicitly shared bounded counters and an update time; no video, frames, or landmarks. Users can delete the observations separately. Apply the migration to Neon before saving or retrieving camera data.
+Migration `0003_tricky_lorna_dane.sql` adds `camera_observations`, keyed to one interview with cascading deletion. It stores only explicitly shared bounded counters and an update time; no video, frames, or landmarks. Users can delete the observations separately. Migration `0004_violet_the_leader.sql` adds pose, wrist and hand-height aggregate counters, defaulting existing rows to zero. Apply migrations through 0004 to Neon before saving or retrieving camera data.

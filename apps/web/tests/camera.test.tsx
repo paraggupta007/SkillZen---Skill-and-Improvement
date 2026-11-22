@@ -6,16 +6,23 @@ import userEvent from "@testing-library/user-event";
 import {
   FaceAnalyzer,
   FaceMetricsAggregator,
+  PoseAnalyzer,
   type Point,
 } from "../src/vision/analyzers";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CameraCoaching } from "../src/components/camera-coaching";
+import { createPoseLandmarker } from "../src/vision/landmarker";
 const detector = vi.hoisted(() => ({
+  close: vi.fn(),
+  detect: vi.fn(() => []),
+}));
+const poseDetector = vi.hoisted(() => ({
   close: vi.fn(),
   detect: vi.fn(() => []),
 }));
 vi.mock("../src/vision/landmarker", () => ({
   createFaceLandmarker: vi.fn(async () => detector),
+  createPoseLandmarker: vi.fn(async () => poseDetector),
 }));
 afterEach(() => {
   cleanup();
@@ -61,11 +68,87 @@ describe("camera observations", () => {
       gazeNearCamera: 1,
     });
   });
+  it("requires visible shoulders and hips and counts coarse wrist movement", () => {
+    const analyzer = new PoseAnalyzer();
+    expect(analyzer.analyze([])).toEqual({
+      postureAligned: null,
+      handRaised: null,
+      wrists: [null, null],
+    });
+    const points: Point[] = Array.from({ length: 33 }, () => ({
+      x: 0.5,
+      y: 0.5,
+      visibility: 0,
+    }));
+    points[11] = { x: 0.3, y: 0.3, visibility: 0.9 };
+    points[12] = { x: 0.7, y: 0.3, visibility: 0.9 };
+    points[23] = { x: 0.4, y: 0.7, visibility: 0.9 };
+    points[24] = { x: 0.6, y: 0.7, visibility: 0.9 };
+    points[15] = { x: 0.2, y: 0.5, visibility: 0.9 };
+    const aggregator = new FaceMetricsAggregator();
+    aggregator.addPose(analyzer.analyze(points));
+    points[15] = { x: 0.4, y: 0.2, visibility: 0.9 };
+    aggregator.addPose(analyzer.analyze(points));
+    expect(aggregator.snapshot()).toMatchObject({
+      poseSamples: 2,
+      postureKnown: 2,
+      postureAligned: 2,
+      wristKnown: 1,
+      wristMovements: 1,
+      handRaisedKnown: 1,
+      handRaised: 1,
+    });
+    points[23] = { x: 0.4, y: 0.7, visibility: 0.1 };
+    expect(analyzer.analyze(points).postureAligned).toBeNull();
+  });
+  it("continues face-only when the pose model cannot load", async () => {
+    vi.mocked(createPoseLandmarker).mockRejectedValueOnce(
+      new Error("model unavailable"),
+    );
+    const stop = vi.fn();
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: {
+        getUserMedia: vi.fn().mockResolvedValue({
+          getTracks: () => [{ stop, addEventListener: vi.fn() }],
+        }),
+      },
+    });
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            success: true,
+            data: { metrics: null, suggestions: [] },
+            error: null,
+          }),
+        ),
+      ),
+    );
+    render(
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <CameraCoaching interviewId="abc" />
+      </QueryClientProvider>,
+    );
+    const actor = userEvent.setup();
+    await actor.click(screen.getByRole("checkbox"));
+    await actor.click(screen.getByRole("button", { name: /start camera/i }));
+    await screen.findByText(/body and wrist observations are unavailable/i);
+    await screen.findByRole("button", { name: /stop camera/i });
+    await actor.click(screen.getByRole("button", { name: /stop camera/i }));
+    expect(stop).toHaveBeenCalled();
+  });
   it("requires consent and explicit start, and stops camera tracks", async () => {
     const stop = vi.fn();
-    const getUserMedia = vi
-      .fn()
-      .mockResolvedValue({ getTracks: () => [{ stop }] });
+    const getUserMedia = vi.fn().mockResolvedValue({
+      getTracks: () => [{ stop, addEventListener: vi.fn() }],
+    });
     Object.defineProperty(navigator, "mediaDevices", {
       configurable: true,
       value: { getUserMedia },
@@ -106,6 +189,7 @@ describe("camera observations", () => {
     await actor.click(screen.getByRole("button", { name: /stop camera/i }));
     await waitFor(() => expect(stop).toHaveBeenCalled());
     expect(detector.close).toHaveBeenCalled();
+    expect(poseDetector.close).toHaveBeenCalled();
     expect(
       fetcher.mock.calls.every(
         ([, options]) => !options.method || options.method === "GET",
@@ -118,9 +202,9 @@ it("sends only aggregate counts after a separate save action", async () => {
   Object.defineProperty(navigator, "mediaDevices", {
     configurable: true,
     value: {
-      getUserMedia: vi
-        .fn()
-        .mockResolvedValue({ getTracks: () => [{ stop: stopTrack }] }),
+      getUserMedia: vi.fn().mockResolvedValue({
+        getTracks: () => [{ stop: stopTrack, addEventListener: vi.fn() }],
+      }),
     },
   });
   vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue();
@@ -183,6 +267,13 @@ it("sends only aggregate counts after a separate save action", async () => {
       "gazeNearCamera",
       "headMovements",
       "samples",
+      "poseSamples",
+      "postureKnown",
+      "postureAligned",
+      "wristKnown",
+      "wristMovements",
+      "handRaisedKnown",
+      "handRaised",
     ].sort(),
   );
   expect(stopTrack).toHaveBeenCalled();

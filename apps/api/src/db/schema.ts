@@ -167,6 +167,13 @@ export const cameraObservations = pgTable("camera_observations", {
   gazeNearCamera: integer("gaze_near_camera").notNull(),
   gazeKnown: integer("gaze_known").notNull(),
   headMovements: integer("head_movements").notNull(),
+  poseSamples: integer("pose_samples").notNull().default(0),
+  postureKnown: integer("posture_known").notNull().default(0),
+  postureAligned: integer("posture_aligned").notNull().default(0),
+  wristKnown: integer("wrist_known").notNull().default(0),
+  wristMovements: integer("wrist_movements").notNull().default(0),
+  handRaisedKnown: integer("hand_raised_known").notNull().default(0),
+  handRaised: integer("hand_raised").notNull().default(0),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

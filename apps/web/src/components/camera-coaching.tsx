@@ -5,8 +5,12 @@ import { apiRequest } from "../services/api";
 import type { CameraResult } from "../services/types";
 import { ErrorState } from "./ui";
 import { Camera, CameraOff } from "lucide-react";
-import { FaceAnalyzer, FaceMetricsAggregator } from "../vision/analyzers";
-import type { IFaceLandmarker } from "../vision/landmarker";
+import {
+  FaceAnalyzer,
+  FaceMetricsAggregator,
+  PoseAnalyzer,
+} from "../vision/analyzers";
+import type { IFaceLandmarker, IPoseLandmarker } from "../vision/landmarker";
 type Metrics = ReturnType<FaceMetricsAggregator["snapshot"]>;
 /** Offer optional local camera observations without uploading any frames or metrics. */
 export function CameraCoaching({ interviewId }: { interviewId: string }) {
@@ -41,10 +45,12 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<"idle" | "starting" | "active">("idle");
   const [error, setError] = useState("");
+  const [poseWarning, setPoseWarning] = useState("");
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const video = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null);
   const landmarker = useRef<IFaceLandmarker | null>(null);
+  const poseLandmarker = useRef<IPoseLandmarker | null>(null);
   const timer = useRef<number | null>(null);
   const generation = useRef(0);
   const aggregate = useRef<FaceMetricsAggregator | null>(null);
@@ -61,6 +67,8 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
     stream.current = null;
     landmarker.current?.close();
     landmarker.current = null;
+    poseLandmarker.current?.close();
+    poseLandmarker.current = null;
     if (video.current) video.current.srcObject = null;
     setState("idle");
   }
@@ -70,6 +78,7 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
       if (timer.current !== null) window.clearInterval(timer.current);
       stream.current?.getTracks().forEach((track) => track.stop());
       landmarker.current?.close();
+      poseLandmarker.current?.close();
     },
     [],
   );
@@ -79,6 +88,7 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
     setState("starting");
     share.reset();
     setError("");
+    setPoseWarning("");
     setMetrics(null);
     try {
       if (!navigator.mediaDevices?.getUserMedia)
@@ -93,6 +103,21 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
         return;
       }
       landmarker.current = detector;
+      try {
+        const pose = await import("../vision/landmarker").then((module) =>
+          module.createPoseLandmarker(),
+        );
+        if (generation.current !== token) {
+          pose.close();
+          return;
+        }
+        poseLandmarker.current = pose;
+      } catch {
+        if (generation.current !== token) return;
+        setPoseWarning(
+          "Body and wrist observations are unavailable; face observations can still be used.",
+        );
+      }
       const media = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: false,
@@ -102,11 +127,26 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
         return;
       }
       stream.current = media;
+      media.getTracks().forEach((track) =>
+        track.addEventListener(
+          "ended",
+          () => {
+            if (generation.current === token) {
+              stop();
+              setError(
+                "Camera access ended. You can restart it or continue without camera practice.",
+              );
+            }
+          },
+          { once: true },
+        ),
+      );
       if (!video.current) throw new Error("Camera preview is unavailable.");
       video.current.srcObject = media;
       await video.current.play();
       if (generation.current !== token) return;
       const analyzer = new FaceAnalyzer();
+      const poseAnalyzer = new PoseAnalyzer();
       const aggregator = new FaceMetricsAggregator();
       aggregate.current = aggregator;
       let lastVideoTime = -1;
@@ -124,7 +164,24 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
           aggregator.add(
             analyzer.analyze(detector.detect(current, performance.now())),
           );
-          if (++updates % 5 === 0) setMetrics(aggregator.snapshot());
+          if (++updates % 5 === 0) {
+            if (poseLandmarker.current) {
+              try {
+                aggregator.addPose(
+                  poseAnalyzer.analyze(
+                    poseLandmarker.current.detect(current, performance.now()),
+                  ),
+                );
+              } catch {
+                poseLandmarker.current.close();
+                poseLandmarker.current = null;
+                setPoseWarning(
+                  "Body and wrist observations stopped; face observations remain active.",
+                );
+              }
+            }
+            setMetrics(aggregator.snapshot());
+          }
           if (aggregator.snapshot().samples >= 18000) {
             stop();
             setError(
@@ -157,10 +214,10 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
         </div>
       </div>
       <p className="camera-notice">
-        Video is analyzed in your browser, never uploaded. The face model
-        downloads from Google when you start. Estimates are imperfect and are
-        not retina scans, proof of attention, or cheating detection. You can
-        skip or stop at any time.
+        Video is analyzed in your browser, never uploaded. Face and pose models
+        download from Google when you start. Estimates are imperfect and are not
+        retina scans, proof of attention, or cheating detection. You can skip or
+        stop at any time.
       </p>
       <label className="resume-consent">
         <input
@@ -200,6 +257,11 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
           Loading the model and requesting camera permission...
         </p>
       )}
+      {poseWarning && (
+        <p className="voice-error" role="status">
+          {poseWarning}
+        </p>
+      )}
       {error && (
         <p className="voice-error" role="alert">
           {error}
@@ -221,6 +283,19 @@ export function CameraCoaching({ interviewId }: { interviewId: string }) {
               : "Not enough data to estimate iris position."}{" "}
             Lighting, glasses, positioning and individual differences affect
             results.
+          </p>
+          <p>
+            {metrics.postureKnown
+              ? `Shoulder and hip centers aligned in ${metrics.postureAligned} of ${metrics.postureKnown} usable pose samples.`
+              : "Not enough visible shoulder and hip data for alignment estimates."}{" "}
+            {metrics.wristKnown
+              ? `Wrist movement was detected in ${metrics.wristMovements} of ${metrics.wristKnown} usable samples.`
+              : "Wrists were not sufficiently visible to estimate movement."}{" "}
+            {metrics.handRaisedKnown
+              ? ` A hand appeared above shoulder height in ${metrics.handRaised} of ${metrics.handRaisedKnown} usable samples.`
+              : " Hand-raise observations were unavailable."}{" "}
+            These are rough geometry measurements, not judgments about posture,
+            gesture quality, health or confidence.
           </p>
           <p>
             Only these aggregate counts can be shared; video and landmarks never

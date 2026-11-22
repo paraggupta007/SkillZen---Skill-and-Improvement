@@ -50,4 +50,4 @@ PDF input is limited to 5 MB, 10 pages and 20,000 extracted characters. PDF.js r
 
 ## Camera observations
 
-Video and landmarks stay in the browser. The user separately chooses whether to save coarse counts; they can delete those counts. The model is downloaded from Google after opt-in, and WebAssembly files are served locally. Estimates are uncertain and are not biometric identification, medical retinal analysis, evidence of attention, or cheating detection. The observations do not change interview scores. Full body and hand gesture analysis remains to be implemented and requires additional validation.
+Video and landmarks stay in the browser. The user separately chooses whether to save coarse counts; they can delete those counts. The face and pose models are downloaded from Google after opt-in, and WebAssembly files are served locally. Estimates are uncertain and are not biometric identification, medical retinal analysis, evidence of attention, or cheating detection. The observations do not change interview scores. Rough shoulder/hip alignment, wrist movement and hand-height counts are not gesture classification and require real-device validation.

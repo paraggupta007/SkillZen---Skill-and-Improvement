@@ -12,6 +12,8 @@ import { createContainer } from "../src/container.js";
 import { loadEnv } from "../src/config/env.js";
 import { DrizzleUserRepository } from "../src/modules/users/drizzle-user-repository.js";
 import { DrizzleInterviewRepository } from "../src/modules/interviews/drizzle-interview-repository.js";
+import { DrizzleCameraRepository } from "../src/modules/camera/drizzle-camera-repository.js";
+import { PdfResumeTextExtractor } from "../src/modules/resumes/pdf-extractor.js";
 import { DrizzleReportRepository } from "../src/modules/reports/drizzle-report-repository.js";
 import { DrizzleAnalyticsRepository } from "../src/modules/analytics/drizzle-analytics-repository.js";
 class ReportFake implements ILLMProvider {
@@ -81,6 +83,7 @@ describe("report and analytics API", () => {
           userRepository: new DrizzleUserRepository(db),
           interviewRepository: new DrizzleInterviewRepository(db),
           reportRepository: new DrizzleReportRepository(db),
+          cameraRepository: new DrizzleCameraRepository(db),
           analyticsRepository: new DrizzleAnalyticsRepository(db),
           providers: [fake],
         },
@@ -120,6 +123,26 @@ describe("report and analytics API", () => {
       expect(completedData(response.text).metrics).toMatchObject({
         overall: 8,
       });
+      expect(
+        (
+          await owner
+            .put(`/api/interviews/${id}/camera-metrics`)
+            .send({
+              samples: 100,
+              faceVisible: 70,
+              centered: 60,
+              centeredKnown: 70,
+              gazeNearCamera: 40,
+              gazeKnown: 60,
+              headMovements: 3,
+              poseSamples: 20,
+              postureKnown: 12,
+              postureAligned: 8,
+              wristKnown: 15,
+              wristMovements: 2,
+            })
+        ).status,
+      ).toBe(200);
       fake.failReports = true;
       expect((await owner.post(`/api/interviews/${id}/complete`)).status).toBe(
         200,
@@ -155,7 +178,21 @@ describe("report and analytics API", () => {
           .subarray(0, 5)
           .toString(),
       ).toBe("%PDF-");
+      const text = await new PdfResumeTextExtractor().extract(
+        Buffer.from(pdf.body as Uint8Array),
+      );
+      expect(text).toContain("Optional camera observations");
+      expect(text).toContain("Wrist movement");
       expect((await other.get(`/api/reports/${id}/pdf`)).status).toBe(404);
+      expect(
+        (await owner.delete(`/api/interviews/${id}/camera-metrics`)).status,
+      ).toBe(200);
+      const afterDelete = await owner.get(`/api/reports/${id}/pdf`);
+      expect(
+        await new PdfResumeTextExtractor().extract(
+          Buffer.from(afterDelete.body as Uint8Array),
+        ),
+      ).not.toContain("Optional camera observations");
       const summary = await owner.get("/api/analytics/summary");
       expect(summary.body.data).toMatchObject({
         totalInterviews: 1,

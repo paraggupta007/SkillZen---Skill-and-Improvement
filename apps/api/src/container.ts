@@ -154,6 +154,7 @@ export function createContainer(
           jsonGenerator,
           new ReportPrompt(prompts),
           new ReportPdfRenderer(),
+          cameraService,
         )
       : undefined;
   if (reportService && options.subscribeReports !== false)

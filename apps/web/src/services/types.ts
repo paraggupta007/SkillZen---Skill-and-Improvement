@@ -97,6 +97,13 @@ export interface CameraResult {
     gazeNearCamera: number;
     gazeKnown: number;
     headMovements: number;
+    poseSamples: number;
+    postureKnown: number;
+    postureAligned: number;
+    wristKnown: number;
+    wristMovements: number;
+    handRaisedKnown: number;
+    handRaised: number;
   } | null;
   suggestions: string[];
 }

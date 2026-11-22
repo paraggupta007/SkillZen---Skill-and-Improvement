@@ -30,6 +30,13 @@ export class CameraService {
             gazeNearCamera: metrics.gazeNearCamera,
             gazeKnown: metrics.gazeKnown,
             headMovements: metrics.headMovements,
+            poseSamples: metrics.poseSamples,
+            postureKnown: metrics.postureKnown,
+            postureAligned: metrics.postureAligned,
+            wristKnown: metrics.wristKnown,
+            wristMovements: metrics.wristMovements,
+            handRaisedKnown: metrics.handRaisedKnown,
+            handRaised: metrics.handRaised,
           }
         : null,
       suggestions: metrics ? this.evaluator.evaluate(metrics) : [],

@@ -4,6 +4,7 @@ export interface Point {
   x: number;
   y: number;
   z?: number;
+  visibility?: number;
 }
 /** One frame's approximate observations. Null means insufficient landmarks. */
 export interface FaceObservation {
@@ -66,6 +67,14 @@ export class FaceMetricsAggregator {
   private gazeKnown = 0;
   private movement = 0;
   private previousX: number | null = null;
+  private poseSamples = 0;
+  private postureKnown = 0;
+  private postureAligned = 0;
+  private wristKnown = 0;
+  private wristMovements = 0;
+  private handRaisedKnown = 0;
+  private handRaised = 0;
+  private lastWrists: [Point | null, Point | null] = [null, null];
   /** Incorporate a single approximate observation. */
   add(result: FaceObservation) {
     this.samples++;
@@ -86,6 +95,30 @@ export class FaceMetricsAggregator {
       this.movement++;
     this.previousX = result.headX;
   }
+  /** Add a less-frequent pose sample; wrist motion is not a classified gesture. */
+  addPose(result: PoseObservation) {
+    this.poseSamples++;
+    if (result.postureAligned !== null) {
+      this.postureKnown++;
+      if (result.postureAligned) this.postureAligned++;
+    }
+    if (result.handRaised !== null) {
+      this.handRaisedKnown++;
+      if (result.handRaised) this.handRaised++;
+    }
+    if (result.wrists.some((point, index) => point && this.lastWrists[index]))
+      this.wristKnown++;
+    if (
+      result.wrists.some((point, index) => {
+        const last = this.lastWrists[index];
+        return (
+          point && last && Math.hypot(point.x - last.x, point.y - last.y) > 0.08
+        );
+      })
+    )
+      this.wristMovements++;
+    this.lastWrists = result.wrists;
+  }
   /** Return counts and known denominators; no biometric landmarks leave the analyzer. */
   snapshot() {
     return {
@@ -96,6 +129,68 @@ export class FaceMetricsAggregator {
       gazeNearCamera: this.gaze,
       gazeKnown: this.gazeKnown,
       headMovements: this.movement,
+      poseSamples: this.poseSamples,
+      postureKnown: this.postureKnown,
+      postureAligned: this.postureAligned,
+      wristKnown: this.wristKnown,
+      wristMovements: this.wristMovements,
+      handRaisedKnown: this.handRaisedKnown,
+      handRaised: this.handRaised,
     };
+  }
+}
+
+/** Coarse pose observations; absent joints are unknown, not negative results. */
+export interface PoseObservation {
+  postureAligned: boolean | null;
+  handRaised: boolean | null;
+  wrists: [Point | null, Point | null];
+}
+/** Analyze body landmarks without inferring emotion, attention or health. */
+export interface IPoseAnalyzer {
+  analyze(points: readonly Point[]): PoseObservation;
+}
+/** Approximate shoulder-to-hip alignment and visible wrist position. */
+export class PoseAnalyzer implements IPoseAnalyzer {
+  /** Return null for body parts outside the frame or below visibility threshold. */
+  analyze(points: readonly Point[]): PoseObservation {
+    const visible = (index: number) => {
+      const point = points[index];
+      return point &&
+        point.visibility !== undefined &&
+        point.visibility >= 0.6 &&
+        point.x >= 0 &&
+        point.x <= 1 &&
+        point.y >= 0 &&
+        point.y <= 1
+        ? point
+        : null;
+    };
+    const leftShoulder = visible(11),
+      rightShoulder = visible(12),
+      leftHip = visible(23),
+      rightHip = visible(24);
+    let postureAligned: boolean | null = null;
+    if (leftShoulder && rightShoulder && leftHip && rightHip) {
+      const width = Math.abs(leftShoulder.x - rightShoulder.x);
+      if (width >= 0.05) {
+        const shoulderCenter = (leftShoulder.x + rightShoulder.x) / 2;
+        const hipCenter = (leftHip.x + rightHip.x) / 2;
+        postureAligned = Math.abs(shoulderCenter - hipCenter) <= width * 0.6;
+      }
+    }
+    const leftWrist = visible(15),
+      rightWrist = visible(16);
+    const leftRaised =
+      leftShoulder && leftWrist ? leftWrist.y < leftShoulder.y : null;
+    const rightRaised =
+      rightShoulder && rightWrist ? rightWrist.y < rightShoulder.y : null;
+    const handRaised =
+      leftRaised === true || rightRaised === true
+        ? true
+        : leftRaised === false && rightRaised === false
+          ? false
+          : null;
+    return { postureAligned, handRaised, wrists: [leftWrist, rightWrist] };
   }
 }

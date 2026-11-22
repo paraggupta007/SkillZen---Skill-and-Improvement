@@ -69,4 +69,4 @@
 ## Phase 8 — in progress
 
 - Added explicitly consented local MediaPipe face-framing and iris-position observations, with opt-in aggregate sharing and deletion.
-- Added migration 0003 and non-diagnostic report suggestions. Full gesture/body-posture analysis, PDF integration and real-camera testing remain pending.
+- Added migrations 0003–0004, coarse local pose/wrist observations and non-diagnostic suggestions in online and PDF reports. Full gesture classification and real-camera testing remain pending.

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { AppError } from "../../core/errors.js";
 import type { JsonGenerator } from "../../ai/json-generator.js";
 import type { ReportPrompt } from "../../domain/prompts/report-prompt.js";
+import type { CameraService } from "../camera/camera-service.js";
 import type { IInterviewRepository } from "../interviews/interview-repository.js";
 import type { IReportPdfRenderer } from "./pdf-renderer.js";
 import type { IReportRepository } from "./report-repository.js";
@@ -24,6 +25,7 @@ export class ReportService {
     private readonly generator: Pick<JsonGenerator, "generate">,
     private readonly prompt: ReportPrompt,
     private readonly pdf: IReportPdfRenderer,
+    private readonly camera?: Pick<CameraService, "get">,
   ) {}
   private key(userId: string, interviewId: string) {
     return `${userId}:${interviewId}`;
@@ -123,7 +125,13 @@ export class ReportService {
         "REPORT_NOT_READY",
         "Report is not ready for download",
       );
-    return this.pdf.render(report);
+    const camera = await this.camera?.get(userId, id);
+    return this.pdf.render(
+      report,
+      camera?.metrics
+        ? { metrics: camera.metrics, suggestions: camera.suggestions }
+        : undefined,
+    );
   }
   /** Retry a failed or missing report generation without duplicating an active job. */
   async retry(userId: string, id: string) {

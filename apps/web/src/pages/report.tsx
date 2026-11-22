@@ -195,6 +195,19 @@ export function ReportPage() {
                       ? `Iris position near center in ${camera.data.metrics.gazeNearCamera} of ${camera.data.metrics.gazeKnown} usable frames.`
                       : "Not enough data to estimate iris position."}
                   </p>
+                  <p>
+                    {camera.data.metrics.postureKnown
+                      ? `Shoulder and hip centers aligned in ${camera.data.metrics.postureAligned} of ${camera.data.metrics.postureKnown} usable pose samples.`
+                      : "Not enough visible pose data for alignment estimates."}{" "}
+                    {camera.data.metrics.wristKnown
+                      ? `Wrist movement detected in ${camera.data.metrics.wristMovements} of ${camera.data.metrics.wristKnown} usable samples.`
+                      : "No usable wrist samples."}{" "}
+                    {camera.data.metrics.handRaisedKnown
+                      ? ` A hand appeared above shoulder height in ${camera.data.metrics.handRaised} of ${camera.data.metrics.handRaisedKnown} usable samples.`
+                      : " Hand-raise observations were unavailable."}{" "}
+                    These are rough measurements, not judgments about posture,
+                    gesture quality or health.
+                  </p>
                   {camera.data.suggestions.map((tip, index) => (
                     <p key={`${index}-${tip}`}>{tip}</p>
                   ))}

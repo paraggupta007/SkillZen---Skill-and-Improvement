@@ -20,6 +20,13 @@ const metrics = {
   gazeNearCamera: 40,
   gazeKnown: 60,
   headMovements: 3,
+  poseSamples: 20,
+  postureKnown: 12,
+  postureAligned: 8,
+  wristKnown: 15,
+  wristMovements: 2,
+  handRaisedKnown: 10,
+  handRaised: 4,
 };
 describe("optional camera metrics", () => {
   it("enforces owner access, bounded counts, no video and deletion", async () => {
@@ -42,28 +49,22 @@ describe("optional camera metrics", () => {
       const app = createApp(container);
       const owner = request.agent(app);
       const other = request.agent(app);
-      await owner
-        .post("/api/auth/register")
-        .send({
-          name: "Ada",
-          email: "ada@example.com",
-          password: "password123",
-        });
-      await other
-        .post("/api/auth/register")
-        .send({
-          name: "Bob",
-          email: "bob@example.com",
-          password: "password123",
-        });
-      const created = await owner
-        .post("/api/interviews")
-        .send({
-          role: "Engineer",
-          roundType: "technical",
-          difficulty: "easy",
-          totalQuestions: 1,
-        });
+      await owner.post("/api/auth/register").send({
+        name: "Ada",
+        email: "ada@example.com",
+        password: "password123",
+      });
+      await other.post("/api/auth/register").send({
+        name: "Bob",
+        email: "bob@example.com",
+        password: "password123",
+      });
+      const created = await owner.post("/api/interviews").send({
+        role: "Engineer",
+        roundType: "technical",
+        difficulty: "easy",
+        totalQuestions: 1,
+      });
       const path = `/api/interviews/${created.body.data.id}/camera-metrics`;
       expect((await request(app).get(path)).status).toBe(401);
       expect((await other.put(path).send(metrics)).status).toBe(404);
@@ -77,6 +78,30 @@ describe("optional camera metrics", () => {
       expect(
         (await owner.put(path).send({ ...metrics, samples: 18001 })).status,
       ).toBe(400);
+      expect(
+        (await owner.put(path).send({ ...metrics, postureKnown: 21 })).status,
+      ).toBe(400);
+      expect(
+        (await owner.put(path).send({ ...metrics, wristMovements: 16 })).status,
+      ).toBe(400);
+      expect(
+        (await owner.put(path).send({ ...metrics, handRaised: 11 })).status,
+      ).toBe(400);
+      const oldClient = await owner
+        .put(path)
+        .send({
+          samples: 10,
+          faceVisible: 5,
+          centered: 3,
+          centeredKnown: 5,
+          gazeNearCamera: 2,
+          gazeKnown: 4,
+          headMovements: 0,
+        });
+      expect(oldClient.body.data.metrics).toMatchObject({
+        poseSamples: 0,
+        handRaisedKnown: 0,
+      });
       const stored = await owner.put(path).send(metrics);
       expect(stored.status).toBe(200);
       expect(stored.body.data.metrics).toEqual(metrics);

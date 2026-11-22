@@ -22,6 +22,13 @@ const metricsSchema = z
     gazeNearCamera: count,
     gazeKnown: count,
     headMovements: count,
+    poseSamples: count.default(0),
+    postureKnown: count.default(0),
+    postureAligned: count.default(0),
+    wristKnown: count.default(0),
+    wristMovements: count.default(0),
+    handRaisedKnown: count.default(0),
+    handRaised: count.default(0),
   })
   .strict()
   .refine(
@@ -31,7 +38,14 @@ const metricsSchema = z
       m.centered <= m.centeredKnown &&
       m.gazeKnown <= m.faceVisible &&
       m.gazeNearCamera <= m.gazeKnown &&
-      m.headMovements < m.samples,
+      m.headMovements < m.samples &&
+      m.poseSamples <= m.samples &&
+      m.postureKnown <= m.poseSamples &&
+      m.postureAligned <= m.postureKnown &&
+      m.wristKnown <= m.poseSamples &&
+      m.wristMovements <= m.wristKnown &&
+      m.handRaisedKnown <= m.poseSamples &&
+      m.handRaised <= m.handRaisedKnown,
   );
 function asyncRoute(fn: (req: Request, res: Response) => Promise<void>) {
   return (req: Request, res: Response, next: NextFunction) => {

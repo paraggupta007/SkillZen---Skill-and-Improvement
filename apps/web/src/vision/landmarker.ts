@@ -1,5 +1,9 @@
 // Lazy-loaded MediaPipe adapter; model assets are fetched only after camera consent.
-import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import {
+  FaceLandmarker,
+  FilesetResolver,
+  PoseLandmarker,
+} from "@mediapipe/tasks-vision";
 import simdLoader from "@mediapipe/tasks-vision/vision_wasm_internal.js?url";
 import simdBinary from "@mediapipe/tasks-vision/vision_wasm_internal.wasm?url";
 import fallbackLoader from "@mediapipe/tasks-vision/vision_wasm_nosimd_internal.js?url";
@@ -31,6 +35,37 @@ export async function createFaceLandmarker(): Promise<IFaceLandmarker> {
   return {
     detect: (video, timestamp) =>
       instance.detectForVideo(video, timestamp).faceLandmarks[0] ?? [],
+    close: () => instance.close(),
+  };
+}
+
+/** Browser-only body pose detector. */
+export interface IPoseLandmarker {
+  detect(video: HTMLVideoElement, timestamp: number): readonly Point[];
+  close(): void;
+}
+/** Load the official lite pose model only after camera opt-in. */
+export async function createPoseLandmarker(): Promise<IPoseLandmarker> {
+  const simd = await FilesetResolver.isSimdSupported();
+  const instance = await PoseLandmarker.createFromOptions(
+    {
+      wasmLoaderPath: simd ? simdLoader : fallbackLoader,
+      wasmBinaryPath: simd ? simdBinary : fallbackBinary,
+    },
+    {
+      baseOptions: {
+        modelAssetPath:
+          "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+        delegate: "CPU",
+      },
+      runningMode: "VIDEO",
+      numPoses: 1,
+      outputSegmentationMasks: false,
+    },
+  );
+  return {
+    detect: (video, timestamp) =>
+      instance.detectForVideo(video, timestamp).landmarks[0] ?? [],
     close: () => instance.close(),
   };
 }

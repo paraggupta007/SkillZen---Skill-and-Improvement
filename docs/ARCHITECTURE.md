@@ -9,7 +9,7 @@ flowchart LR
   Browser[React + Vite] -->|REST and SSE| API[Express API]
   API --> DB[(PostgreSQL / Neon pool)]
   API --> AI[Free AI provider chain]
-  Browser -. optional local analysis .-> Camera[Webcam face observations]
+  Browser -. optional local analysis .-> Camera[Webcam face and pose observations]
 ```
 
 ## Layers
@@ -94,4 +94,4 @@ An injected report PDF renderer creates an in-memory PDF after checking ownershi
 
 ## Camera coaching (Phase 8 in progress)
 
-After explicit consent and start, the browser loads MediaPipe Face Landmarker and its official model from Google, captures video locally and samples at approximately 5 fps. Face framing and iris-position counters are approximations, not attention or cheating detection. No frames or landmarks are sent to the server. The user can explicitly save/delete aggregate counters; a separate evaluator provides non-diagnostic framing suggestions on the online report, without affecting scores. Full body/hand gesture analysis and PDF integration are not implemented; real camera and model loading remain unverified.
+After explicit consent and start, the browser loads MediaPipe Face and Pose Landmarkers and their official models from Google, captures video locally and samples face at approximately 5 fps and pose at approximately 1 fps. Face framing and iris-position counters are approximations, not attention or cheating detection. No frames or landmarks are sent to the server. The user can explicitly save/delete aggregate counters; a separate evaluator provides non-diagnostic framing suggestions on online and PDF reports, without affecting scores. Coarse shoulder/hip alignment, wrist movement and hand height are not gesture classification; pose can fall back to face-only if unavailable. Real camera and model loading remain unverified.

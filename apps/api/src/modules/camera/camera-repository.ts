@@ -10,6 +10,13 @@ export type CameraMetrics = Pick<
   | "gazeNearCamera"
   | "gazeKnown"
   | "headMovements"
+  | "poseSamples"
+  | "postureKnown"
+  | "postureAligned"
+  | "wristKnown"
+  | "wristMovements"
+  | "handRaisedKnown"
+  | "handRaised"
 >;
 /** Storage contract after ownership has been verified by the service. */
 export interface ICameraRepository {

@@ -43,3 +43,7 @@
 ## Voice and privacy
 
 Browser speech APIs vary in availability and may use a network service. We offer an explicit recording alternative that uploads to Groq only after the user chooses it; no audio is persisted by the application. Groq documents `whisper-large-v3-turbo` and free-tier audio limits at https://console.groq.com/docs/speech-to-text and https://console.groq.com/docs/rate-limits; availability and quotas may change. Word rate, fillers and pauses are rough English recognition heuristics, not diagnostic measurements; edited or mixed input has no speech metrics.
+
+## Resume extraction and privacy
+
+PDF input is limited to 5 MB, 10 pages and 20,000 extracted characters. PDF.js runs in a subprocess with a 128 MB V8 heap limit, 15-second deadline and two-process concurrency limit; this is resource isolation, not an OS security sandbox. Only extracted text is stored. Users can delete it, but generated interview material may retain derived information. AI match scores are estimates, never ATS or hiring decisions. Scanned PDFs and full Unicode report-font coverage are deferred.

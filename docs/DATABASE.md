@@ -15,7 +15,7 @@ erDiagram
 ```
 
 - `users`: account and profile; skills stored as JSON.
-- `resumes`: extracted text, skills and ATS score, belonging to a user.
+- `resumes`: extracted text, skills and approximate last AI match score (stored in `ats_score` for schema compatibility), belonging to a user; the original file and full analysis are not stored. Deletion clears interview references but does not remove already-generated interview content.
 - `interviews`: user, role, optional resume, type, difficulty and status.
 - `questions`: interview question and optional parent follow-up.
 - `answers`: text and optional speech metrics.
@@ -40,3 +40,5 @@ Phase 4 uses the existing `reports` table and its unique `interview_id` index; i
 ## Voice
 
 Phase 6 adds no migration. Existing answer speech metrics and evaluation data are stored when supplied; audio recordings are not stored by the application. Text transcriptions enter the editable answer field and are saved only when the answer is submitted.
+
+Phase 7 uses the existing resume table and foreign key; it adds no migration. Resume text persists until the owner deletes it or the user is deleted.

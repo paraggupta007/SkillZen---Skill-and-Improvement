@@ -1,7 +1,7 @@
 // Interview setup form and session creation.
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "../services/api";
 import { useCurrentUser } from "../services/queries";
-import type { CreateInterview, Interview } from "../services/types";
+import type { CreateInterview, Interview, Resume } from "../services/types";
 import { ErrorState, Eyebrow } from "../components/ui";
 const rounds = [
   {
@@ -44,6 +44,12 @@ export function Setup() {
   const [difficulty, setDifficulty] = useState("medium");
   const [totalQuestions, setTotalQuestions] = useState(5);
   const [jdText, setJdText] = useState("");
+  const [resumeId, setResumeId] = useState("");
+  const resumes = useQuery({
+    queryKey: ["resumes"],
+    queryFn: () => apiRequest<Resume[]>("/resumes"),
+    retry: false,
+  });
   const create = useMutation({
     mutationFn: (input: CreateInterview) =>
       apiRequest<Interview>("/interviews", {
@@ -66,6 +72,7 @@ export function Setup() {
       difficulty,
       totalQuestions,
       ...(jdText.trim() ? { jdText: jdText.trim() } : {}),
+      ...(resumeId ? { resumeId } : {}),
     });
   }
   return (
@@ -170,6 +177,32 @@ export function Setup() {
               </select>
             </label>
           </div>
+          <label className="field-label optional-field">
+            Resume <span>OPTIONAL</span>
+            <select
+              value={resumeId}
+              onChange={(event) => setResumeId(event.target.value)}
+            >
+              <option value="">No resume</option>
+              {resumes.data?.map((resume) => (
+                <option key={resume.id} value={resume.id}>
+                  Resume from {new Date(resume.createdAt).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
+            <small>
+              Selected resume text is sent to the AI provider for interview
+              questions and evaluations.{" "}
+              <Link className="text-link" to="/app/resumes">
+                Manage resumes
+              </Link>
+            </small>
+          </label>
+          {resumes.isError && (
+            <p className="voice-error">
+              Could not load resumes; you can continue without one.
+            </p>
+          )}
           <label className="field-label optional-field">
             Job description <span>OPTIONAL</span>
             <textarea

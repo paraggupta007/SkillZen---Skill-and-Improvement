@@ -88,6 +88,6 @@ React Router provides public and protected routes. TanStack Query owns server st
 
 The browser can read questions with speech synthesis and use Web Speech recognition after an explicit click. Some browser recognition implementations transmit audio to their own provider. A separate opt-in MediaRecorder path sends audio to an authenticated, owner-checked, rate-limited API and the server-only `ITranscriber` Groq adapter; it does not write audio to disk. Browser-derived speech metrics are approximate; no metrics are submitted after editing a transcript or appending to existing text. Live microphone and provider behavior remain unverified.
 
-## PDF report export (Phase 7 in progress)
+## Resume analysis and PDF export
 
-An injected report PDF renderer creates an in-memory PDF after checking ownership and report readiness. The download route does not start a report job. Built-in PDF fonts currently have limited Unicode coverage; resume extraction and analysis are still in progress.
+An injected report PDF renderer creates an in-memory PDF after checking ownership and report readiness. The download route does not start a report job. Built-in PDF fonts currently have limited Unicode coverage. A separate resource-limited child process extracts text from uploaded PDFs; it is not an OS security sandbox. A repository stores extracted text by owner, and the AI prompt treats resume/JD contents as untrusted.

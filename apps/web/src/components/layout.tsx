@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   LayoutDashboard,
+  FileText,
   LogOut,
   Plus,
   Sparkles,
@@ -52,6 +53,9 @@ export function AppLayout() {
           <NavLink to="/app/setup">
             <Plus size={18} /> New interview
           </NavLink>
+          <NavLink to="/app/resumes">
+            <FileText size={18} /> Resumes
+          </NavLink>
         </nav>
         <div className="sidebar-bottom">
           <div className="side-note">
@@ -92,6 +96,9 @@ export function AppLayout() {
           <div className="mobile-actions">
             <Link to="/app" className="back-link">
               Dashboard
+            </Link>
+            <Link to="/app/resumes" className="back-link">
+              Resumes
             </Link>
             <Link to="/app/setup" className="button button-small button-dark">
               New interview

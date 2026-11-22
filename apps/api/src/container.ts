@@ -22,6 +22,14 @@ import {
   GroqTranscriber,
   type ITranscriber,
 } from "./modules/speech/transcriber.js";
+import { ResumeService } from "./modules/resumes/resume-service.js";
+import { DrizzleResumeRepository } from "./modules/resumes/drizzle-resume-repository.js";
+import type { IResumeRepository } from "./modules/resumes/resume-repository.js";
+import {
+  PdfResumeTextExtractor,
+  type IResumeTextExtractor,
+} from "./modules/resumes/pdf-extractor.js";
+import { ResumePrompt } from "./domain/prompts/resume-prompt.js";
 import { ReportPdfRenderer } from "./modules/reports/pdf-renderer.js";
 import { ReportService } from "./modules/reports/report-service.js";
 import { DrizzleReportRepository } from "./modules/reports/drizzle-report-repository.js";
@@ -44,6 +52,8 @@ export function createContainer(
     userRepository?: IUserRepository;
     interviewRepository?: IInterviewRepository;
     reportRepository?: IReportRepository;
+    resumeRepository?: IResumeRepository;
+    resumeExtractor?: IResumeTextExtractor;
     analyticsRepository?: IAnalyticsRepository;
     providers?: ILLMProvider[];
     transcriber?: ITranscriber;
@@ -96,6 +106,17 @@ export function createContainer(
     new SpeechMetricsEvaluator(),
   ]);
   const events = new EventBus();
+  const resumeRepo =
+    options.resumeRepository ??
+    (database ? new DrizzleResumeRepository(database.db) : undefined);
+  const resumeService = resumeRepo
+    ? new ResumeService(
+        resumeRepo,
+        options.resumeExtractor ?? new PdfResumeTextExtractor(),
+        jsonGenerator,
+        new ResumePrompt(prompts),
+      )
+    : undefined;
   const interviewRepo =
     options.interviewRepository ??
     (database ? new DrizzleInterviewRepository(database.db) : undefined);
@@ -107,6 +128,7 @@ export function createContainer(
         jsonGenerator,
         evaluator,
         events,
+        resumeRepo,
       )
     : undefined;
   const reportRepo =
@@ -133,6 +155,7 @@ export function createContainer(
     ? new AnalyticsService(analyticsRepo)
     : undefined;
   return {
+    resumes: resumeService,
     transcriber:
       options.transcriber ??
       (env.GROQ_API_KEY ? new GroqTranscriber(env.GROQ_API_KEY) : undefined),

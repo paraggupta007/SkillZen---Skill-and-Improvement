@@ -17,6 +17,7 @@ import type {
   InterviewTurn,
   QuestionCandidate,
 } from "./interview-repository.js";
+import type { IResumeRepository } from "../resumes/resume-repository.js";
 const questionSchema = z.object({
   question: z.string().trim().min(1).max(2000),
   category: z.string().trim().min(1).max(120),
@@ -40,6 +41,7 @@ export class InterviewService {
     private readonly generator: Pick<JsonGenerator, "generate">,
     private readonly evaluator: IEvaluator,
     private readonly events: Pick<EventBus, "publish">,
+    private readonly resumes?: IResumeRepository,
   ) {}
   /** Create a session for the authenticated user. */
   async create(userId: string, input: CreateInterview) {
@@ -48,6 +50,11 @@ export class InterviewService {
     } catch {
       throw new AppError(400, "INVALID_ROUND", "Unknown interview round");
     }
+    if (
+      input.resumeId &&
+      (!this.resumes || !(await this.resumes.get(userId, input.resumeId)))
+    )
+      throw new AppError(404, "NOT_FOUND", "Resume not found");
     return this.repo.create(userId, input);
   }
   /** Return an owned interview and its turns. */
@@ -64,8 +71,16 @@ export class InterviewService {
     if (!interview) throw new AppError(404, "NOT_FOUND", "Interview not found");
     return interview;
   }
-  private context(interview: Interview, turns: InterviewTurn[]): RoundContext {
+  private async context(
+    interview: Interview,
+    turns: InterviewTurn[],
+  ): Promise<RoundContext> {
+    const resume =
+      interview.resumeId && this.resumes
+        ? await this.resumes.get(interview.userId, interview.resumeId)
+        : undefined;
     return {
+      resume: resume?.rawText.slice(0, 12000),
       role: interview.role,
       difficulty: interview.difficulty,
       jobDescription: interview.jdText ?? undefined,
@@ -115,7 +130,7 @@ export class InterviewService {
         ? cached.candidate
         : await this.question(
             interview,
-            this.context(interview, turns),
+            await this.context(interview, turns),
             options,
           );
     return (await this.repo.addQuestion(userId, id, candidate)).question;
@@ -141,7 +156,7 @@ export class InterviewService {
     if (!current) throw new AppError(404, "NOT_FOUND", "Question not found");
     if (current.answer)
       throw new AppError(409, "ALREADY_ANSWERED", "Question already answered");
-    const context = this.context(interview, turns);
+    const context = await this.context(interview, turns);
     const evalPromise = this.evaluator.evaluate({
       context: {
         ...context,

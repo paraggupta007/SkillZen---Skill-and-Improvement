@@ -22,7 +22,7 @@ Unknown endpoints return HTTP 404:
 
 Malformed JSON returns 400 `INVALID_JSON`; oversized JSON returns 413 `PAYLOAD_TOO_LARGE`; rate-limited requests return 429 `RATE_LIMITED`; unhandled errors return 500 `INTERNAL_ERROR`.
 
-Resumes, mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
+Mock tests and candidate feedback endpoints are planned and do not exist yet. Their actual requests, responses and errors will be added in the same phase as their implementation.
 
 ## Authentication and profile
 
@@ -62,7 +62,7 @@ All interview endpoints require the session cookie and use user ownership checks
 
 ### POST /api/interviews
 
-Request: `{"role":"Backend developer","roundType":"technical","difficulty":"medium","totalQuestions":2,"jdText":"Optional job description"}`. Round types: `technical`, `hr`, `behavioral`; difficulty: `easy`, `medium`, `hard`; question count: 1–20. The optional job description is at most 12,000 characters. Response 201 contains the newly created interview. Errors include 400 `VALIDATION_ERROR`/`INVALID_ROUND`, 401 `UNAUTHENTICATED`, and 503 `INTERVIEWS_UNAVAILABLE`.
+Request: `{"role":"Backend developer","roundType":"technical","difficulty":"medium","totalQuestions":2,"jdText":"Optional job description"}`. Round types: `technical`, `hr`, `behavioral`; difficulty: `easy`, `medium`, `hard`; question count: 1–20. The optional job description is at most 12,000 characters. Include `"resumeId":"<owned uuid>"` to use a saved resume as context. The first 12,000 characters of extracted text are sent to the AI provider for questions and evaluations; an unowned resume returns 404. Response 201 contains the newly created interview. Errors include 400 `VALIDATION_ERROR`/`INVALID_ROUND`, 401 `UNAUTHENTICATED`, and 503 `INTERVIEWS_UNAVAILABLE`.
 
 ### GET /api/interviews and GET /api/interviews/:id
 
@@ -126,3 +126,23 @@ The existing answer endpoint accepts optional `speech` metrics (durationSeconds,
 ### GET /api/reports/:interviewId/pdf
 
 Requires authentication and ownership. Downloads a ready completed interview report as `application/pdf` with a private, no-store response. The PDF route does not start report generation. Returns 409 `REPORT_NOT_READY` when no report is stored, 409 `INTERVIEW_INCOMPLETE` for an incomplete session, 404 for an unknown or unowned interview, and the usual validation/authentication errors. Current built-in PDF fonts have limited Unicode coverage; non-Latin text may not render correctly.
+
+## Resumes and job descriptions
+
+All resume routes require an authenticated session. The application stores extracted text in PostgreSQL until deletion; it does not store the original PDF file. Resume and job-description text are sent to the configured AI provider during analysis or when a resume is selected for an interview. Provider retention policies apply. Generated interview content may retain information derived from a deleted resume.
+
+### POST /api/resumes
+
+Send a raw text-based PDF body with `Content-Type: application/pdf` (not multipart). Up to 5 MB, 10 pages and 20,000 extracted characters; scanned/image-only and encrypted PDFs are not supported. Response 201: `{"success":true,"data":{"id":"<uuid>","fileName":"resume.pdf","parsedSkills":[],"matchScore":null,"createdAt":"<ISO date>"},"error":null}`. Extracted text is not returned. Errors include 400 `INVALID_PDF`, 401 `UNAUTHENTICATED`, 413 `PAYLOAD_TOO_LARGE`, 415 `UNSUPPORTED_FILE`, 429 `RATE_LIMITED`, 503 `EXTRACTOR_BUSY` or `RESUMES_UNAVAILABLE`. Upload and analysis share a 20 requests/user/15 minutes limit.
+
+### GET /api/resumes
+
+Returns an array of at most 100 owned resume metadata objects. Raw text is never returned by this route.
+
+### POST /api/resumes/:id/analyze
+
+Body: `{"jobDescription":"Optional role description"}` (up to 12,000 characters, default empty). Response contains `skills`, `strengths`, `gaps`, `suggestions` arrays, `summary`, and nullable integer `matchScore` from 0–100. The match is an AI estimate, not an ATS or hiring decision. It is null without a job description. Only skills and the latest score are persisted, not the full analysis. Errors include 400 `VALIDATION_ERROR`, 404 `NOT_FOUND`, 429 `RATE_LIMITED`, and provider errors.
+
+### DELETE /api/resumes/:id
+
+Deletes the owned resume row and extracted text, clearing its interview references; returns `{"success":true,"data":{"deleted":true},"error":null}`. Returns 404 for missing or unowned resumes. Derived questions, answers and reports are not deleted.

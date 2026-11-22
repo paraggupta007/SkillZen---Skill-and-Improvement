@@ -11,6 +11,7 @@ import { AuthPage } from "./pages/auth";
 const Dashboard = lazy(() =>
   import("./pages/dashboard").then((module) => ({ default: module.Dashboard })),
 );
+import { ResumesPage } from "./pages/resumes";
 import { Setup } from "./pages/setup";
 import { InterviewPage } from "./pages/interview";
 import { ReportPage } from "./pages/report";
@@ -35,6 +36,7 @@ createRoot(document.getElementById("root")!).render(
                 </Suspense>
               }
             />
+            <Route path="resumes" element={<ResumesPage />} />
             <Route path="setup" element={<Setup />} />
             <Route path="interview/:id" element={<InterviewPage />} />
             <Route path="report/:id" element={<ReportPage />} />

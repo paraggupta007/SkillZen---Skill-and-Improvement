@@ -19,6 +19,7 @@ const createSchema = z
     difficulty: z.enum(["easy", "medium", "hard"]),
     totalQuestions: z.number().int().min(1).max(20),
     jdText: z.string().max(12000).optional(),
+    resumeId: z.uuid().optional(),
   })
   .strict();
 const speechSchema = z

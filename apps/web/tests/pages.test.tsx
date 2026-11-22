@@ -81,7 +81,11 @@ describe("frontend pages", () => {
       .fn()
       .mockImplementation((url: string) =>
         Promise.resolve(
-          url.endsWith("/users/me") ? json(user) : json({ id: "abc" }, 201),
+          url.endsWith("/users/me")
+            ? json(user)
+            : url.endsWith("/resumes")
+              ? json([])
+              : json({ id: "abc" }, 201),
         ),
       );
     vi.stubGlobal("fetch", fetcher);

@@ -2208,3 +2208,77 @@ p {
   justify-content: flex-end;
   margin-bottom: 12px;
 }
+.resume-section {
+  margin-top: 14px;
+}
+.resume-consent {
+  display: flex;
+  gap: 10px;
+  align-items: start;
+  margin: 18px 0;
+  color: #718276;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.resume-consent input {
+  margin-top: 3px;
+  accent-color: #508563;
+}
+.resume-list {
+  display: grid;
+  gap: 8px;
+}
+.resume-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e9eee7;
+  border-radius: 8px;
+  color: #709779;
+}
+.resume-row label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+  font-size: 12px;
+  color: #40594b;
+}
+.resume-row input {
+  accent-color: #508563;
+}
+.resume-muted {
+  font-size: 11px;
+  color: #91a095;
+}
+.resume-disclaimer {
+  margin: 12px 0;
+}
+.resume-results {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e9eee7;
+}
+.resume-results h3 {
+  font-size: 18px;
+}
+.resume-results h3 span {
+  font-size: 12px;
+  color: #699879;
+  letter-spacing: 0;
+}
+.resume-results h4 {
+  font-size: 12px;
+  margin: 20px 0 7px;
+}
+.resume-results p,
+.resume-results li {
+  font-size: 12px;
+  color: #718276;
+  line-height: 1.7;
+}
+.resume-results ul {
+  list-style: disc;
+  padding-left: 20px;
+}

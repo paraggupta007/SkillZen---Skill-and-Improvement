@@ -67,4 +67,22 @@ export interface CreateInterview {
   difficulty: string;
   totalQuestions: number;
   jdText?: string;
+  resumeId?: string;
+}
+/** Resume metadata returned without extracted personal text. */
+export interface Resume {
+  id: string;
+  fileName: string;
+  parsedSkills: string[];
+  matchScore: number | null;
+  createdAt: string;
+}
+/** AI-generated coaching, not a hiring or ATS decision. */
+export interface ResumeAnalysis {
+  skills: string[];
+  strengths: string[];
+  gaps: string[];
+  suggestions: string[];
+  summary: string;
+  matchScore: number | null;
 }

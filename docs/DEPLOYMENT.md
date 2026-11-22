@@ -6,3 +6,5 @@
 4. Check migrations, login, interview flows and browser privacy manually before declaring the project deployed. Free tiers, cold-start behavior and availability can change. `/api/health` is a liveness check, not a database readiness check.
 
 No deployment has been performed. Production frontend-to-API authentication and hosting configuration have not been verified.
+
+The API deployment must include `apps/api/scripts/extract-resume-pdf.mjs` alongside the compiled `dist` directory and allow Node child processes for resume extraction. Concurrency limits are per process; this is not a security sandbox. Verify process/memory limits on the chosen host.

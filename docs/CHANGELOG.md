@@ -61,6 +61,7 @@
 - Added opt-in, owner-checked, size-limited Groq Whisper transcription and microphone cleanup.
 - Added mocked voice lifecycle and API security tests; real microphone and live Whisper calls remain unverified.
 
-## Phase 7 — in progress
+## Phase 7 — resume and PDF
 
-- Added owner-checked PDF report downloads; default PDF fonts have limited Unicode support. Resume analysis is not implemented yet.
+- Added owner-checked PDF report downloads; default PDF fonts have limited Unicode support.
+- Added text-based PDF resume upload, deletion, AI coaching and optional resume context for interviews. Extraction uses a resource-bounded subprocess; live provider analysis is unverified.

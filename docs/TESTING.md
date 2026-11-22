@@ -31,4 +31,4 @@ Phase 5 frontend tests exercise registration, protected-route redirects, setup, 
 
 Phase 6 tests mock browser recognition/recording lifecycle, explicit start, track cleanup and Groq upload, and exercise authenticated transcription, cross-user isolation, audio type/signature and size limits with PGlite. The Groq transport is mocked. Manual testing of device permissions, speech recognition, MediaRecorder formats and actual Whisper responses remains necessary.
 
-Phase 7 work in progress: report integration tests check PDF signature and cross-user ownership. Manually verify PDF layout, large content and non-Latin rendering; current built-in fonts have limited Unicode coverage.
+Phase 7 tests check actual PDF text extraction, malformed/empty/large PDFs, page limits, user isolation, AI prompt boundaries, interview context and deletion, plus mocked browser consent and analysis. Report tests check PDF signature and ownership. Real AI analysis, real browser uploads, PDF layout and non-Latin rendering need manual verification; built-in report fonts have limited Unicode coverage.

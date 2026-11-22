@@ -24,6 +24,7 @@ export interface CreateInterview {
   difficulty: string;
   totalQuestions: number;
   jdText?: string;
+  resumeId?: string;
 }
 /** Validated question produced by the AI. */
 export interface QuestionCandidate {

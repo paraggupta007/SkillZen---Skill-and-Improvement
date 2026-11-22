@@ -18,5 +18,6 @@
 - [Phase 4: Reports and analytics](phases/phase-04-reports.md)
 - [Phase 5: Frontend MVP](phases/phase-05-frontend.md)
 - [Phase 6: Voice](phases/phase-06-voice.md)
+- [Phase 7: Resume, JD and PDF](phases/phase-07-resume-pdf.md)
 
 More phase documents will be added alongside their code.
